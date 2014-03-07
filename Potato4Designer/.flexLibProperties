@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="potato.ui.UIComponent"/>
+    <classEntry path="potato.events.GestureEvent"/>
+    <classEntry path="potato.boot.IBootProgressBar"/>
+    <classEntry path="potato.utils.Locale"/>
+    <classEntry path="potato.ui.IRegist"/>
+    <classEntry path="potato.ui.Grid9Image"/>
+    <classEntry path="potato.movie.dragon.DragonMovie"/>
+    <classEntry path="potato.movie.dragon.events.DragonEvent"/>
+    <classEntry path="potato.movie.FrameMovie"/>
+    <classEntry path="potato.movie.FrameBean"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

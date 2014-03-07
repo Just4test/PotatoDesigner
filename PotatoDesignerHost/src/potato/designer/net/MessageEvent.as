@@ -6,10 +6,10 @@ package potato.designer.net
 	{
 		protected var _message:Message;
 		
-		public function MessageEvent(connection:Connection, type:String, index:uint, data:*)
+		public function MessageEvent(message:Message)
 		{
-			super(type);
-			_message = new Message(connection, type, index, data);
+			super(message.type);
+			_message = message;
 		}
 		
 		public function answer(type:String, data:* = null, answerHandle:Function = null):void

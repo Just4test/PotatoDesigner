@@ -22,13 +22,13 @@ package potato.designer.net
 	{
 		protected var _socket:Socket;
 		
-//		/**
-//		 *指定数据包是一个应答。
-//		 * 应答直接传给对应的处理函数，而不会派发事件。 
-//		 */
-//		protected static const HEAD_TYPE_ANSWER:int = 1;
+		//		/**
+		//		 *指定数据包是一个应答。
+		//		 * 应答直接传给对应的处理函数，而不会派发事件。 
+		//		 */
+		//		protected static const HEAD_TYPE_ANSWER:int = 1;
 		
-//		protected static const HEAD_TYPE_CODE:int = 1;
+		//		protected static const HEAD_TYPE_CODE:int = 1;
 		
 		/**
 		 *指示还未收到的包的长度 
@@ -118,6 +118,7 @@ package potato.designer.net
 		public function close():void
 		{
 			_socket.close();
+			_packageLength = 0;
 		}
 		
 		
@@ -127,68 +128,83 @@ package potato.designer.net
 		protected function connectHandler(e:Event):void
 		{
 			trace("[Connection] 连接已经建立!");
+			dispatchEvent(e);
 		}
 		
 		protected function closeHandler(e:Event):void
 		{
 			trace("[Connection] 远端切断了连接");
+			_packageLength = 0;
+			dispatchEvent(e);
 		}
 		
 		protected function errorHandler(e:Event):void
 		{
 			trace("[Connection] 发生错误");
 			trace(e);
+			dispatchEvent(e);
 		}
 		
 		protected function dataHandler(e:Event):void
 		{
-			while(_socket.bytesAvailable)
+			try
 			{
-				if(!_packageLength)
+				while(_socket.bytesAvailable)
 				{
-					if(_socket.bytesAvailable >= 4)
+					if(!_packageLength)
 					{
-						_packageLength = _socket.readUnsignedInt();
+						if(_socket.bytesAvailable >= 4)
+						{
+							_packageLength = _socket.readUnsignedInt();
+						}
+						else
+						{
+							return;
+						}
 					}
-					else
+					
+					if(_socket.bytesAvailable < _packageLength)
 					{
 						return;
 					}
-				}
-				
-				if(_socket.bytesAvailable < _packageLength)
-				{
-					return;
-				}
-				
-				var typeCode:uint = _socket.readUnsignedInt();
-				if(typeCode == _receiveCode2Type.length)
-				{
-					_receiveCode2Type[typeCode] = _socket.readUTF();
-				}
-				
-				var index:uint = _socket.readUnsignedInt();
-				var answerIndex:uint = _socket.readUnsignedInt();
-				var data:* = _socket.readObject();
-				
-				if(answerIndex)
-				{
-					var answerHandle:Function = _msgMap[answerIndex];
-					if(answerHandle is Function)
+					
+					var typeCode:uint = _socket.readUnsignedInt();
+					if(typeCode == _receiveCode2Type.length)
 					{
-						answerHandle(_receiveCode2Type[typeCode], data);
-						delete _msgMap[answerIndex];
+						_receiveCode2Type[typeCode] = _socket.readUTF();
+					}
+					
+					var index:uint = _socket.readUnsignedInt();
+					var answerIndex:uint = _socket.readUnsignedInt();
+					var data:* = _socket.readObject();
+					
+					if(answerIndex)
+					{
+						var answerHandle:Function = _msgMap[answerIndex];
+						if(answerHandle is Function)
+						{
+							answerHandle(_receiveCode2Type[typeCode], data);
+							delete _msgMap[answerIndex];
+						}
+						else
+						{
+							trace("[Connection] 远端发来了对消息号", answerIndex, "的应答。但对应的原始消息未找到。");
+						}
 					}
 					else
 					{
-						trace("[Connection] 远端发来了对消息号", answerIndex, "的应答。但对应的原始消息未找到。");
+						dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
 					}
+					_packageLength = 0;
 				}
-				else
-				{
-					dispatchEvent( new MessageEvent(this, _receiveCode2Type[typeCode], index, data));
-				}
+			} 
+			catch(error:Error) 
+			{
+				trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");
+				close();
+				_packageLength = 0;
 			}
+			
 		}
 	}
 }

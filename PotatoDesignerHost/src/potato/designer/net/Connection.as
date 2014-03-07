@@ -79,6 +79,15 @@ package potato.designer.net
 			_socket.connect(host, port);
 		}
 		
+		/**
+		 *发送消息 
+		 * @param type 消息类型
+		 * @param data 消息的数据
+		 * @param answerHandle 指定应答处理函数。如果对方有应答，则调用此处理函数而不是派发事件。
+		 * <br>原型 function(msg:Message)
+		 * @param answerIndex 指定该消息是对对方的某目标消息的应答，这是目标消息的index
+		 * 
+		 */
 		public function send(type:String, data:* = null, answerHandle:Function = null, answerIndex:uint = 0):void
 		{
 			//encode
@@ -185,7 +194,7 @@ package potato.designer.net
 				}
 				else
 				{
-					dispatchEvent( new MessageEvent(this, _receiveCode2Type[typeCode], index, data));
+					dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
 				}
 			}
 		}
