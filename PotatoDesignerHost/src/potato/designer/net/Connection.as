@@ -1,12 +1,11 @@
 package potato.designer.net
 {
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.net.Socket;
 	import flash.utils.ByteArray;
-	
-	import core.events.Event;
-	import core.events.EventDispatcher;
-	import core.events.IOErrorEvent;
-	import core.events.ProgressEvent;
-	import core.net.Socket;
 	
 	/**
 	 *消息结构： pkgLength:uint, typeCode:uint, [type:String,] msgIndex:uint, answerIndex:uint, data:Object
@@ -22,13 +21,13 @@ package potato.designer.net
 	{
 		protected var _socket:Socket;
 		
-//		/**
-//		 *指定数据包是一个应答。
-//		 * 应答直接传给对应的处理函数，而不会派发事件。 
-//		 */
-//		protected static const HEAD_TYPE_ANSWER:int = 1;
+		//		/**
+		//		 *指定数据包是一个应答。
+		//		 * 应答直接传给对应的处理函数，而不会派发事件。 
+		//		 */
+		//		protected static const HEAD_TYPE_ANSWER:int = 1;
 		
-//		protected static const HEAD_TYPE_CODE:int = 1;
+		//		protected static const HEAD_TYPE_CODE:int = 1;
 		
 		/**
 		 *指示还未收到的包的长度 
