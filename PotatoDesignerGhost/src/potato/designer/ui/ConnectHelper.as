@@ -11,6 +11,7 @@ package potato.designer.ui
 	import potato.designer.net.Connection;
 	import potato.designer.net.MessageEvent;
 	import potato.designer.net.NetConst;
+	import potato.events.GestureEvent;
 	import potato.events.InputEvent;
 	import potato.ui.Button;
 	import potato.ui.TextInput;
@@ -55,38 +56,30 @@ package potato.designer.ui
 			_textAlerm.y = 40;
 			addChild(_textAlerm);
 			
-			_timer = new Timer(500, 1);
+			_btnConnect = new Button("btn_up","btn_down", "连接", "btn_disable")
+			_btnConnect.y = 60;
+			addChild(_btnConnect);
+			_btnConnect.enabled = false;
+			_btnConnect.addEventListener(GestureEvent.GESTURE_CLICK, onButtonHandler);
 			
-			testHost();
+			_timer = new Timer(500, 1);
+			test();
 			
 		}
 		
-//		protected function onTextInputHandler(event:TextEvent):void
-//		{
-//			var key:uint = event.text.charCodeAt(0);
-//			if(KeyboardConst.ENTER == key)
-//			{
-//				testHost();
-//			}
-//			else
-//			{
-//				_timer.stop();
-//				_timer.start();
-//			}
-//		}
 		protected function onInputChangeHandler(event:InputEvent):void
 		{
 			_timer.removeEventListeners();
-			_timer.addEventListener(TimerEvent.TIMER, testHost);
+			_timer.addEventListener(TimerEvent.TIMER, test);
 			_timer.reset();
 			_timer.start();
 		}
 		protected function onInputCompleteHandler(event:Event):void
 		{
-			testHost();
+			test();
 		}
 		
-		protected function testHost(e:Event = null):void
+		protected function test(e:Event = null):void
 		{
 			trace("正在检测");
 			_textAlerm.text = "正在检测";
@@ -100,25 +93,25 @@ package potato.designer.ui
 				}
 			}
 			
-			
 			//目前桌面环境connect一个非法的主机路径会导致崩溃
+//			_connection = new Connection;
+//			_connection.addEventListener(Event.CONNECT, connectHandler);
+//			_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+//			_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
 //			try
 //			{
-//				_connection = new Connection;
-//				_connection.addEventListener(Event.CONNECT, connectHandler);
-//				_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-//				_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
 //				_connection.connect(_textHost.text, NetConst.PORT);
 //			} 
 //			catch(error:Error) 
 //			{
 //				_textAlerm.text = "不合法的主机路径";
 //			}
-			if(testHostText(_textHost.text))
+			if(testIP(_textHost.text))
 			{
 			
 				_connection = new Connection;
 				_connection.addEventListener(Event.CONNECT, connectHandler);
+				_connection.addEventListener(Event.CLOSE, closeHandler);
 				_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
 				_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
 				_connection.connect(_textHost.text, NetConst.PORT);
@@ -130,7 +123,7 @@ package potato.designer.ui
 			
 		}
 		
-		protected function testHostText(text:String):Boolean
+		protected function testIP(text:String):Boolean
 		{
 			if(!/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(_textHost.text))
 			{
@@ -156,6 +149,11 @@ package potato.designer.ui
 			_timer.reset();
 			_timer.start();
 		}
+		protected function closeHandler(event:Event):void
+		{
+			_timer.stop();
+			failed();
+		}
 		protected function timeoutHandler(e:Event):void
 		{
 			failed();
@@ -179,12 +177,26 @@ package potato.designer.ui
 		protected function connected():void
 		{
 			_textAlerm.text = "连接成功";
+			_btnConnect.enabled = true;
 		}
 		
 		protected function failed():void
 		{
 			trace("连接失败");
 			_textAlerm.text = "连接失败";
+			_btnConnect.enabled = false;
+			
+			//如果无响应则重复尝试
+			_timer.removeEventListeners();
+			_timer.addEventListener(TimerEvent.TIMER, test);
+			_timer.reset();
+			_timer.start();
+		}
+		
+		
+		protected function onButtonHandler(event:Event):void
+		{
+			Main.instance.setConnection(_connection);
 		}
 	}
 }

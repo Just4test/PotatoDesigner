@@ -34,15 +34,15 @@ package potato.designer.net
 		 *指示还未收到的包的长度 
 		 */
 		protected var _packageLength:uint;
-		/**
-		 *指示下一个发送消息的index 
-		 */
-		protected var _nextSendIndex:uint;
 		
 		/**
-		 *已发送且需要应答的消息index与应答句柄映射表 
+		 *需要应答的消息index与应答句柄映射表 
 		 */
 		protected var _callbackMap:Object;
+		/**
+		 *指示下一个需要应答消息的index 
+		 */
+		protected var _nextCallbackIndex:uint;
 		
 		
 		/**
@@ -65,6 +65,10 @@ package potato.designer.net
 		{
 			_socket = socket || new Socket;
 			
+			if(_socket.connected)
+			{
+				initSocket();
+			}
 			_socket.addEventListener(Event.CONNECT, connectHandler);
 			_socket.addEventListener(Event.CLOSE, closeHandler);
 			_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
@@ -75,6 +79,21 @@ package potato.designer.net
 		}
 		
 		
+		
+		protected function initSocket():void
+		{
+			_socket.addEventListener(Event.CLOSE, closeHandler);
+			_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			_socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+			
+			//连接建立后才创建，以免之前断掉的连接污染本次
+			_sendType2Code = new Object;
+			_nextSendTypeIndex = 0;
+			_receiveCode2Type = new Vector.<String>;
+			_callbackMap = new Object;
+			_nextCallbackIndex = 1;
+		}
+		
 		public function connect(host:String, port:int):void
 		{
 			if(!_socket.connected)
@@ -82,9 +101,7 @@ package potato.designer.net
 				_socket.connect(host, port);
 				_packageLength = 0;
 				_socket.addEventListener(Event.CONNECT, connectHandler);
-				_socket.addEventListener(Event.CLOSE, closeHandler);
 				_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-				_socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
 			}
 		}
 		
@@ -116,9 +133,9 @@ package potato.designer.net
 			var index:uint;
 			if(callbackHandle is Function)
 			{
-				index = _nextSendIndex;
+				index = _nextCallbackIndex;
 				_callbackMap[index] = callbackHandle;
-				_nextSendIndex += 1;
+				_nextCallbackIndex += 1;
 			}
 			ba.writeUnsignedInt(index);
 			//写入answerIndex
@@ -152,6 +169,7 @@ package potato.designer.net
 		protected function connectHandler(e:Event):void
 		{
 			trace("[Connection] 连接已经建立!");
+			initSocket();
 			dispatchEvent(e);
 		}
 		
@@ -212,7 +230,8 @@ package potato.designer.net
 						var answerHandle:Function = _callbackMap[answerIndex];
 						if(answerHandle is Function)
 						{
-							answerHandle(_receiveCode2Type[typeCode], data);
+							trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
+							answerHandle(new Message(this, _receiveCode2Type[typeCode], index, data));
 							delete _callbackMap[answerIndex];
 						}
 						else
@@ -222,6 +241,7 @@ package potato.designer.net
 					}
 					else
 					{
+						trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
 						dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
 					}
 					_packageLength = 0;

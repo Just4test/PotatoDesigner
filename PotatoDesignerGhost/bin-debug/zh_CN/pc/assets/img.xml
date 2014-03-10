@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://www.codeandweb.com/texturepacker-->
-<!-- $TexturePacker:SmartUpdate:530d17fd2ffd7d716170d872835743b7:19caf75be6d5592f554d71aa834ac3c4:ab5a43cf356ea673ad1fd105448baf8c$ -->
+<!-- $TexturePacker:SmartUpdate:490f6bf8b31caa8f0f734035428eed69:4763dd579dca58eea82dccb7d7792172:ab5a43cf356ea673ad1fd105448baf8c$ -->
 <!--Format:
 n  => name of the sprite
 x  => sprite x pos in texture
@@ -14,6 +14,7 @@ oH => sprite's original height (only available if trimmed)
 r => 'y' only set if sprite is rotated
 -->
 <TextureAtlas imagePath="img.png" width="128" height="128">
-    <sprite n="btn_down" x="1" y="42" w="94" h="34"/>
-    <sprite n="btn_up" x="1" y="1" w="97" h="39"/>
+    <sprite n="btn_disable" x="1" y="85" w="100" h="40"/>
+    <sprite n="btn_down" x="1" y="43" w="100" h="40"/>
+    <sprite n="btn_up" x="1" y="1" w="100" h="40"/>
 </TextureAtlas>

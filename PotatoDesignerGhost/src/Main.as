@@ -1,28 +1,28 @@
 package
 {
+	import flash.utils.describeType;
+	import flash.utils.getDefinitionByName;
+	
 	import core.display.DisplayObjectContainer;
 	import core.display.Stage;
-	import core.events.Event;
-	import core.events.IOErrorEvent;
-	import core.net.Socket;
-	import core.system.Capabilities;
 	import core.system.Domain;
 	
 	import potato.designer.net.Connection;
 	import potato.designer.net.MessageEvent;
+	import potato.designer.net.NetConst;
 	import potato.designer.ui.ConnectHelper;
-	import potato.events.HttpEvent;
 	import potato.res.Res;
 	
 	public class Main extends DisplayObjectContainer
 	{
-		protected var domain:Domain;
-		public var socket:Socket
-		public var socket2:Socket
-		static public var connection:Connection;
+		protected var _domain:Domain;
+		protected var _connection:Connection;
+		
+		static protected var _instance:Main;
 		
 		public function Main(arg:String = null)
 		{
+			_instance = this;
 			
 			var res:Res = new Res();
 			//			res.addEventListener(HttpEvent.RES_LOAD_COMPLETE, onLoaded);
@@ -32,28 +32,15 @@ package
 			addChild(connectHelper);
 			
 		}
-		protected function errorHandler(event:IOErrorEvent):void
-		{
-			trace("[Connection] 连接出错", event);
-		}
-		protected function errorHandler2(event:IOErrorEvent):void
-		{
-			trace("[Connection] 连接2出错", event);
-		}
-		protected function connectHandler(e:Event):void
-		{
-			trace("[Connection] 连接已经建立!");
-			dispatchEvent(e);
-		}
 		
 		public function load(fileName:String):void
 		{
-			if(domain)
+			if(_domain)
 			{
 				return;
 			}
-			domain = new Domain(Domain.currentDomain);
-			domain.load(fileName);
+			_domain = new Domain(Domain.currentDomain);
+			_domain.load(fileName);
 			
 		}
 		
@@ -71,7 +58,57 @@ package
 			
 			stage.removeEventListeners();
 			
-			domain = null;
+			_domain = null;
 		}
+		
+		public function setConnection(connection:Connection):void
+		{
+			while(Stage.getStage().numChildren)
+			{
+				Stage.getStage().removeChildAt(0);
+			}
+			
+			if(_connection)
+			{
+				_connection.removeEventListeners();
+			}
+			
+			_connection = connection;
+			
+			//注册所有网络消息侦听
+			_connection.addEventListener(NetConst.S2C_REQ_DESCRIBE_TYPE, onReqDescribeTypeHandler);
+			
+			//通知服务端客户端准备好，可以开始初始化过程
+			
+			connection.send(NetConst.C2S_HELLO, "hello world!");
+			
+		}
+		
+		protected function onReqDescribeTypeHandler(e:MessageEvent):void
+		{
+			try
+			{
+				var obj:Object = getDefinitionByName(e.data as String);
+				if(obj is Class)
+				{
+					e.answer("", describeType(obj));
+				}
+				else
+				{
+					e.answer("");
+				}
+			} 
+			catch(error:Error) 
+			{
+				e.answer("");
+			}
+		}
+
+		public static function get instance():Main
+		{
+			return _instance;
+		}
+		
+		
 	}
 }

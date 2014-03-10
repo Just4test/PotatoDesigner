@@ -33,15 +33,15 @@ package potato.designer.net
 		 *指示还未收到的包的长度 
 		 */
 		protected var _packageLength:uint;
-		/**
-		 *指示下一个发送消息的index 
-		 */
-		protected var _nextSendIndex:uint;
 		
 		/**
-		 *已发送且需要应答的消息index与应答句柄映射表 
+		 *需要应答的消息index与应答句柄映射表 
 		 */
-		protected var _msgMap:Object;
+		protected var _callbackMap:Object;
+		/**
+		 *指示下一个需要应答消息的index 
+		 */
+		protected var _nextCallbackIndex:uint;
 		
 		
 		/**
@@ -64,6 +64,10 @@ package potato.designer.net
 		{
 			_socket = socket || new Socket;
 			
+			if(_socket.connected)
+			{
+				initSocket();
+			}
 			_socket.addEventListener(Event.CONNECT, connectHandler);
 			_socket.addEventListener(Event.CLOSE, closeHandler);
 			_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
@@ -74,21 +78,41 @@ package potato.designer.net
 		}
 		
 		
+		
+		protected function initSocket():void
+		{
+			_socket.addEventListener(Event.CLOSE, closeHandler);
+			_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			_socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+			
+			//连接建立后才创建，以免之前断掉的连接污染本次
+			_sendType2Code = new Object;
+			_nextSendTypeIndex = 0;
+			_receiveCode2Type = new Vector.<String>;
+			_callbackMap = new Object;
+			_nextCallbackIndex = 1;
+		}
+		
 		public function connect(host:String, port:int):void
 		{
-			_socket.connect(host, port);
+			if(!_socket.connected)
+			{
+				_socket.connect(host, port);
+				_packageLength = 0;
+				_socket.addEventListener(Event.CONNECT, connectHandler);
+				_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			}
 		}
 		
 		/**
-		 *发送消息 
+		 *发送或应答一条消息 
 		 * @param type 消息类型
-		 * @param data 消息的数据
-		 * @param answerHandle 指定应答处理函数。如果对方有应答，则调用此处理函数而不是派发事件。
-		 * <br>原型 function(msg:Message)
-		 * @param answerIndex 指定该消息是对对方的某目标消息的应答，这是目标消息的index
+		 * @param data 消息数据体
+		 * @param callbackHandle 指定应答回调函数
+		 * @param answerIndex 表示这是对某条消息的应答
 		 * 
 		 */
-		public function send(type:String, data:* = null, answerHandle:Function = null, answerIndex:uint = 0):void
+		public function send(type:String, data:* = null, callbackHandle:Function = null, answerIndex:uint = 0):void
 		{
 			//encode
 			var ba:ByteArray = new ByteArray;
@@ -106,11 +130,11 @@ package potato.designer.net
 			}
 			//写入index
 			var index:uint;
-			if(answerHandle is Function)
+			if(callbackHandle is Function)
 			{
-				index = _nextSendIndex;
-				_msgMap[index] = answerHandle;
-				_nextSendIndex += 1;
+				index = _nextCallbackIndex;
+				_callbackMap[index] = callbackHandle;
+				_nextCallbackIndex += 1;
 			}
 			ba.writeUnsignedInt(index);
 			//写入answerIndex
@@ -126,6 +150,15 @@ package potato.designer.net
 		public function close():void
 		{
 			_socket.close();
+			_socket.removeEventListener(Event.CONNECT, connectHandler);
+			_socket.removeEventListener(Event.CLOSE, closeHandler);
+			_socket.removeEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			_socket.removeEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+		}
+		
+		public function get connected():Boolean
+		{
+			return _socket.connected;
 		}
 		
 		
@@ -135,68 +168,90 @@ package potato.designer.net
 		protected function connectHandler(e:Event):void
 		{
 			trace("[Connection] 连接已经建立!");
+			initSocket();
+			dispatchEvent(e);
 		}
 		
 		protected function closeHandler(e:Event):void
 		{
 			trace("[Connection] 远端切断了连接");
+			_packageLength = 0;
+			dispatchEvent(e);
 		}
 		
 		protected function errorHandler(e:Event):void
 		{
 			trace("[Connection] 发生错误");
 			trace(e);
+			dispatchEvent(e);
+			
+			if(!_socket.connected)
+			{
+				_socket.close();//AVM的BUG，如果开始连接后没有连接成功，将占用最大连接数。需要用close()清除。
+			}
 		}
 		
 		protected function dataHandler(e:Event):void
 		{
-			while(_socket.bytesAvailable)
+			try
 			{
-				if(!_packageLength)
+				while(_socket.bytesAvailable)
 				{
-					if(_socket.bytesAvailable >= 4)
+					if(!_packageLength)
 					{
-						_packageLength = _socket.readUnsignedInt();
+						if(_socket.bytesAvailable >= 4)
+						{
+							_packageLength = _socket.readUnsignedInt();
+						}
+						else
+						{
+							return;
+						}
 					}
-					else
+					
+					if(_socket.bytesAvailable < _packageLength)
 					{
 						return;
 					}
-				}
-				
-				if(_socket.bytesAvailable < _packageLength)
-				{
-					return;
-				}
-				
-				var typeCode:uint = _socket.readUnsignedInt();
-				if(typeCode == _receiveCode2Type.length)
-				{
-					_receiveCode2Type[typeCode] = _socket.readUTF();
-				}
-				
-				var index:uint = _socket.readUnsignedInt();
-				var answerIndex:uint = _socket.readUnsignedInt();
-				var data:* = _socket.readObject();
-				
-				if(answerIndex)
-				{
-					var answerHandle:Function = _msgMap[answerIndex];
-					if(answerHandle is Function)
+					
+					var typeCode:uint = _socket.readUnsignedInt();
+					if(typeCode == _receiveCode2Type.length)
 					{
-						answerHandle(_receiveCode2Type[typeCode], data);
-						delete _msgMap[answerIndex];
+						_receiveCode2Type[typeCode] = _socket.readUTF();
+					}
+					
+					var index:uint = _socket.readUnsignedInt();
+					var answerIndex:uint = _socket.readUnsignedInt();
+					var data:* = _socket.readObject();
+					
+					if(answerIndex)
+					{
+						var answerHandle:Function = _callbackMap[answerIndex];
+						if(answerHandle is Function)
+						{
+							trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
+							answerHandle(new Message(this, _receiveCode2Type[typeCode], index, data));
+							delete _callbackMap[answerIndex];
+						}
+						else
+						{
+							trace("[Connection] 远端发来了对消息号", answerIndex, "的应答。但对应的原始消息未找到。");
+						}
 					}
 					else
 					{
-						trace("[Connection] 远端发来了对消息号", answerIndex, "的应答。但对应的原始消息未找到。");
+						trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
+						dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
 					}
+					_packageLength = 0;
 				}
-				else
-				{
-					dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
-				}
+			} 
+			catch(error:Error) 
+			{
+				trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");
+				close();
 			}
+			
 		}
 	}
 }
