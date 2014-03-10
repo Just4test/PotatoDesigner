@@ -16,7 +16,6 @@ package potato.designer.ui
 	import potato.ui.TextInput;
 	import potato.ui.UIComponent;
 	import potato.ui.UIGlobal;
-	import potato.utils.KeyboardConst;
 
 	/**
 	 * 提供UI以便用户决定要连接到哪个主机。
@@ -32,12 +31,15 @@ package potato.designer.ui
 		protected var _timer:Timer;
 		protected var _connection:Connection;
 		
+		
+		protected var returnIfSuccess:Boolean;
+		
 		public function ConnectHelper()
 		{
 //			_textHost = new TextField("", 200, 30, UIGlobal.defaultFont, 32, 0xffffffff);
 //			_textHost.type = TextField.INPUT;
 //			_textHost.inputType = 4;
-			_textHost = new TextInput("", 200, 30, UIGlobal.defaultFont, 32, 0xffffffff);
+			_textHost = new TextInput("", 300, 30, UIGlobal.defaultFont, 32, 0xffffffff);
 			_textHost.addEventListener(InputEvent.INPUT_CHANGE, onInputChangeHandler);
 			_textHost.addEventListener(InputEvent.INPUT_COMPLETE, onInputCompleteHandler);
 			addChild(_textHost);
@@ -54,12 +56,8 @@ package potato.designer.ui
 			addChild(_textAlerm);
 			
 			_timer = new Timer(500, 1);
-			_timer.addEventListener(TimerEvent.TIMER, testHost);
 			
-			_connection = new Connection;
-//			_connection.addEventListener(Event.CONNECT, connectHandler);
-			_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-			_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
+			testHost();
 			
 		}
 		
@@ -78,13 +76,91 @@ package potato.designer.ui
 //		}
 		protected function onInputChangeHandler(event:InputEvent):void
 		{
-			testHost();
+			_timer.removeEventListeners();
+			_timer.addEventListener(TimerEvent.TIMER, testHost);
+			_timer.reset();
+			_timer.start();
 		}
 		protected function onInputCompleteHandler(event:Event):void
 		{
-			_timer.stop();
+			testHost();
+		}
+		
+		protected function testHost(e:Event = null):void
+		{
+			trace("正在检测");
+			_textAlerm.text = "正在检测";
+			if(_connection)
+			{
+				_connection.removeEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+				_connection.removeEventListener(NetConst.S2C_HELLO, helloHandler);
+				if(_connection.connected)
+				{
+					_connection.close();
+				}
+			}
+			
+			
+			//目前桌面环境connect一个非法的主机路径会导致崩溃
+//			try
+//			{
+//				_connection = new Connection;
+//				_connection.addEventListener(Event.CONNECT, connectHandler);
+//				_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+//				_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
+//				_connection.connect(_textHost.text, NetConst.PORT);
+//			} 
+//			catch(error:Error) 
+//			{
+//				_textAlerm.text = "不合法的主机路径";
+//			}
+			if(testHostText(_textHost.text))
+			{
+			
+				_connection = new Connection;
+				_connection.addEventListener(Event.CONNECT, connectHandler);
+				_connection.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+				_connection.addEventListener(NetConst.S2C_HELLO, helloHandler);
+				_connection.connect(_textHost.text, NetConst.PORT);
+			}
+			else
+			{
+				_textAlerm.text = "不合法的主机路径";
+			}
+			
+		}
+		
+		protected function testHostText(text:String):Boolean
+		{
+			if(!/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(_textHost.text))
+			{
+				return false;
+			}
+			
+				
+			for each (var s:String in _textHost.text.split(".")) 
+			{
+				if(int(s) > 255)
+				{
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		protected function connectHandler(event:Event):void
+		{
+			_timer.removeEventListeners();
+			_timer.addEventListener(TimerEvent.TIMER, timeoutHandler);
+			_timer.reset();
 			_timer.start();
 		}
+		protected function timeoutHandler(e:Event):void
+		{
+			failed();
+		}
+		
 		/**
 		 *接收到了服务器Hello事件，说明正确的连接到了服务器。
 		 * @param event
@@ -92,25 +168,23 @@ package potato.designer.ui
 		 */
 		protected function helloHandler(event:MessageEvent):void
 		{
-			_textAlerm.text = "连接成功";
+			connected();
+			_timer.stop();
 		}
 		protected function errorHandler(event:IOErrorEvent):void
 		{
-			_textAlerm.text = "连接失败";
+			failed();
 		}
 		
-		protected function testHost(e:Event = null):void
+		protected function connected():void
 		{
-			_connection.close();
-			_textAlerm.text = "正在检测";
-			try
-			{
-				_connection.connect(_textHost.text, NetConst.PORT);
-			} 
-			catch(error:Error) 
-			{
-				_textAlerm.text = "不合法的主机路径";
-			}
+			_textAlerm.text = "连接成功";
+		}
+		
+		protected function failed():void
+		{
+			trace("连接失败");
+			_textAlerm.text = "连接失败";
 		}
 	}
 }

@@ -42,7 +42,7 @@ package potato.designer.net
 		/**
 		 *已发送且需要应答的消息index与应答句柄映射表 
 		 */
-		protected var _msgMap:Object;
+		protected var _callbackMap:Object;
 		
 		
 		/**
@@ -77,10 +77,26 @@ package potato.designer.net
 		
 		public function connect(host:String, port:int):void
 		{
-			_socket.connect(host, port);
+			if(!_socket.connected)
+			{
+				_socket.connect(host, port);
+				_packageLength = 0;
+				_socket.addEventListener(Event.CONNECT, connectHandler);
+				_socket.addEventListener(Event.CLOSE, closeHandler);
+				_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+				_socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+			}
 		}
 		
-		public function send(type:String, data:* = null, answerHandle:Function = null, answerIndex:uint = 0):void
+		/**
+		 *发送或应答一条消息 
+		 * @param type 消息类型
+		 * @param data 消息数据体
+		 * @param callbackHandle 指定应答回调函数
+		 * @param answerIndex 表示这是对某条消息的应答
+		 * 
+		 */
+		public function send(type:String, data:* = null, callbackHandle:Function = null, answerIndex:uint = 0):void
 		{
 			//encode
 			var ba:ByteArray = new ByteArray;
@@ -98,10 +114,10 @@ package potato.designer.net
 			}
 			//写入index
 			var index:uint;
-			if(answerHandle is Function)
+			if(callbackHandle is Function)
 			{
 				index = _nextSendIndex;
-				_msgMap[index] = answerHandle;
+				_callbackMap[index] = callbackHandle;
 				_nextSendIndex += 1;
 			}
 			ba.writeUnsignedInt(index);
@@ -118,7 +134,15 @@ package potato.designer.net
 		public function close():void
 		{
 			_socket.close();
-			_packageLength = 0;
+			_socket.removeEventListener(Event.CONNECT, connectHandler);
+			_socket.removeEventListener(Event.CLOSE, closeHandler);
+			_socket.removeEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			_socket.removeEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
+		}
+		
+		public function get connected():Boolean
+		{
+			return _socket.connected;
 		}
 		
 		
@@ -143,6 +167,11 @@ package potato.designer.net
 			trace("[Connection] 发生错误");
 			trace(e);
 			dispatchEvent(e);
+			
+			if(!_socket.connected)
+			{
+				_socket.close();//AVM的BUG，如果开始连接后没有连接成功，将占用最大连接数。需要用close()清除。
+			}
 		}
 		
 		protected function dataHandler(e:Event):void
@@ -180,11 +209,11 @@ package potato.designer.net
 					
 					if(answerIndex)
 					{
-						var answerHandle:Function = _msgMap[answerIndex];
+						var answerHandle:Function = _callbackMap[answerIndex];
 						if(answerHandle is Function)
 						{
 							answerHandle(_receiveCode2Type[typeCode], data);
-							delete _msgMap[answerIndex];
+							delete _callbackMap[answerIndex];
 						}
 						else
 						{
@@ -202,7 +231,6 @@ package potato.designer.net
 			{
 				trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");
 				close();
-				_packageLength = 0;
 			}
 			
 		}

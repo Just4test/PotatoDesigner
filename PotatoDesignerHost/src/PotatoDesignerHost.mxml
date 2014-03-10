@@ -8,6 +8,7 @@
 			import mx.events.FlexEvent;
 			
 			import potato.designer.net.Connection;
+			import potato.designer.net.NetConst;
 			
 			
 			protected var connection:Connection;
@@ -16,9 +17,10 @@
 			
 			protected function windowedapplication1_initializeHandler(event:FlexEvent):void
 			{
+				
 				// TODO Auto-generated method stub
 				serverSocket = new ServerSocket;
-				serverSocket.bind(9999, "0.0.0.0");
+				serverSocket.bind(NetConst.PORT, "0.0.0.0");
 				serverSocket.listen();
 				serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, connectHandler);
 				trace("开始侦听");
@@ -28,7 +30,7 @@
 			{
 				trace("已经连接");
 				connection = new Connection(e.socket);
-				connection.send("hello", "hello world!");
+				connection.send(NetConst.S2C_HELLO, "hello world!");
 			}
 			
 		]]>
