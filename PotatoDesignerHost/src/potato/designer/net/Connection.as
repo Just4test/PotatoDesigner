@@ -68,13 +68,6 @@ package potato.designer.net
 			{
 				initSocket();
 			}
-			_socket.addEventListener(Event.CONNECT, connectHandler);
-			_socket.addEventListener(Event.CLOSE, closeHandler);
-			_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-			_socket.addEventListener(ProgressEvent.SOCKET_DATA, dataHandler);
-			
-			_sendType2Code = new Object;
-			_receiveCode2Type = new Vector.<String>;
 		}
 		
 		
