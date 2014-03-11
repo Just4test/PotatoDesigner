@@ -145,6 +145,25 @@ package potato.designer.net
 			_socket.writeUnsignedInt(ba.length);
 			_socket.writeBytes(ba);
 			_socket.flush();
+			
+			var traceStr:String;
+			if(answerIndex)
+			{
+				traceStr = "[Connection] 发送对消息号 " + answerIndex + " 的应答[" + type + "]";
+			}
+			else
+			{
+				traceStr = "[Connection] 发送广播消息[" + type + "]";
+			}
+			if(index)
+			{
+				traceStr += "，并请求应答，请求消息号 " + index;
+			}
+			else
+			{
+				
+			}
+			trace(traceStr);
 		}
 		
 		public function close():void
@@ -220,6 +239,7 @@ package potato.designer.net
 						_receiveCode2Type[typeCode] = _socket.readUTF();
 					}
 					
+					var type:String = _receiveCode2Type[typeCode];
 					var index:uint = _socket.readUnsignedInt();
 					var answerIndex:uint = _socket.readUnsignedInt();
 					var data:* = _socket.readObject();
@@ -229,19 +249,19 @@ package potato.designer.net
 						var answerHandle:Function = _callbackMap[answerIndex];
 						if(answerHandle is Function)
 						{
-							trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
-							answerHandle(new Message(this, _receiveCode2Type[typeCode], index, data));
+							trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");
+							answerHandle(new Message(this, type, index, data));
 							delete _callbackMap[answerIndex];
 						}
 						else
 						{
-							trace("[Connection] 远端发来了对消息号", answerIndex, "的应答。但对应的原始消息未找到。");
+							trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]，但对应的原始消息未找到。");
 						}
 					}
 					else
 					{
-						trace("[Connection] 收到消息", _receiveCode2Type[typeCode]);
-						dispatchEvent( new MessageEvent(new Message(this, _receiveCode2Type[typeCode], index, data)));
+						trace("[Connection] 收到消息 [" + type + "]");
+						dispatchEvent( new MessageEvent(new Message(this, type, index, data)));
 					}
 					_packageLength = 0;
 				}
