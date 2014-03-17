@@ -9,7 +9,6 @@
 			
 			import potato.designer.net.Connection;
 			import potato.designer.net.Message;
-			import potato.designer.net.MessageEvent;
 			import potato.designer.net.NetConst;
 			
 			
@@ -35,12 +34,18 @@
 				connection.send(NetConst.S2C_HELLO, "hello world!");
 				connection.addEventListener(NetConst.C2S_HELLO, clientInitHandler);
 			}
-			protected function clientInitHandler(e:MessageEvent):void
+			protected function clientInitHandler(e:Message):void
 			{
 				connection.send(NetConst.S2C_REQ_DESCRIBE_TYPE, "Main", onDescribeTypeHandler);
 				function onDescribeTypeHandler(msg:Message):void
 				{
 					trace("收到解析", msg.data);
+				}
+				
+				connection.addEventListener(NetConst.C2S_LOG, onLogHandler);
+				function onLogHandler(msg:Message):void
+				{
+					trace("[Ghost]", msg.data);
 				}
 			}
 			

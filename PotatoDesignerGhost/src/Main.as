@@ -8,7 +8,7 @@ package
 	import core.system.Domain;
 	
 	import potato.designer.net.Connection;
-	import potato.designer.net.MessageEvent;
+	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
 	import potato.designer.ui.ConnectHelper;
 	import potato.res.Res;
@@ -81,10 +81,11 @@ package
 			//通知服务端客户端准备好，可以开始初始化过程
 			
 			connection.send(NetConst.C2S_HELLO, "hello world!");
+			log("客户端已经准备好。");
 			
 		}
 		
-		protected function onReqDescribeTypeHandler(e:MessageEvent):void
+		protected function onReqDescribeTypeHandler(e:Message):void
 		{
 			try
 			{
@@ -107,6 +108,11 @@ package
 		public static function get instance():Main
 		{
 			return _instance;
+		}
+
+		public function get connection():Connection
+		{
+			return _connection;
 		}
 		
 		

@@ -22,14 +22,6 @@ package potato.designer.net
 	{
 		protected var _socket:Socket;
 		
-		//		/**
-		//		 *指定数据包是一个应答。
-		//		 * 应答直接传给对应的处理函数，而不会派发事件。 
-		//		 */
-		//		protected static const HEAD_TYPE_ANSWER:int = 1;
-		
-		//		protected static const HEAD_TYPE_CODE:int = 1;
-		
 		/**
 		 *指示还未收到的包的长度 
 		 */
@@ -255,7 +247,7 @@ package potato.designer.net
 					else
 					{
 						trace("[Connection] 收到消息 [" + type + "]");
-						dispatchEvent( new MessageEvent(new Message(this, type, index, data)));
+						dispatchEvent( new Message(this, type, index, data));
 					}
 					_packageLength = 0;
 				}

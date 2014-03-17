@@ -2,14 +2,13 @@ package potato.designer.ui
 {
 	import core.events.Event;
 	import core.events.IOErrorEvent;
-	import core.events.TextEvent;
 	import core.events.TimerEvent;
 	import core.system.Capabilities;
 	import core.text.TextField;
 	import core.utils.Timer;
 	
 	import potato.designer.net.Connection;
-	import potato.designer.net.MessageEvent;
+	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
 	import potato.events.GestureEvent;
 	import potato.events.InputEvent;
@@ -164,7 +163,7 @@ package potato.designer.ui
 		 * @param event
 		 * 
 		 */
-		protected function helloHandler(event:MessageEvent):void
+		protected function helloHandler(event:Message):void
 		{
 			connected();
 			_timer.stop();
