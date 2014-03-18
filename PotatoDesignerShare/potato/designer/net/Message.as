@@ -1,7 +1,12 @@
 package potato.designer.net
 {
-	import core.events.Event;
-
+	CONFIG::HOST{
+		import flash.events.Event;
+	}
+	CONFIG::GHOST{
+		import core.events.Event;
+	}
+	
 	public class Message extends Event
 	{
 		protected var _connection:Connection;

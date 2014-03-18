@@ -1,12 +1,25 @@
 package potato.designer.net
 {
-	import flash.utils.ByteArray;
-	
-	import core.events.Event;
-	import core.events.EventDispatcher;
-	import core.events.IOErrorEvent;
-	import core.events.ProgressEvent;
-	import core.net.Socket;
+	CONFIG::HOST
+	{
+		import flash.events.Event;
+		import flash.events.EventDispatcher;
+		import flash.events.IOErrorEvent;
+		import flash.events.ProgressEvent;
+		import flash.net.Socket;
+		import flash.utils.ByteArray;
+	}
+		
+	CONFIG::GHOST
+	{
+		import flash.utils.ByteArray;
+		
+		import core.events.Event;
+		import core.events.EventDispatcher;
+		import core.events.IOErrorEvent;
+		import core.events.ProgressEvent;
+		import core.net.Socket;
+	}
 	
 	/**
 	 *消息结构： pkgLength:uint, typeCode:uint, [type:String,] msgIndex:uint, answerIndex:uint, data:Object
@@ -16,7 +29,6 @@ package potato.designer.net
 	 * msgIndex:消息的index。注意一个消息如果不需要应答，其index固定为0
 	 * answerIndex:指定该消息是对另一个消息的应答。当此值为0时说明其不应答任何消息，而是一条广播消息
 	 * @author Just4test
-	 * 
 	 */
 	public class Connection extends EventDispatcher
 	{
@@ -132,24 +144,26 @@ package potato.designer.net
 			_socket.writeBytes(ba);
 			_socket.flush();
 			
-			var traceStr:String;
-			if(answerIndex)
-			{
-				traceStr = "[Connection] 发送对消息号 " + answerIndex + " 的应答[" + type + "]";
+			CONFIG::DEBUG{
+				var traceStr:String;
+				if(answerIndex)
+				{
+					traceStr = "[Connection] 发送对消息号 " + answerIndex + " 的应答[" + type + "]";
+				}
+				else
+				{
+					traceStr = "[Connection] 发送广播消息[" + type + "]";
+				}
+				if(index)
+				{
+					traceStr += "，并请求应答，请求消息号 " + index;
+				}
+				else
+				{
+					
+				}
+				trace(traceStr);
 			}
-			else
-			{
-				traceStr = "[Connection] 发送广播消息[" + type + "]";
-			}
-			if(index)
-			{
-				traceStr += "，并请求应答，请求消息号 " + index;
-			}
-			else
-			{
-				
-			}
-			trace(traceStr);
 		}
 		
 		public function close():void
@@ -172,22 +186,22 @@ package potato.designer.net
 		
 		protected function connectHandler(e:Event):void
 		{
-			trace("[Connection] 连接已经建立!");
+			CONFIG::DEBUG{trace("[Connection] 连接已经建立!");}
 			initSocket();
 			dispatchEvent(e);
 		}
 		
 		protected function closeHandler(e:Event):void
 		{
-			trace("[Connection] 远端切断了连接");
+			CONFIG::DEBUG{trace("[Connection] 远端切断了连接");}
 			_packageLength = 0;
 			dispatchEvent(e);
 		}
 		
 		protected function errorHandler(e:Event):void
 		{
-			trace("[Connection] 发生错误");
-			trace(e);
+			CONFIG::DEBUG{trace("[Connection] 发生错误");}
+			CONFIG::DEBUG{trace(e);}
 			dispatchEvent(e);
 			
 			if(!_socket.connected)
@@ -235,18 +249,18 @@ package potato.designer.net
 						var answerHandle:Function = _callbackMap[answerIndex];
 						if(answerHandle is Function)
 						{
-							trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");
+							CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");}
 							answerHandle(new Message(this, type, index, data));
 							delete _callbackMap[answerIndex];
 						}
 						else
 						{
-							trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]，但对应的原始消息未找到。");
+							CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]，但对应的原始消息未找到。");}
 						}
 					}
 					else
 					{
-						trace("[Connection] 收到消息 [" + type + "]");
+						CONFIG::DEBUG{trace("[Connection] 收到消息 [" + type + "]");}
 						dispatchEvent( new Message(this, type, index, data));
 					}
 					_packageLength = 0;
@@ -254,7 +268,7 @@ package potato.designer.net
 			} 
 			catch(error:Error) 
 			{
-				trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");
+				CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");}
 				close();
 			}
 			
