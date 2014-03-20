@@ -36,7 +36,7 @@
 			}
 			protected function clientInitHandler(e:Message):void
 			{
-				connection.send(NetConst.S2C_REQ_DESCRIBE_TYPE, "Main", onDescribeTypeHandler);
+				connection.send(NetConst.S2C_REQ_DESCRIBE_TYPE, "flash.display.Sprite", onDescribeTypeHandler);
 				function onDescribeTypeHandler(msg:Message):void
 				{
 					trace("收到解析", msg.data);

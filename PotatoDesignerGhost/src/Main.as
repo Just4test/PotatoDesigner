@@ -7,6 +7,7 @@ package
 	import core.display.Stage;
 	import core.system.Domain;
 	
+	import potato.designer.Const;
 	import potato.designer.net.Connection;
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
@@ -33,20 +34,31 @@ package
 			
 		}
 		
+		/**
+		 * 载入项目代码
+		 * <br>使用部分设计器专用代码覆盖项目代码中的同名类，以实现高级功能。 
+		 * @param fileName
+		 * 
+		 */
 		public function load(fileName:String):void
 		{
 			if(_domain)
 			{
-				return;
+				unload();
 			}
-			_domain = new Domain(Domain.currentDomain);
+			
+			//载入覆盖代码
+			var resDomain:Domain = new Domain();
+			resDomain.load(Const.DESIGNER_OVERRIDE_FILE);
+			
+			//载入项目代码
+			_domain = new Domain(resDomain);
 			_domain.load(fileName);
 			
 		}
 		
 		/**
-		 *卸载所有类，并保证内存得到完全回收。 
-		 * 
+		 *卸载所有类，并保证内存得到完全回收。
 		 */
 		public function unload():void
 		{
