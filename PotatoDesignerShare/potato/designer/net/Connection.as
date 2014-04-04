@@ -22,12 +22,13 @@ package potato.designer.net
 	}
 	
 	/**
-	 *消息结构： pkgLength:uint, typeCode:uint, [type:String,] msgIndex:uint, answerIndex:uint, data:Object
-	 * pkgLength:消息除了pkgLength所占空间外剩余的长度
-	 * typeCode:类型的短代码。每个短代码对应了一个类型的完整路径。注意，对于发送和接收同样的type，其短代码是不同的。
-	 * type:类型的完整路径。如果第一次使用一个类型，将为其指定一个短代码，并在消息中附加完整路径
-	 * msgIndex:消息的index。注意一个消息如果不需要应答，其index固定为0
-	 * answerIndex:指定该消息是对另一个消息的应答。当此值为0时说明其不应答任何消息，而是一条广播消息
+	 * 连接控制器。使用该对象进行网络通讯。
+	 * <br>消息结构： pkgLength:uint, typeCode:uint, [type:String,] msgIndex:uint, answerIndex:uint, data:Object
+	 * <br>pkgLength:消息除了pkgLength所占空间外剩余的长度
+	 * <br>typeCode:类型的短代码。每个短代码对应了一个类型的完整路径。注意，对于发送和接收同样的type，其短代码是不同的。
+	 * <br>type:类型的完整路径。如果第一次使用一个类型，将为其指定一个短代码，并在消息中附加完整路径
+	 * <br>msgIndex:消息的index。注意一个消息如果不需要应答，其index固定为0
+	 * <br>answerIndex:指定该消息是对另一个消息的应答。当此值为0时说明其不应答任何消息，而是一条广播消息
 	 * @author Just4test
 	 */
 	public class Connection extends EventDispatcher
@@ -65,6 +66,11 @@ package potato.designer.net
 		 */
 		protected var _receiveCode2Type:Vector.<String>;
 		
+		/**
+		 * 创建连接控制器
+		 * @param socket 如果需要控制一个已经存在的Socket，则传入此Socket对象。否则将自己创建一个Socket。
+		 * 
+		 */		
 		public function Connection(socket:Socket = null)
 		{
 			_socket = socket || new Socket;
@@ -106,8 +112,8 @@ package potato.designer.net
 		 *发送或应答一条消息 
 		 * @param type 消息类型
 		 * @param data 消息数据体
-		 * @param callbackHandle 指定应答回调函数
-		 * @param answerIndex 表示这是对某条消息的应答
+		 * @param callbackHandle 指定应答回调方法。如果指定此方法，则消息的接收方可以对此消息进行应答，应答消息由回调方法处理。
+		 * @param answerIndex 表示这是对某条消息的应答。
 		 * 
 		 */
 		public function send(type:String, data:* = null, callbackHandle:Function = null, answerIndex:uint = 0):void
@@ -166,6 +172,10 @@ package potato.designer.net
 			}
 		}
 		
+		/**
+		 *关闭连接 
+		 * 
+		 */
 		public function close():void
 		{
 			_socket.close();
@@ -212,9 +222,9 @@ package potato.designer.net
 		
 		protected function dataHandler(e:Event):void
 		{
-			try
+			while(_socket.bytesAvailable)
 			{
-				while(_socket.bytesAvailable)
+				try
 				{
 					if(!_packageLength)
 					{
@@ -243,33 +253,34 @@ package potato.designer.net
 					var index:uint = _socket.readUnsignedInt();
 					var answerIndex:uint = _socket.readUnsignedInt();
 					var data:* = _socket.readObject();
-					
-					if(answerIndex)
+				} 
+				catch(error:Error) 
+				{
+					CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");}
+					close();
+				}
+			
+				
+				if(answerIndex)
+				{
+					var answerHandle:Function = _callbackMap[answerIndex];
+					if(answerHandle is Function)
 					{
-						var answerHandle:Function = _callbackMap[answerIndex];
-						if(answerHandle is Function)
-						{
-							CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");}
-							answerHandle(new Message(this, type, index, data));
-							delete _callbackMap[answerIndex];
-						}
-						else
-						{
-							CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]，但对应的原始消息未找到。");}
-						}
+						CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");}
+						answerHandle(new Message(this, type, index, data));
+						delete _callbackMap[answerIndex];
 					}
 					else
 					{
-						CONFIG::DEBUG{trace("[Connection] 收到消息 [" + type + "]");}
-						dispatchEvent( new Message(this, type, index, data));
+						CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]，但对应的原始消息未找到。");}
 					}
-					_packageLength = 0;
 				}
-			} 
-			catch(error:Error) 
-			{
-				CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");}
-				close();
+				else
+				{
+					CONFIG::DEBUG{trace("[Connection] 收到消息 [" + type + "]");}
+					dispatchEvent( new Message(this, type, index, data));
+				}
+				_packageLength = 0;
 			}
 			
 		}

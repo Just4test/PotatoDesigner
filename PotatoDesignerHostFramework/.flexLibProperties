@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="potato.designer.framework.DataCenter"/>
+    <classEntry path="log"/>
+    <classEntry path="potato.designer.framework.PluginLoader"/>
+    <classEntry path="LoadSWCExample"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
