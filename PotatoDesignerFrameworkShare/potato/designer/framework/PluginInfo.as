@@ -189,7 +189,7 @@ package potato.designer.framework
 			
 			CONFIG::GHOST
 			{
-				//TODO
+				return _path + "/" + _ghostFile;
 			}
 		}
 		
@@ -203,7 +203,7 @@ package potato.designer.framework
 			
 			CONFIG::GHOST
 			{
-				//TODO
+				return _ghostClass;
 			}
 		}
 

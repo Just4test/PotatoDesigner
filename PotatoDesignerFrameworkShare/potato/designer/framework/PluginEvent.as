@@ -1,6 +1,14 @@
 package potato.designer.framework
 {
-	import flash.events.Event;
+	CONFIG::HOST
+	{
+		import flash.events.Event;
+	}
+	
+	CONFIG::GHOST
+	{
+		import core.events.Event;
+	}
 	
 	public class PluginEvent extends Event
 	{

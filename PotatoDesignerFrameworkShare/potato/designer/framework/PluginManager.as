@@ -1,10 +1,21 @@
 package potato.designer.framework
 {
-	import flash.events.Event;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
-	import flash.system.ApplicationDomain;
+	CONFIG::HOST
+	{
+		import flash.events.Event;
+		import flash.filesystem.File;
+		import flash.filesystem.FileMode;
+		import flash.filesystem.FileStream;
+		import flash.system.ApplicationDomain;
+	}
+	CONFIG::GHOST
+	{
+		
+	}
+	
+	import core.filesystem.File;
+	import core.filesystem.FileInfo;
+	import core.system.Domain;
 
 	public class PluginManager
 	{
@@ -58,7 +69,7 @@ package potato.designer.framework
 		CONFIG::GHOST
 		{
 			//TODO
-			public static const Manife;
+			private static var _domain:Domain;
 		}
 		
 		/**清单文件内容示例*/
@@ -79,7 +90,6 @@ package potato.designer.framework
 		/**扫描 Plugin文件夹以便发现所有插件*/
 		public static function scan():void
 		{
-			trace(JSON.stringify(MANIFEST_FILE_EXAMPLE));
 			CONFIG::HOST
 			{
 				var fileStream:FileStream = new FileStream();
@@ -101,20 +111,21 @@ package potato.designer.framework
 							var manifestFile:File = new File(file.nativePath + "/" + MANIFEST_FILE_NAME);
 							if(manifestFile.exists)
 							{
-//								try
-//								{
-									fileStream.open(manifestFile, FileMode.READ);
-									var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
-									fileStream.close();
+								fileStream.open(manifestFile, FileMode.READ);
+								var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
+								fileStream.close();
+								
+								try
+								{
 									var pluginInfo:PluginInfo = new PluginInfo(file.nativePath, str);
 									var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain);
 									pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
 									pluginLoader.addEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
-//								}
-//								catch(error:Error)
-//								{
-//									log("加载位于", file.nativePath, "的插件时发生错误\n", error);
-//								}
+								}
+								catch(error:Error)
+								{
+									log("加载位于", file.nativePath, "的插件时发生错误\n", error);
+								}
 								
 							}
 						}
@@ -126,7 +137,36 @@ package potato.designer.framework
 				
 			CONFIG::GHOST
 			{
-				//TODO
+				//如果插件目录不存在或者不是目录则返回
+				if(!File.exists(PLUGIN_FOLDER + "/."))
+				{
+					return;
+				}
+				
+				var array:Array = File.getDirectoryListing(PLUGIN_FOLDER);
+				
+				for each(var i:FileInfo in array)
+				{
+					if(!i.isDirectory || "." == i.name || ".." == i.name)
+					{
+						continue;
+					}
+					
+					var foldPath:String = PLUGIN_FOLDER + "/" + i.name;
+					var filePath:String = foldPath + "/" + MANIFEST_FILE_NAME;
+					if(File.exists(filePath))
+					{	
+						try
+						{
+							var pluginInfo:PluginInfo = new PluginInfo(foldPath, File.read(filePath));
+							
+						}
+						catch(error:Error)
+						{
+							log("加载位于", foldPath, "的插件时发生错误\n", error);
+						}
+					}
+				}
 			}
 		}
 		
@@ -179,12 +219,6 @@ package potato.designer.framework
 		public static function getPluginById(id:String):PluginInfo
 		{
 			return _pluginMap[id];
-		}
-		
-		/////////////////////////////////////////////////////////////
-		
-		private static function regPlgin(manifest:Object):void
-		{
 		}
 		
 		
