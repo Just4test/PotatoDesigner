@@ -5,6 +5,7 @@
     <classEntry path="log"/>
     <classEntry path="potato.designer.framework.PluginLoader"/>
     <classEntry path="LoadSWCExample"/>
+    <classEntry path="potato.designer.framework.PluginEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -2,15 +2,20 @@ package potato.designer.framework
 {
 	import flash.events.Event;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.system.ApplicationDomain;
 
 	public class PluginManager
 	{
+		/**当有一个新的插件被安装后派发此事件*/
+		public static const EVENT_PLUGIN_INSTALLED:String = "EVENT_PLUGIN_INSTALLED";
 		/**当有一个新的插件被激活后派发此事件*/
 		public static const EVENT_PLUGIN_START:String = "EVENT_PLUGIN_START";
 		/**指定清单文件的文件名*/
 		public static const MANIFEST_FILE_NAME:String = "Manifest.json";
+		
+		public static const PLUGIN_FOLDER:String = "plugins";
 		
 		private static const _pluginList:Vector.<PluginInfo> = new Vector.<PluginInfo>;
 		private static const _pluginMap:Object = new Object;
@@ -32,9 +37,21 @@ package potato.designer.framework
 			{
 				var pluginLoader:PluginLoader = e.target as PluginLoader;
 				pluginLoader.removeEventListener(Event.COMPLETE, pluginLoadedHandler);
+				pluginLoader.removeEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
 				
-				_pluginMap[pluginLoader.pluginInfo.id] = pluginLoader.pluginInfo;
-				_pluginList.push(pluginLoader.pluginInfo);
+				var pluginInfo:PluginInfo = pluginLoader.pluginInfo
+				_pluginMap[pluginInfo.id] = pluginInfo;
+				_pluginList.push(pluginInfo);
+				pluginInfo.setDomain(pluginLoader.domain);
+				EventCenter.dispatchEvent(new PluginEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
+			}
+			
+			private static function pluginLoadFailHandler(e:Event):void
+			{
+				var pluginLoader:PluginLoader = e.target as PluginLoader;
+				pluginLoader.removeEventListener(Event.COMPLETE, pluginLoadedHandler);
+				pluginLoader.removeEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
+				log("[Plugin] 载入插件失败");
 			}
 		}
 		
@@ -47,28 +64,29 @@ package potato.designer.framework
 		/**清单文件内容示例*/
 		private static const MANIFEST_FILE_EXAMPLE:Object = 
 			{
-				id:"plugin1",					//指定插件id
-				version:1,						//指定插件版本。
-				depend:["GhostManager"],		//指定插件所依赖的其他插件id
-				startLevel:10,					//指定插件启动顺序。
-				hostFile:"plugin1Host.swf",	//指定宿主端类文件。
-				hostClass:"plugin1Host",		//指定宿主端启动类。该类具有无参构造方法，并且实现IPluginLoader
-				ghostFile:"plugin1Ghost.mbf",	//指定客户端类文件。通常在桌面上使用。
-				ghostEncryptionFile:
-						"plugin1GhostE.mbf",	//指定客户端加密类文件。在移动设备上使用。
+//				id:"plugin1",					//指定插件id
+//				version:1,						//指定插件版本。
+				//depend:["GhostManager"],		//指定插件所依赖的其他插件id
+//				startLevel:10,					//指定插件启动顺序。
+//				hostFile:"plugin1Host.swf",	//指定宿主端类文件。
+//				hostClass:"plugin1Host",		//指定宿主端启动类。该类具有无参构造方法，并且实现IPluginLoader
+//				ghostFile:"plugin1Ghost.mbf",	//指定客户端类文件。通常在桌面上使用。
+//				ghostEncryptionFile:
+//						"plugin1GhostE.mbf",	//指定客户端加密类文件。在移动设备上使用。
 				ghostClass:"plugin1Ghost"		//指定客户端启动类。该类具有无参构造方法，并且实现IPluginLoader
 			};
 		
 		/**扫描 Plugin文件夹以便发现所有插件*/
 		public static function scan():void
 		{
+			trace(JSON.stringify(MANIFEST_FILE_EXAMPLE));
 			CONFIG::HOST
 			{
 				var fileStream:FileStream = new FileStream();
 				
 				//扫描程序安装目录
 				trace(File.applicationDirectory.nativePath);
-				scanThisDir(File.applicationDirectory);
+				scanThisDir(File.applicationDirectory.resolvePath(PLUGIN_FOLDER));
 				//扫描工程目录
 				//TODO
 				
@@ -83,18 +101,21 @@ package potato.designer.framework
 							var manifestFile:File = new File(file.nativePath + "/" + MANIFEST_FILE_NAME);
 							if(manifestFile.exists)
 							{
-								try
-								{
-									var pluginInfo:PluginInfo = new PluginInfo(file.nativePath,
-										fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset));
-								}
-								catch(error:Error)
-								{
-									log("加载位于", file.nativePath, "的插件时发生错误\n", error);
-								}
+//								try
+//								{
+									fileStream.open(manifestFile, FileMode.READ);
+									var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
+									fileStream.close();
+									var pluginInfo:PluginInfo = new PluginInfo(file.nativePath, str);
+									var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain);
+									pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
+									pluginLoader.addEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
+//								}
+//								catch(error:Error)
+//								{
+//									log("加载位于", file.nativePath, "的插件时发生错误\n", error);
+//								}
 								
-								var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain)
-								pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
 							}
 						}
 						

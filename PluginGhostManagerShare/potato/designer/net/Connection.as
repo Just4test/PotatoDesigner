@@ -21,6 +21,10 @@ package potato.designer.net
 		import core.net.Socket;
 	}
 	
+	[Event(name="connect", type="flash.events.Event")]
+	[Event(name="close", type="flash.events.Event")]
+	[Event(name="ioError", type="flash.events.IOErrorEvent")]
+	[Event(name="crash", type="potato.designer.net.Connection")]
 	/**
 	 * 连接控制器。使用该对象进行网络通讯。
 	 * <br>消息结构： pkgLength:uint, typeCode:uint, [type:String,] msgIndex:uint, answerIndex:uint, data:Object
@@ -33,6 +37,9 @@ package potato.designer.net
 	 */
 	public class Connection extends EventDispatcher
 	{
+		/**连接崩溃时派发*/
+		public static const EVENT_CRASH:String = "crash";
+		
 		protected var _socket:Socket;
 		
 		/**
@@ -257,6 +264,7 @@ package potato.designer.net
 				catch(error:Error) 
 				{
 					CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");}
+					dispatchEvent(new Event(EVENT_CRASH));
 					close();
 				}
 			
@@ -283,6 +291,26 @@ package potato.designer.net
 				_packageLength = 0;
 			}
 			
+		}
+		
+		public function get localAddress():String
+		{
+			return _socket.localAddress;
+		}
+		
+		public function get localPort():int
+		{
+			return _socket.localPort;
+		}
+		
+		public function get remoteAddress():String
+		{
+			return _socket.remoteAddress;
+		}
+		
+		public function get remotePort():int
+		{
+			return _socket.remotePort;
 		}
 	}
 }

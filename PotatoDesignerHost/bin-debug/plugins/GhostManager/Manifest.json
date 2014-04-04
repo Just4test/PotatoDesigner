@@ -1,0 +1,11 @@
+{
+	"id":"GhostManager",
+	"version":1,
+	"depend":[],
+	"startLevel":10,
+	"hostFile":"PluginGhostManagerHost.swc",
+	"hostClass":"potato.designer.plugin.ghostManager.GhostManagerHost",
+	"ghostFile":"plugin1Ghost.mbf",
+	"ghostEncryptionFile":"plugin1GhostE.mbf",
+	"ghostClass":"plugin1Ghost"	
+}

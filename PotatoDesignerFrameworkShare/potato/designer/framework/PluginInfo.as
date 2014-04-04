@@ -1,5 +1,6 @@
 package potato.designer.framework
 {
+	import flash.utils.getQualifiedClassName;
 
 	CONFIG::HOST
 	{
@@ -44,7 +45,7 @@ package potato.designer.framework
 			internal function setDomain(domain:ApplicationDomain):void
 			{
 				_domain = domain;
-				_state = STATE_LOADING;
+				_state = STATE_STOP;
 			}
 		}
 		
@@ -56,7 +57,7 @@ package potato.designer.framework
 		public function PluginInfo(path:String, manifestStr:String)
 		{
 			_path = path;
-			_manifestStr = _manifestStr;
+			_manifestStr = manifestStr;
 			
 			CONFIG::HOST
 			{
@@ -71,6 +72,12 @@ package potato.designer.framework
 			_id = manifest.id;
 			_version = manifest.version;
 			_depend = Vector.<String>(manifest.depend);
+			_startLevel = manifest.startLevel;
+			_hostFile = manifest.hostFile;
+			_hostClass = manifest.hostClass;
+			_ghostFile = manifest.ghostFile;
+			_ghostEncryptionFile = manifest.ghostEncryptionFile;
+			_ghostClass = manifest.ghostClass;
 		}
 		
 		/**
@@ -83,7 +90,10 @@ package potato.designer.framework
 				_state = STATE_RUNNING;
 				
 			}
-			throw new Error("插件[" + _id + "]于" + _state + "状态下尝试报告其启动完成");
+			else
+			{
+				throw new Error("插件[" + _id + "]于" + _state + "状态下尝试报告其启动完成");
+			}
 		}
 		
 		
@@ -112,13 +122,15 @@ package potato.designer.framework
 			}
 			
 			var activator:IPluginActivator;
-			try
-			{
+//			try
+//			{
 				CONFIG::HOST
 				{
 					//从Manager的domain创建启动类实例
 					var activatorClass:Class = _domain.getDefinition(startClass) as Class;
 					activator = new activatorClass();
+					_state = STATE_INITING;
+					activator.start(this);
 				}
 				
 				CONFIG::GHOST
@@ -126,14 +138,12 @@ package potato.designer.framework
 					;//TODO
 				}
 				
-			}
-			catch(error:Error)
-			{
-				log("启动插件[" + _id + "]时发生错误，\n" + error);
-			}
+//			}
+//			catch(error:Error)
+//			{
+//				log("启动插件[" + _id + "]时发生错误，\n" + error);
+//			}
 			
-			_state = STATE_INITING;
-			activator.start(this);
 		}
 		
 		//////////////////////////////////////////
