@@ -1,10 +1,14 @@
 package potato.designer.framework
 {
-	import flash.utils.getQualifiedClassName;
+	
 
 	CONFIG::HOST
 	{
 		import flash.system.ApplicationDomain;
+	}
+	CONFIG::GHOST
+	{
+		import core.system.Domain;
 	}
 
 	public class PluginInfo
@@ -43,6 +47,20 @@ package potato.designer.framework
 			protected var _domain:ApplicationDomain;
 			
 			internal function setDomain(domain:ApplicationDomain):void
+			{
+				_domain = domain;
+				_state = STATE_STOP;
+			}
+		}
+		
+		CONFIG::GHOST
+		{
+			/**插件还没有被载入。这是一个内部状态，此状态下的插件不应能被检索。*/
+			public static const STATE_LOADING:String = "STATE_LOADING";
+			
+			protected var _domain:Domain;
+			
+			internal function setDomain(domain:Domain):void
 			{
 				_domain = domain;
 				_state = STATE_STOP;
@@ -88,11 +106,11 @@ package potato.designer.framework
 			if(STATE_INITING == _state)
 			{
 				_state = STATE_RUNNING;
-				
+				log("[Plugin] 插件[" + _id + "]启动完成");
 			}
 			else
 			{
-				throw new Error("插件[" + _id + "]于" + _state + "状态下尝试报告其启动完成");
+				throw new Error("[Plugin] 插件[" + _id + "]于" + _state + "状态下尝试报告其启动完成");
 			}
 		}
 		
@@ -118,31 +136,33 @@ package potato.designer.framework
 		{
 			if(!isDependenciesMeet)
 			{
-				throw new Error("尝试启动未满足依赖的插件[" + _id + "]");
+				throw new Error("[Plugin] 尝试启动未满足依赖的插件[" + _id + "]");
 			}
 			
+			log("[Plugin] 插件[" + _id + "]正在启动");
 			var activator:IPluginActivator;
-//			try
-//			{
+			try
+			{
 				CONFIG::HOST
 				{
 					//从Manager的domain创建启动类实例
-					var activatorClass:Class = _domain.getDefinition(startClass) as Class;
-					activator = new activatorClass();
-					_state = STATE_INITING;
-					activator.start(this);
+					var activatorClass:Class = _domain.getDefinition(startClassName) as Class;
 				}
 				
 				CONFIG::GHOST
 				{
-					;//TODO
+					var activatorClass:Class = _domain.getClass(startClassName) as Class;
 				}
 				
-//			}
-//			catch(error:Error)
-//			{
-//				log("启动插件[" + _id + "]时发生错误，\n" + error);
-//			}
+				activator = new activatorClass();
+				_state = STATE_INITING;
+				activator.start(this);
+				
+			}
+			catch(error:Error)
+			{
+				log("[Plugin] 启动插件[" + _id + "]时发生错误，\n" + error);
+			}
 			
 		}
 		
@@ -194,7 +214,7 @@ package potato.designer.framework
 		}
 		
 		/**该插件在当前环境下的启动类名*/
-		public function get startClass():String
+		public function get startClassName():String
 		{
 			CONFIG::HOST
 			{

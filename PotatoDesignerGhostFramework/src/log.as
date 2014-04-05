@@ -1,6 +1,8 @@
 package
 {
-	import potato.designer.net.NetConst;
+	import core.events.Event;
+	
+	import potato.designer.framework.EventCenter;
 
 	public function log(...args):void
 	{
@@ -12,7 +14,10 @@ package
 			s += i + " ";
 		}
 		
-		Main.instance.connection.send(NetConst.C2S_LOG, s);
+		EventCenter.dispatchEvent(new Event(EventCenter.EVENT_LOG));
+		
+		
+//		Main.instance.connection.send(NetConst.C2S_LOG, s);
 		
 		
 	}

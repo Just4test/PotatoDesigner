@@ -10,12 +10,11 @@ package potato.designer.framework
 	}
 	CONFIG::GHOST
 	{
-		
+		import core.filesystem.File;
+		import core.filesystem.FileInfo;
+		import core.system.Domain;
 	}
 	
-	import core.filesystem.File;
-	import core.filesystem.FileInfo;
-	import core.system.Domain;
 
 	public class PluginManager
 	{
@@ -54,7 +53,8 @@ package potato.designer.framework
 				_pluginMap[pluginInfo.id] = pluginInfo;
 				_pluginList.push(pluginInfo);
 				pluginInfo.setDomain(pluginLoader.domain);
-				EventCenter.dispatchEvent(new PluginEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
+				log("[Plugin] 插件[" + pluginInfo.id + "]已经载入");
+				EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
 			}
 			
 			private static function pluginLoadFailHandler(e:Event):void
@@ -124,7 +124,7 @@ package potato.designer.framework
 								}
 								catch(error:Error)
 								{
-									log("加载位于", file.nativePath, "的插件时发生错误\n", error);
+									log("[Plugin] 加载位于", file.nativePath, "的插件时发生错误\n", error);
 								}
 								
 							}
@@ -163,7 +163,7 @@ package potato.designer.framework
 						}
 						catch(error:Error)
 						{
-							log("加载位于", foldPath, "的插件时发生错误\n", error);
+							log("[Plugin] 加载位于", foldPath, "的插件时发生错误\n", error);
 						}
 					}
 				}
@@ -184,7 +184,7 @@ package potato.designer.framework
 			
 			if(!plugin)
 			{
-				throw new Error("尝试启动不存在的插件[" + id + "]");
+				throw new Error("[Plugin] 尝试启动不存在的插件[" + id + "]");
 			}
 			
 			switch(plugin.state)
@@ -204,7 +204,7 @@ package potato.designer.framework
 						return false;
 					}
 				default:
-					throw new Error("插件[" + id + "]的状态是非法值\"" + plugin.state + "\"");
+					throw new Error("[Plugin] 插件[" + id + "]的状态是非法值\"" + plugin.state + "\"");
 			}
 		}
 		

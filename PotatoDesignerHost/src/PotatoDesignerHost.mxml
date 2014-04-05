@@ -7,8 +7,8 @@
 		<![CDATA[
 			import mx.events.FlexEvent;
 			
+			import potato.designer.framework.DesignerEvent;
 			import potato.designer.framework.EventCenter;
-			import potato.designer.framework.PluginEvent;
 			import potato.designer.framework.PluginManager;
 			
 			
@@ -22,9 +22,9 @@
 				EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, loadPluginWhenLoaded);
 			}
 			
-			protected function loadPluginWhenLoaded(e:PluginEvent):void
+			protected function loadPluginWhenLoaded(e:DesignerEvent):void
 			{
-				PluginManager.startPlugin(e.plugin.id);
+				PluginManager.startPlugin(e.data.id);
 			}
 			
 //			protected function connectHandler(e:ServerSocketConnectEvent):void

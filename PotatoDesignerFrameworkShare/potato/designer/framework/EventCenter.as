@@ -19,6 +19,8 @@ package potato.designer.framework
 	 */
 	public class EventCenter
 	{
+		public static const EVENT_LOG:String = "log";
+		
 		private static var eventDispatcher:EventDispatcher = new EventDispatcher;
 		
 		public static function addEventListener(type:String, listener:Function):void

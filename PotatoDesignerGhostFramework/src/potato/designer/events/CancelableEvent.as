@@ -17,9 +17,14 @@ package potato.designer.events
 		public function CancelableEvent(type:String, bubbles:Boolean=false)
 		{
 			super(type, bubbles);
+			_root = this;
 		}
 		
-		/**覆盖该类时，请注意为root赋值。*/
+		/**
+		 *覆盖此方法时请一定注意 
+		 * @return 
+		 * 
+		 */
 		public override function clone():Event
 		{
 			var ret:CancelableEvent = new CancelableEvent(type, bubbles);
@@ -33,13 +38,13 @@ package potato.designer.events
 		 */
 		public function isDefaultPrevented():Boolean
 		{
-			return canceledMap[_root || this];
+			return canceledMap[_root];
 		}
 		
 		/**请求取消默认行为*/		
 		public function preventDefault():void
 		{
-			canceledMap[_root || this] = true;
+			canceledMap[_root] = true;
 		}
 	}
 	
