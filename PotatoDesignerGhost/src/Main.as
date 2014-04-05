@@ -1,11 +1,16 @@
 package
 {
+	import flash.system.Worker;
+	import flash.system.WorkerDomain;
 	import flash.utils.getQualifiedClassName;
 	
 	import core.display.DisplayObjectContainer;
 	import core.events.Event;
 	
 	import potato.designer.events.CancelableEvent;
+	import potato.designer.framework.DesignerEvent;
+	import potato.designer.framework.EventCenter;
+	import potato.designer.framework.PluginManager;
 	
 	public class Main extends DisplayObjectContainer
 	{
@@ -25,9 +30,14 @@ package
 //			var connectHelper:ConnectHelper = new ConnectHelper;
 //			addChild(connectHelper);
 			
-			var e:Event = new CancelableEvent("123");
-			trace(getQualifiedClassName(e), getQualifiedClassName(e.clone()));
 			
+			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, loadPluginWhenLoaded);
+			PluginManager.scan();
+		}
+		
+		protected function loadPluginWhenLoaded(e:DesignerEvent):void
+		{
+			PluginManager.startPlugin(e.data.id);
 		}
 		
 //		/**

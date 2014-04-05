@@ -70,6 +70,10 @@ package potato.designer.framework
 		{
 			//TODO
 			private static var _domain:Domain;
+			
+			{
+				_domain = new Domain(Domain.currentDomain);
+			}
 		}
 		
 		/**清单文件内容示例*/
@@ -95,7 +99,6 @@ package potato.designer.framework
 				var fileStream:FileStream = new FileStream();
 				
 				//扫描程序安装目录
-				trace(File.applicationDirectory.nativePath);
 				scanThisDir(File.applicationDirectory.resolvePath(PLUGIN_FOLDER));
 				//扫描工程目录
 				//TODO
@@ -138,12 +141,15 @@ package potato.designer.framework
 			CONFIG::GHOST
 			{
 				//如果插件目录不存在或者不是目录则返回
-				if(!File.exists(PLUGIN_FOLDER + "/."))
+				try
 				{
+					var array:Array = File.getDirectoryListing(PLUGIN_FOLDER);
+				}
+				catch(error:Error)
+				{
+					//文件夹不存在
 					return;
 				}
-				
-				var array:Array = File.getDirectoryListing(PLUGIN_FOLDER);
 				
 				for each(var i:FileInfo in array)
 				{
@@ -159,12 +165,19 @@ package potato.designer.framework
 						try
 						{
 							var pluginInfo:PluginInfo = new PluginInfo(foldPath, File.read(filePath));
-							
+							_domain.load(pluginInfo.filePath);
 						}
 						catch(error:Error)
 						{
 							log("[Plugin] 加载位于", foldPath, "的插件时发生错误\n", error);
+							continue;
 						}
+						
+						_pluginMap[pluginInfo.id] = pluginInfo;
+						_pluginList.push(pluginInfo);
+						pluginInfo.setDomain(_domain);
+						log("[Plugin] 插件[" + pluginInfo.id + "]已经载入");
+						EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
 					}
 				}
 			}

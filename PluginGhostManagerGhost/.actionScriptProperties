@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<actionScriptProperties analytics="false" mainApplicationPath="PluginGhostManagerGhost.as" projectUUID="f8059f9d-3a82-4009-8a30-db9adecbad31" version="11">
-  <compiler additionalCompilerArguments="-locale en_US" advancedTelemetry="false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="true" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" useFlashSDK="true" verifyDigests="true" warn="true">
-    <compilerSourcePath/>
+<actionScriptProperties analytics="false" mainApplicationPath="potato/designer/plugin/ghostManager/GhostManagerGhost.as" projectUUID="f8059f9d-3a82-4009-8a30-db9adecbad31" version="11">
+  <compiler additionalCompilerArguments="-locale en_US" advancedTelemetry="false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" useFlashSDK="true" verifyDigests="true" warn="true">
+    <compilerSourcePath>
+      <compilerSourcePathEntry kind="1" linkType="1" path="C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PluginGhostManagerShare"/>
+    </compilerSourcePath>
     <libraryPath defaultLinkType="0">
-      <libraryPathEntry kind="3" linkType="1" path="${DOCUMENTS}/avm/libs/core.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/avm/libs/core.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/PotatoDesignerGhostFramework/bin/PotatoDesignerGhostFramework.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="PluginGhostManagerGhost.as"/>
+    <application path="potato/designer/plugin/ghostManager/GhostManagerGhost.as"/>
   </applications>
   <modules/>
   <workers/>
