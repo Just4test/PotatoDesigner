@@ -1,9 +1,12 @@
 package potato.designer.plugin.guestManager
 {
 	
+	import flash.desktop.NativeProcess;
+	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ServerSocketConnectEvent;
+	import flash.filesystem.File;
 	import flash.net.ServerSocket;
 	
 	import potato.designer.framework.IPluginActivator;
@@ -33,6 +36,7 @@ package potato.designer.plugin.guestManager
 			log("[GuestManager] 开始监听连接");
 			
 			info.started();
+			startLocalGuest();
 		}
 		
 		/**
@@ -80,10 +84,21 @@ package potato.designer.plugin.guestManager
 			guest.connection = connection;
 		}
 		
+		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";
+		public static const loaclProjectPath:String = "C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PotatoDesignerGuest";
+		public static const loaclProjectMainSwfPath:String = "bin-debug/Main.swf";
 		/**启动一个新的本地客户端实例。*/
 		public static function startLocalGuest():Guest
 		{
-			return null;
+			var ret:Guest = new Guest("local", true);
+			var avmFile:File = new File(loaclAvmPath);
+			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			startupInfo.executable = avmFile;
+			startupInfo.arguments = new Vector.<String>;
+			startupInfo.arguments[0] = loaclProjectPath + "/" + loaclProjectMainSwfPath;
+			var process:NativeProcess = new NativeProcess();
+			process.start(startupInfo);
+			return ret;
 		}
 		
 		public static function get guestList():Array

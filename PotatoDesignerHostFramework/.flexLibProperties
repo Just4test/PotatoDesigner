@@ -4,8 +4,8 @@
     <classEntry path="potato.designer.framework.DataCenter"/>
     <classEntry path="log"/>
     <classEntry path="potato.designer.framework.PluginLoader"/>
-    <classEntry path="LoadSWCExample"/>
     <classEntry path="potato.designer.framework.DesignerEvent"/>
+    <classEntry path="potato.designer.framework.Utils"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

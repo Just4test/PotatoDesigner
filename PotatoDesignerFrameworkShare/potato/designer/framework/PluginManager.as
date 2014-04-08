@@ -33,7 +33,7 @@ package potato.designer.framework
 		/**指定清单文件的文件名*/
 		public static const MANIFEST_FILE_NAME:String = "Manifest.json";
 		
-		public static const PLUGIN_FOLDER:String = "plugins";
+		public static const PLUGIN_FOLDER:String = "designer/plugins";
 		
 		private static const _pluginList:Vector.<PluginInfo> = new Vector.<PluginInfo>;
 		private static const _pluginMap:Object = new Object;
@@ -70,7 +70,7 @@ package potato.designer.framework
 				var pluginLoader:PluginLoader = e.target as PluginLoader;
 				pluginLoader.removeEventListener(Event.COMPLETE, pluginLoadedHandler);
 				pluginLoader.removeEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
-				log("[Plugin] 载入插件失败，原因:", e.data);
+				log("[Plugin] 加载位于", pluginLoader.pluginInfo.filePath, "的插件时发生错误，原因:", e.data);
 			}
 		}
 		
@@ -174,9 +174,10 @@ package potato.designer.framework
 					try
 					{
 						var pluginInfo:PluginInfo = new PluginInfo(path, str);
-						var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain);
+						var pluginLoader:PluginLoader = new PluginLoader;
 						pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
 						pluginLoader.addEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
+						pluginLoader.load(pluginInfo, _domain);
 						
 					
 					}
