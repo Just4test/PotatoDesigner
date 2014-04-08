@@ -1,5 +1,12 @@
 package potato.designer.framework
 {
+	import flash.display.Loader;
+	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.system.LoaderContext;
+	import flash.utils.ByteArray;
+	
+	import potato.designer.framework.deng.fzip.FZipErrorEvent;
 
 	CONFIG::HOST
 	{
@@ -204,6 +211,18 @@ package potato.designer.framework
 		public static function finishLoad(pluginInfo:PluginInfo):void
 		{
 			
+		}
+		
+				
+		/**
+		 *解压缩指定目录的swc并返回其中swf的ByteArray
+		 * @param path
+		 * @return 
+		 * 
+		 */
+		protected static function unzipSwc(path:String):ByteArray
+		{
+			return null;
 		}
 		
 		/**
