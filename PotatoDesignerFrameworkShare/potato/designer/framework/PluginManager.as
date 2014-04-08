@@ -94,6 +94,7 @@ package potato.designer.framework
 		/**扫描 Plugin文件夹以便发现所有插件*/
 		public static function scan():void
 		{
+			log("[Plugin] 开始扫描插件");
 			CONFIG::HOST
 			{
 				var fileStream:FileStream = new FileStream();
@@ -114,6 +115,8 @@ package potato.designer.framework
 							var manifestFile:File = new File(file.nativePath + "/" + MANIFEST_FILE_NAME);
 							if(manifestFile.exists)
 							{
+								log("[Plugin] 发现插件，位于", file.nativePath);
+								
 								fileStream.open(manifestFile, FileMode.READ);
 								var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
 								fileStream.close();
@@ -132,8 +135,6 @@ package potato.designer.framework
 								
 							}
 						}
-						
-						
 					} 
 				}
 			}
@@ -161,7 +162,9 @@ package potato.designer.framework
 					var foldPath:String = PLUGIN_FOLDER + "/" + i.name;
 					var filePath:String = foldPath + "/" + MANIFEST_FILE_NAME;
 					if(File.exists(filePath))
-					{	
+					{
+						log("[Plugin] 发现插件，位于", foldPath);
+						
 						try
 						{
 							var pluginInfo:PluginInfo = new PluginInfo(foldPath, File.read(filePath));
@@ -181,6 +184,8 @@ package potato.designer.framework
 					}
 				}
 			}
+			
+			log("[Plugin] 完成插件扫描");
 		}
 		
 		/**

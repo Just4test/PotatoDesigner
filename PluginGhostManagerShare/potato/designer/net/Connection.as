@@ -41,6 +41,11 @@ package potato.designer.net
 		public static const EVENT_CRASH:String = "crash";
 		
 		protected var _socket:Socket;
+		CONFIG::GHOST
+		{
+			protected var _remoteAddress:String;
+			protected var _remotePort:int;
+		}
 		
 		/**
 		 *指示还未收到的包的长度 
@@ -112,6 +117,13 @@ package potato.designer.net
 				_packageLength = 0;
 				_socket.addEventListener(Event.CONNECT, connectHandler);
 				_socket.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+			}
+			
+			
+			CONFIG::GHOST
+			{
+				_remoteAddress = host;
+				_remotePort = port;
 			}
 		}
 		
@@ -293,24 +305,30 @@ package potato.designer.net
 			
 		}
 		
-		public function get localAddress():String
+		CONFIG::HOST
 		{
-			return _socket.localAddress;
-		}
-		
-		public function get localPort():int
-		{
-			return _socket.localPort;
+			public function get localAddress():String
+			{
+				return _socket.localAddress;
+			}
+			
+			public function get localPort():int
+			{
+				return _socket.localPort;
+			}
+			
 		}
 		
 		public function get remoteAddress():String
 		{
-			return _socket.remoteAddress;
+			CONFIG::HOST{return _socket.remoteAddress;}
+			CONFIG::GHOST{return _remoteAddress;}
 		}
 		
 		public function get remotePort():int
 		{
-			return _socket.remotePort;
+			CONFIG::HOST{return _socket.remotePort;}
+			CONFIG::GHOST{return _remotePort;}
 		}
 	}
 }
