@@ -18,9 +18,9 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package deng.fzip
+package potato.designer.framework.deng.fzip
 {
-	import deng.utils.ChecksumUtil;
+	import potato.designer.framework.deng.utils.ChecksumUtil;
 	
 	import flash.utils.*;
 

@@ -1,4 +1,4 @@
-package potato.designer.plugin.ghostManager
+package potato.designer.plugin.guestManager
 {
 	import core.events.Event;
 	import core.events.IOErrorEvent;

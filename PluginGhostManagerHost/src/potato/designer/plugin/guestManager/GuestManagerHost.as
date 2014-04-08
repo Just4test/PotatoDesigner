@@ -1,4 +1,4 @@
-package potato.designer.plugin.ghostManager
+package potato.designer.plugin.guestManager
 {
 	
 	import flash.events.Event;
@@ -12,14 +12,14 @@ package potato.designer.plugin.ghostManager
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
 
-	public class GhostManagerHost implements IPluginActivator
+	public class GuestManagerHost implements IPluginActivator
 	{
 		/**客户端创建*/
-		public static const EVENT_GHOST_CREATED:String = "EVENT_GHOST_CREATED";
+		public static const EVENT_GUEST_CREATED:String = "EVENT_GUEST_CREATED";
 		/**客户端连接到宿主*/
-		public static const EVENT_GHOST_CONNECTED:String = "EVENT_GHOST_CONNECTED";
+		public static const EVENT_GUEST_CONNECTED:String = "EVENT_GUEST_CONNECTED";
 		/**客户端从宿主断开*/
-		public static const EVENT_GHOST_DISCONNECTED:String = "EVENT_GHOST_DISCONNECTED";
+		public static const EVENT_GUEST_DISCONNECTED:String = "EVENT_GUEST_DISCONNECTED";
 		
 		private static var serverSocket:ServerSocket;
 		
@@ -30,7 +30,7 @@ package potato.designer.plugin.ghostManager
 			serverSocket.bind(NetConst.PORT, "0.0.0.0");
 			serverSocket.listen();
 			serverSocket.addEventListener(ServerSocketConnectEvent.CONNECT, connectHandler);
-			log("[GhostManager] 开始监听连接");
+			log("[GuestManager] 开始监听连接");
 			
 			info.started();
 		}
@@ -43,7 +43,7 @@ package potato.designer.plugin.ghostManager
 		private static function connectHandler(e:ServerSocketConnectEvent):void
 		{
 			var connection:Connection = new Connection(e.socket);
-			log("[GhostManager] 检测到连接，来自 ", connection.remoteAddress);
+			log("[GuestManager] 检测到连接，来自 ", connection.remoteAddress);
 			connection.send(NetConst.S2C_HELLO, "hello world!");
 			
 			connection.addEventListener(NetConst.C2S_HELLO, clientInitHandler);
@@ -56,7 +56,7 @@ package potato.designer.plugin.ghostManager
 		{
 			var connection:Connection = e.target as Connection;
 			
-			log("[GhostManager] 连接在对接前失败，来自 ", connection.remoteAddress);
+			log("[GuestManager] 连接在对接前失败，来自 ", connection.remoteAddress);
 			
 			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
 			connection.removeEventListener(Event.CLOSE, connectFailHandler);
@@ -68,25 +68,25 @@ package potato.designer.plugin.ghostManager
 		{
 			var connection:Connection = e.target as Connection;
 			
-			log("[GhostManager] 客户端对接成功，来自 ", connection.remoteAddress);
+			log("[GuestManager] 客户端对接成功，来自 ", connection.remoteAddress);
 			
 			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
 			connection.removeEventListener(Event.CLOSE, connectFailHandler);
 			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
 			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
 			
-			//创建Ghost对象
-			var ghost:Ghost = new Ghost();
-			ghost.connection = connection;
+			//创建Guest对象
+			var guest:Guest = new Guest();
+			guest.connection = connection;
 		}
 		
 		/**启动一个新的本地客户端实例。*/
-		public static function startLocalGhost():Ghost
+		public static function startLocalGuest():Guest
 		{
 			return null;
 		}
 		
-		public static function get ghostList():Array
+		public static function get guestList():Array
 		{
 			return null;
 		}

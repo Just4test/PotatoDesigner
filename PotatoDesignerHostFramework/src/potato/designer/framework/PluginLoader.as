@@ -6,14 +6,16 @@ package potato.designer.framework
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
-	import deng.fzip.FZip;
-	import deng.fzip.FZipErrorEvent;
-	import deng.fzip.FZipEvent;
+	import potato.designer.framework.deng.fzip.FZip;
+	import potato.designer.framework.deng.fzip.FZipErrorEvent;
+	import potato.designer.framework.deng.fzip.FZipEvent;
 	
 	
 	[Event(name="complete", type="flash.events.Event")]
@@ -37,10 +39,18 @@ package potato.designer.framework
 			_pluginInfo = pluginInfo;
 			_domain = domain;
 			
+			
+			var pluginFile:File = new File(pluginInfo.filePath);
+			var fileStream:FileStream = new FileStream();
+			fileStream.open(pluginFile, FileMode.READ);
+			
+			if("swc" == pluginFile.extension)
+			var swfData:ByteArray = new ByteArray;
+			fileStream.readBytes(swfData);
+			
 			_fZipLoader = new FZip();
 			_fZipLoader.load(new URLRequest(_pluginInfo.filePath));
 			_fZipLoader.addEventListener(Event.COMPLETE, onUnzipCompleteHandler);
-//			_fZipLoader.addEventListener(FZipEvent.FILE_LOADED, onFailHandler);
 			_fZipLoader.addEventListener(FZipErrorEvent.PARSE_ERROR, onFailHandler);
 			_fZipLoader.addEventListener(IOErrorEvent.IO_ERROR, onFailHandler);
 			_fZipLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onFailHandler);
@@ -50,7 +60,6 @@ package potato.designer.framework
 		{
 			var swfData:ByteArray = _fZipLoader.getFileByName("library.swf").content;//取swf内容
 			_fZipLoader.removeEventListener(Event.COMPLETE, onUnzipCompleteHandler);
-//			_fZipLoader.removeEventListener(FZipEvent.FILE_LOADED, onFailHandler);
 			_fZipLoader.removeEventListener(FZipErrorEvent.PARSE_ERROR, onFailHandler);
 			_fZipLoader.removeEventListener(IOErrorEvent.IO_ERROR, onFailHandler);
 			_fZipLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onFailHandler);
@@ -78,7 +87,6 @@ package potato.designer.framework
 			if(_fZipLoader)
 			{
 				_fZipLoader.removeEventListener(Event.COMPLETE, onUnzipCompleteHandler);
-//				_fZipLoader.removeEventListener(FZipEvent.FILE_LOADED, onFailHandler);
 				_fZipLoader.removeEventListener(FZipErrorEvent.PARSE_ERROR, onFailHandler);
 				_fZipLoader.removeEventListener(IOErrorEvent.IO_ERROR, onFailHandler);
 				_fZipLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onFailHandler);
@@ -90,7 +98,21 @@ package potato.designer.framework
 				_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onFailHandler);
 				_loader = null;
 			}
-			dispatchEvent(new Event(EVENT_FAIL));
+			
+			var reason:String;
+			switch(e.type)
+			{
+				case FZipErrorEvent.PARSE_ERROR:
+					reason = "解压缩错误";//连接超时或者连接后主机端无响应
+					break;
+				case IOErrorEvent.IO_ERROR:
+					reason = "IO错误"
+					break;
+				case SecurityErrorEvent.SECURITY_ERROR:
+					reason = "安全错误"
+					break;
+			}
+			dispatchEvent(new DesignerEvent(EVENT_FAIL, reason));
 		}
 
 		public function get pluginInfo():PluginInfo

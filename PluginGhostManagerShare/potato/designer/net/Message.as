@@ -3,7 +3,7 @@ package potato.designer.net
 	CONFIG::HOST{
 		import flash.events.Event;
 	}
-	CONFIG::GHOST{
+	CONFIG::GUEST{
 		import core.events.Event;
 	}
 	

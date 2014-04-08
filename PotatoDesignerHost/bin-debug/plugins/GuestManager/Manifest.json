@@ -3,9 +3,9 @@
 	"version":1,
 	"depend":[],
 	"startLevel":10,
-	"hostFile":"PluginGuestManageruest.swc",
+	"hostFile":"PluginGuestManagerHost.swc",
 	"hostClass":"potato.designer.plugin.guestManager.GuestManagerHost",
-	"guestFile":"GuestManagerGuest.swf",
+	"guestFile":"plugin1Guest.mbf",
 	"guestEncryptionFile":"plugin1GuestE.mbf",
-	"guestClass":"potato.designer.plugin.guestManager.GuestManagerGuest"	
+	"guestClass":"plugin1Guest"	
 }

@@ -213,6 +213,13 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
-PotatoDesignerGhost/bin-debug/Main.swf
-PotatoDesignerHost/bin-debug/PotatoDesignerHost.swf
-PotatoDesignerGhost/bin-debug/Main.swf
+
+#############
+## Flash Builder
+#############
+
+.actionScriptProperties
+.flexProperties
+.project
+.settings/*
+bin-debug/*

@@ -1,4 +1,4 @@
-package potato.designer.plugin.ghostManager
+package potato.designer.plugin.guestManager
 {
 	import core.events.Event;
 	import core.events.IOErrorEvent;
@@ -13,7 +13,7 @@ package potato.designer.plugin.ghostManager
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
 
-	public class GhostManagerGhost implements IPluginActivator
+	public class GuestManagerGuest implements IPluginActivator
 	{
 		/**
 		 * 客户端连接到宿主
@@ -60,7 +60,6 @@ package potato.designer.plugin.ghostManager
 		{
 			
 			info.started();
-			trace("123345");
 			tryConnect("127.0.0.1");
 			
 		}
@@ -85,8 +84,6 @@ package potato.designer.plugin.ghostManager
 		 */
 		public static function tryConnect(ip:String, id:String = null, testOnly:Boolean = false):void
 		{
-			trace("123123");
-			
 			if(_connected)
 			{
 				throw new Error("客户端已经连接");
@@ -167,7 +164,7 @@ package potato.designer.plugin.ghostManager
 			EventCenter.dispatchEvent(
 				new DesignerEvent(EVENT_CONNECT_FAILED,
 					{ip:ip, id:_id, reason:reason}));
-			log("[GhostManager] 尝试对接", ip, "不成功。原因:", reason);
+			log("[GuestManager] 尝试对接", ip, "不成功。原因:", reason);
 		}
 		
 //		protected static function timeoutHandler(e:Event):void
@@ -216,7 +213,7 @@ package potato.designer.plugin.ghostManager
 			_connection.send(NetConst.C2S_HELLO);
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_CONNECTED,
 				{ip:_connection.remoteAddress, id:_id}));
-			log("[GhostManager] 对接成功，来自", _connection.remoteAddress);
+			log("[GuestManager] 对接成功，来自", _connection.remoteAddress);
 		}
 		
 		protected static function onDisconnectHandler(event:Event):void
@@ -248,7 +245,7 @@ package potato.designer.plugin.ghostManager
 			_connection = null;
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_DISCONNECTED,
 				{ip:ip, id:_id, reason:reason}));
-			log("[GhostManager] 从主机端断开", ip, "。原因:", reason);
+			log("[GuestManager] 从主机端断开", ip, "。原因:", reason);
 		}
 		
 		protected function testIP(text:String):Boolean

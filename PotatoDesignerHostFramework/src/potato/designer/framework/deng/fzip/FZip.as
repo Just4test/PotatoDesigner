@@ -18,7 +18,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package deng.fzip
+package potato.designer.framework.deng.fzip
 {
 	import flash.events.*;
 	import flash.net.URLRequest;
@@ -31,7 +31,7 @@ package deng.fzip
 	 *
 	 * @eventType deng.fzip.FZipEvent.FILE_LOADED
 	 */
-	[Event(name="fileLoaded", type="deng.fzip.FZipEvent")]
+	[Event(name="fileLoaded", type="potato.designer.framework.deng.fzip.FZipEvent")]
 
 	/**
 	 * Dispatched when an error is encountered while parsing a 
@@ -39,7 +39,7 @@ package deng.fzip
 	 *
 	 * @eventType deng.fzip.FZipErrorEvent.PARSE_ERROR
 	 */
-	[Event(name="parseError", type="deng.fzip.FZipErrorEvent")]
+	[Event(name="parseError", type="potato.designer.framework.deng.fzip.FZipErrorEvent")]
 
 	/**
 	 * Dispatched when data has loaded successfully. 

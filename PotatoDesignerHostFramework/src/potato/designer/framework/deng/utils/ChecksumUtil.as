@@ -1,4 +1,4 @@
-package deng.utils
+package potato.designer.framework.deng.utils
 {
 	import flash.utils.ByteArray;
 	

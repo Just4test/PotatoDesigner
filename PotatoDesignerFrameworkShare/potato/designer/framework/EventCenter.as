@@ -6,7 +6,7 @@ package potato.designer.framework
 		import flash.events.EventDispatcher;
 	}
 	
-	CONFIG::GHOST
+	CONFIG::GUEST
 	{
 		import core.events.Event;
 		import core.events.EventDispatcher;

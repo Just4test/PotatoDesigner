@@ -18,37 +18,37 @@
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-package deng.fzip
+package potato.designer.framework.deng.fzip
 {
+	import potato.designer.framework.deng.fzip.FZipFile;
 	import flash.events.Event;
 
 	/**
-	 * FZip dispatches FZipErrorEvent objects when it encounters 
-	 * errors while parsing the ZIP archive. There is only one type 
-	 * of FZipErrorEvent: FZipErrorEvent.PARSE_ERROR
+	 * FZip dispatches FZipEvent objects when a file contained in the
+	 * ZIP archive has finished loading and can be accessed. There is 
+	 * only one type of FZipEvent: FZipErrorEvent.FILE_LOADED.
 	 */		
-	public class FZipErrorEvent extends Event
+	public class FZipEvent extends Event
 	{
 		/**
-		* A human readable description of the kind of parse error.
+		* The file that has finished loading.
 		*/		
-		public var text:String;
-
+		public var file:FZipFile;
+		
 		/**
-		* Defines the value of the type property of a FZipErrorEvent object.
+		* Defines the value of the type property of a FZipEvent object.
 		*/		
-		public static const PARSE_ERROR:String = "parseError";
+		public static const FILE_LOADED:String = "fileLoaded";
 
 		/**
 		 * Constructor
 		 * 
 		 * @param type The type of the event. Event listeners can 
 		 * access this information through the inherited type property. 
-		 * There is only one type of FZipErrorEvent: 
-		 * FZipErrorEvent.PARSE_ERROR.
+		 * There is only one type of FZipEvent: 
+		 * FZipEvent.PARSE_ERROR.
 		 * 
-		 * @param text A human readable description of the kind of parse 
-		 * error.
+		 * @param file The file that has finished loading.
 		 * 
 		 * @param bubbles Determines whether the Event object participates 
 		 * in the bubbling stage of the event flow. Event listeners can 
@@ -58,20 +58,29 @@ package deng.fzip
 		 * canceled. Event listeners can access this information through 
 		 * the inherited cancelable property.
 		 */		
-		public function FZipErrorEvent(type:String, text:String = "", bubbles:Boolean = false, cancelable:Boolean = false) {
-			this.text = text;
+		public function FZipEvent(type:String, file:FZipFile = null, bubbles:Boolean = false, cancelable:Boolean = false) {
+			this.file = file;
 			super(type, bubbles, cancelable);
 		}
 		
 		/**
-		 * Creates a copy of the FZipErrorEvent object and sets the value 
+		 * Creates a copy of the FZipEvent object and sets the value 
 		 * of each property to match that of the original.
 		 * 
-		 * @return A new FZipErrorEvent object with property values that 
+		 * @return A new FZipEvent object with property values that 
 		 * match those of the original.
 		 */		
 		override public function clone():Event {
-			return new FZipErrorEvent(type, text, bubbles, cancelable);
+			return new FZipEvent(type, file, bubbles, cancelable);
+		}
+		
+		/**
+		 * TODO
+		 * 
+		 * @return String
+		 */		
+		override public function toString():String {
+			return "[FZipEvent type=\"" + type + "\" filename=\"" + file.filename + "\" bubbles=" + bubbles + " cancelable=" + cancelable + " eventPhase=" + eventPhase + "]";
 		}
 	}
 }

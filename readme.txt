@@ -1,10 +1,10 @@
-PotatoDesignerGhost
-	Éè¼ÆÆ÷¿Í»§¶Ë£¬ÔËÐÐÓÚAVM»·¾³
+ï»¿PotatoDesignerGhost
+	è®¾è®¡å™¨å®¢æˆ·ç«¯ï¼Œè¿è¡ŒäºŽAVMçŽ¯å¢ƒ
 PotatoDesignerGhostFramework
-	ËÞÖ÷¶Ë¿ò¼Ü£¬ËùÓÐËÞÖ÷¶Ë²å¼þµÄÔËÐÐ»·¾³
+	å®¿ä¸»ç«¯æ¡†æž¶ï¼Œæ‰€æœ‰å®¿ä¸»ç«¯æ’ä»¶çš„è¿è¡ŒçŽ¯å¢ƒ
 PotatoDesignerHost
-	Éè¼ÆÆ÷ËÞÖ÷¶Ë£¬ÔËÐÐÓÚAdobe»·¾³
+	è®¾è®¡å™¨å®¿ä¸»ç«¯ï¼Œè¿è¡ŒäºŽAdobeçŽ¯å¢ƒ
 PotatoDesignerHostFramework
-	ËÞÖ÷¶Ë¿ò¼Ü£¬ËùÓÐËÞÖ÷¶Ë²å¼þµÄÔËÐÐ»·¾³
+	å®¿ä¸»ç«¯æ¡†æž¶ï¼Œæ‰€æœ‰å®¿ä¸»ç«¯æ’ä»¶çš„è¿è¡ŒçŽ¯å¢ƒ
 PotatoDesignerShare
-	ÓÉ¿Í»§¶ËºÍËÞÖ÷¶Ë¹²ÏíµÄ´úÂë¡£Ö»ÊÇ´úÂëÎÄ¼þ¼Ð£¬²¢²»ÊÇ¿â¡£Ê¹ÓÃ»·¾³¶¨ÒåÇø·ÖÖ´ÐÐ
+	ç”±å®¢æˆ·ç«¯å’Œå®¿ä¸»ç«¯å…±äº«çš„ä»£ç ã€‚åªæ˜¯ä»£ç æ–‡ä»¶å¤¹ï¼Œå¹¶ä¸æ˜¯åº“ã€‚ä½¿ç”¨çŽ¯å¢ƒå®šä¹‰åŒºåˆ†æ‰§è¡Œ

@@ -6,7 +6,7 @@ package potato.designer.framework
 	{
 		import flash.system.ApplicationDomain;
 	}
-	CONFIG::GHOST
+	CONFIG::GUEST
 	{
 		import core.system.Domain;
 	}
@@ -22,9 +22,9 @@ package potato.designer.framework
 		protected var _path:String;
 		protected var _hostFile:String;
 		protected var _hostClass:String;
-		protected var _ghostFile:String;
-		protected var _ghostEncryptionFile:String;
-		protected var _ghostClass:String;
+		protected var _guestFile:String;
+		protected var _guestEncryptionFile:String;
+		protected var _guestClass:String;
 		
 		protected var _manifestStr:String;
 		/**为true说明依赖已经满足。为false说明上次检查时还未满足*/
@@ -53,7 +53,7 @@ package potato.designer.framework
 			}
 		}
 		
-		CONFIG::GHOST
+		CONFIG::GUEST
 		{
 			/**插件还没有被载入。这是一个内部状态，此状态下的插件不应能被检索。*/
 			public static const STATE_LOADING:String = "STATE_LOADING";
@@ -81,7 +81,7 @@ package potato.designer.framework
 			{
 				_state = STATE_LOADING;
 			}
-			CONFIG::GHOST
+			CONFIG::GUEST
 			{
 				_state = STATE_STOP;
 			}
@@ -93,9 +93,9 @@ package potato.designer.framework
 			_startLevel = manifest.startLevel;
 			_hostFile = manifest.hostFile;
 			_hostClass = manifest.hostClass;
-			_ghostFile = manifest.ghostFile;
-			_ghostEncryptionFile = manifest.ghostEncryptionFile;
-			_ghostClass = manifest.ghostClass;
+			_guestFile = manifest.guestFile;
+			_guestEncryptionFile = manifest.guestEncryptionFile;
+			_guestClass = manifest.guestClass;
 		}
 		
 		/**
@@ -141,15 +141,15 @@ package potato.designer.framework
 			
 			log("[Plugin] 插件[" + _id + "]正在启动");
 			var activator:IPluginActivator;
-//			try
-//			{
+			try
+			{
 				CONFIG::HOST
 				{
 					//从Manager的domain创建启动类实例
 					var activatorClass:Class = _domain.getDefinition(startClassName) as Class;
 				}
 				
-				CONFIG::GHOST
+				CONFIG::GUEST
 				{
 					var activatorClass:Class = _domain.getClass(startClassName) as Class;
 				}
@@ -158,11 +158,11 @@ package potato.designer.framework
 				_state = STATE_INITING;
 				activator.start(this);
 				
-//			}
-//			catch(error:Error)
-//			{
-//				log("[Plugin] 启动插件[" + _id + "]时发生错误，\n" + error);
-//			}
+			}
+			catch(error:Error)
+			{
+				log("[Plugin] 启动插件[" + _id + "]时发生错误，\n" + error);
+			}
 			
 		}
 		
@@ -207,9 +207,9 @@ package potato.designer.framework
 				return _path + "/" + _hostFile;
 			}
 			
-			CONFIG::GHOST
+			CONFIG::GUEST
 			{
-				return _path + "/" + _ghostFile;
+				return _path + "/" + _guestFile;
 			}
 		}
 		
@@ -221,9 +221,9 @@ package potato.designer.framework
 				return _hostClass;
 			}
 			
-			CONFIG::GHOST
+			CONFIG::GUEST
 			{
-				return _ghostClass;
+				return _guestClass;
 			}
 		}
 

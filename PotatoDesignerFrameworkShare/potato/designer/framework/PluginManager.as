@@ -1,5 +1,13 @@
 package potato.designer.framework
 {
+	import flash.display.Loader;
+	import flash.events.IOErrorEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.system.LoaderContext;
+	import flash.utils.ByteArray;
+	
+	import potato.designer.framework.deng.fzip.FZipErrorEvent;
+
 	CONFIG::HOST
 	{
 		import flash.events.Event;
@@ -8,7 +16,7 @@ package potato.designer.framework
 		import flash.filesystem.FileStream;
 		import flash.system.ApplicationDomain;
 	}
-	CONFIG::GHOST
+	CONFIG::GUEST
 	{
 		import core.filesystem.File;
 		import core.filesystem.FileInfo;
@@ -57,16 +65,16 @@ package potato.designer.framework
 				EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
 			}
 			
-			private static function pluginLoadFailHandler(e:Event):void
+			private static function pluginLoadFailHandler(e:DesignerEvent):void
 			{
 				var pluginLoader:PluginLoader = e.target as PluginLoader;
 				pluginLoader.removeEventListener(Event.COMPLETE, pluginLoadedHandler);
 				pluginLoader.removeEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
-				log("[Plugin] 载入插件失败");
+				log("[Plugin] 载入插件失败，原因:", e.data);
 			}
 		}
 		
-		CONFIG::GHOST
+		CONFIG::GUEST
 		{
 			//TODO
 			private static var _domain:Domain;
@@ -81,14 +89,14 @@ package potato.designer.framework
 			{
 //				id:"plugin1",					//指定插件id
 //				version:1,						//指定插件版本。
-				//depend:["GhostManager"],		//指定插件所依赖的其他插件id
+				//depend:["GuestManager"],		//指定插件所依赖的其他插件id
 //				startLevel:10,					//指定插件启动顺序。
 //				hostFile:"plugin1Host.swf",	//指定宿主端类文件。
 //				hostClass:"plugin1Host",		//指定宿主端启动类。该类具有无参构造方法，并且实现IPluginLoader
-//				ghostFile:"plugin1Ghost.mbf",	//指定客户端类文件。通常在桌面上使用。
-//				ghostEncryptionFile:
-//						"plugin1GhostE.mbf",	//指定客户端加密类文件。在移动设备上使用。
-				ghostClass:"plugin1Ghost"		//指定客户端启动类。该类具有无参构造方法，并且实现IPluginLoader
+//				guestFile:"plugin1Guest.mbf",	//指定客户端类文件。通常在桌面上使用。
+//				guestEncryptionFile:
+//						"plugin1GuestE.mbf",	//指定客户端加密类文件。在移动设备上使用。
+				guestClass:"plugin1Guest"		//指定客户端启动类。该类具有无参构造方法，并且实现IPluginLoader
 			};
 		
 		/**扫描 Plugin文件夹以便发现所有插件*/
@@ -97,8 +105,6 @@ package potato.designer.framework
 			log("[Plugin] 开始扫描插件");
 			CONFIG::HOST
 			{
-				var fileStream:FileStream = new FileStream();
-				
 				//扫描程序安装目录
 				scanThisDir(File.applicationDirectory.resolvePath(PLUGIN_FOLDER));
 				//扫描工程目录
@@ -112,34 +118,13 @@ package potato.designer.framework
 						var file:File = nodes[i] as File;
 						if (file.isDirectory)
 						{
-							var manifestFile:File = new File(file.nativePath + "/" + MANIFEST_FILE_NAME);
-							if(manifestFile.exists)
-							{
-								log("[Plugin] 发现插件，位于", file.nativePath);
-								
-								fileStream.open(manifestFile, FileMode.READ);
-								var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
-								fileStream.close();
-								
-								try
-								{
-									var pluginInfo:PluginInfo = new PluginInfo(file.nativePath, str);
-									var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain);
-									pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
-									pluginLoader.addEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
-								}
-								catch(error:Error)
-								{
-									log("[Plugin] 加载位于", file.nativePath, "的插件时发生错误\n", error);
-								}
-								
-							}
+							loadPlugin(file.nativePath);
 						}
 					} 
 				}
 			}
 				
-			CONFIG::GHOST
+			CONFIG::GUEST
 			{
 				//如果插件目录不存在或者不是目录则返回
 				try
@@ -159,33 +144,85 @@ package potato.designer.framework
 						continue;
 					}
 					
-					var foldPath:String = PLUGIN_FOLDER + "/" + i.name;
-					var filePath:String = foldPath + "/" + MANIFEST_FILE_NAME;
-					if(File.exists(filePath))
-					{
-						log("[Plugin] 发现插件，位于", foldPath);
-						
-						try
-						{
-							var pluginInfo:PluginInfo = new PluginInfo(foldPath, File.read(filePath));
-							_domain.load(pluginInfo.filePath);
-						}
-						catch(error:Error)
-						{
-							log("[Plugin] 加载位于", foldPath, "的插件时发生错误\n", error);
-							continue;
-						}
-						
-						_pluginMap[pluginInfo.id] = pluginInfo;
-						_pluginList.push(pluginInfo);
-						pluginInfo.setDomain(_domain);
-						log("[Plugin] 插件[" + pluginInfo.id + "]已经载入");
-						EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
-					}
+					loadPlugin(PLUGIN_FOLDER + "/" + i.name);
 				}
 			}
 			
 			log("[Plugin] 完成插件扫描");
+		}
+		
+		/**
+		 *载入指定路径下的插件 
+		 * @param path 插件路径
+		 * 
+		 */
+		public static function loadPlugin(path:String):void
+		{
+			log("[Plugin] 载入插件，位于", path);
+			CONFIG::HOST
+			{
+				var manifestFile:File = new File(path + "/" + MANIFEST_FILE_NAME);
+				if(manifestFile.exists)
+				{
+					
+					var fileStream:FileStream = new FileStream();
+					
+					fileStream.open(manifestFile, FileMode.READ);
+					var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
+					fileStream.close();
+					
+					try
+					{
+						var pluginInfo:PluginInfo = new PluginInfo(path, str);
+						var pluginLoader:PluginLoader = new PluginLoader(pluginInfo, _domain);
+						pluginLoader.addEventListener(Event.COMPLETE, pluginLoadedHandler);
+						pluginLoader.addEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
+						
+					
+					}
+					catch(error:Error)
+					{
+						log("[Plugin] 加载位于", path, "的插件时发生错误\n", error);
+					}
+				}
+			}
+			
+			CONFIG::GUEST
+			{
+				try
+				{
+					var filePath:String = path + "/" + MANIFEST_FILE_NAME;
+					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(filePath));
+					_domain.load(pluginInfo.filePath);
+				
+					_pluginMap[pluginInfo.id] = pluginInfo;
+					_pluginList.push(pluginInfo);
+					pluginInfo.setDomain(_domain);
+					log("[Plugin] 插件[" + pluginInfo.id + "]已经载入");
+					EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_INSTALLED, pluginInfo));
+				}
+				catch(error:Error)
+				{
+					log("[Plugin] 加载位于", path, "的插件时发生错误\n", error);
+				}
+			}	
+		}
+		
+		public static function finishLoad(pluginInfo:PluginInfo):void
+		{
+			
+		}
+		
+				
+		/**
+		 *解压缩指定目录的swc并返回其中swf的ByteArray
+		 * @param path
+		 * @return 
+		 * 
+		 */
+		protected static function unzipSwc(path:String):ByteArray
+		{
+			return null;
 		}
 		
 		/**

@@ -10,7 +10,7 @@ package potato.designer.net
 		import flash.utils.ByteArray;
 	}
 		
-	CONFIG::GHOST
+	CONFIG::GUEST
 	{
 		import flash.utils.ByteArray;
 		
@@ -41,7 +41,7 @@ package potato.designer.net
 		public static const EVENT_CRASH:String = "crash";
 		
 		protected var _socket:Socket;
-		CONFIG::GHOST
+		CONFIG::GUEST
 		{
 			protected var _remoteAddress:String;
 			protected var _remotePort:int;
@@ -120,7 +120,7 @@ package potato.designer.net
 			}
 			
 			
-			CONFIG::GHOST
+			CONFIG::GUEST
 			{
 				_remoteAddress = host;
 				_remotePort = port;
@@ -322,13 +322,13 @@ package potato.designer.net
 		public function get remoteAddress():String
 		{
 			CONFIG::HOST{return _socket.remoteAddress;}
-			CONFIG::GHOST{return _remoteAddress;}
+			CONFIG::GUEST{return _remoteAddress;}
 		}
 		
 		public function get remotePort():int
 		{
 			CONFIG::HOST{return _socket.remotePort;}
-			CONFIG::GHOST{return _remotePort;}
+			CONFIG::GUEST{return _remotePort;}
 		}
 	}
 }

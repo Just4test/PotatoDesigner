@@ -9,7 +9,7 @@ package
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
-	import deng.fzip.FZip;
+	import potato.designer.framework.deng.fzip.FZip;
 	
 	[SWF(width = "400",height = "300",backgroundColor="#CCCCCC")]
 	public class LoadSWCExample extends Sprite

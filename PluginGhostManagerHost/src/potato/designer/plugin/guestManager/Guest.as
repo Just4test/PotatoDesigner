@@ -1,4 +1,4 @@
-package potato.designer.plugin.ghostManager
+package potato.designer.plugin.guestManager
 {
 	import flash.system.System;
 	
@@ -9,14 +9,14 @@ package potato.designer.plugin.ghostManager
 	 * @author Administrator
 	 * 
 	 */
-	public class Ghost
+	public class Guest
 	{
 		private var _connection:Connection;
 		private var _isLocal:Boolean;
 		
 		private var _id:String;
 		
-		public function Ghost(id:String = null, isLocal:Boolean = false)
+		public function Guest(id:String = null, isLocal:Boolean = false)
 		{
 			_isLocal = isLocal;
 			_id = id || int(Math.random() * 90000 + 1000).toString();
@@ -28,7 +28,7 @@ package potato.designer.plugin.ghostManager
 		}
 		
 		/**向客户端发送重新启动请求
-		 * <br/>重新启动时服务端仍保留Ghost对象，因而可以再次连接。
+		 * <br/>重新启动时服务端仍保留Guest对象，因而可以再次连接。
 		 */
 		public function restart():void
 		{
