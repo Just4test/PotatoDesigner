@@ -1,5 +1,7 @@
 package potato.designer.net
 {
+	import flash.utils.ByteArray;
+	
 	CONFIG::HOST
 	{
 		import flash.events.Event;
@@ -7,13 +9,10 @@ package potato.designer.net
 		import flash.events.IOErrorEvent;
 		import flash.events.ProgressEvent;
 		import flash.net.Socket;
-		import flash.utils.ByteArray;
 	}
 		
 	CONFIG::GUEST
 	{
-		import flash.utils.ByteArray;
-		
 		import core.events.Event;
 		import core.events.EventDispatcher;
 		import core.events.IOErrorEvent;
@@ -41,6 +40,13 @@ package potato.designer.net
 		public static const EVENT_CRASH:String = "crash";
 		
 		protected var _socket:Socket;
+		
+		
+		/**
+		 *指定消息目标。所有广播消息都将被派发到指定的目标对象上。这并不包括控制事件。
+		 */
+		public var messageTarget:EventDispatcher;
+		
 		CONFIG::GUEST
 		{
 			protected var _remoteAddress:String;
@@ -298,7 +304,8 @@ package potato.designer.net
 				else
 				{
 					CONFIG::DEBUG{trace("[Connection] 收到消息 [" + type + "]");}
-					dispatchEvent( new Message(this, type, index, data));
+						
+					(messageTarget || this).dispatchEvent( new Message(this, type, index, data));
 				}
 				_packageLength = 0;
 			}

@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 默认执行"build"任务。 -->
+<project name="Potato2Mobile" basedir="." default="build">
+
+
+	<!-- 载入参数配置 -->
+	<property file="build.properties" />
+	<!-- 各种工具路径，在部署到新电脑上时需要修改 -->
+	<property name="pvrtool_loc" value="" />
+	<property name="texture_packer_loc" value="C:/Program Files (x86)/CodeAndWeb/TexturePacker/bin/TexturePacker.exe" />
+	<property name="the_compressonator_loc" value="C:/Program Files/AMD/The Compressonator 1.50/TheCompressonator.exe" />
+	<property name="versionTool_loc" value="C:/Program Files (x86)/VersionTool/VersionTool.exe" />
+
+
+	<!--如果未于参数配置文件中指定输出路径，则使用默认的项目内路径-->
+	<property name="res_target_loc" value="${basedir}/build/res" />
+	<!--如果未于参数配置文件中指定发行版输出路径，则使用默认的项目内路径-->
+	<property name="build_target_loc_prefix" value="${basedir}/bin-release-" />
+	<!--如果未于参数配置文件中指定版本号文件输出路径，则使用默认的项目内路径-->
+	<property name="scan_target_loc" value="${basedir}/build/version" />
+
+
+	<!-- 源目录 -->
+	<property name="sorce_path" value="/bin-debug" />
+	<!-- 资源配置文件相对路径 -->
+	<property name="res_config_path" value="/rcfg.txt" />
+	<!-- 资源语言，这同时也是源目录下的资源路径 -->
+	<property name="res_language" value="zh_CN" />
+	<!-- 源格式 -->
+	<property name="sorce_format" value="pc" />
+
+	<!--初始化-->
+	<target name="init" description="初始化操作">
+		<echo>ANT引擎版本：${ant.version}</echo>
+		<!--确定系统版本-->
+		<!--是否是Windows Vista及以后的类型-->
+		<condition property="os_is_nt6">
+			<and>
+				<os family="winnt" />
+				<or>
+					<os version="6.0" />
+					<os version="6.1" />
+					<os version="6.2" />
+				</or>
+			</and>
+		</condition>
+		
+
+		<!--将参数转为变量。target的if和unless只能使用condition定义的值，不能使用property定义的值-->
+		<condition property="ctrl.pvr">
+			<istrue value="${process_pvr}" />
+		</condition>
+		
+		<condition property="ctrl.dxt">
+			<istrue value="${process_dxt}" />
+		</condition>
+		
+		<condition property="ctrl.atc">
+			<istrue value="${process_atc}" />
+		</condition>
+		
+		<condition property="ctrl.png">
+			<istrue value="${process_png}" />
+		</condition>
+		
+		<!--指定了use_link 而且环境支持 则使用文件夹连接-->
+		<condition property="ctrl.link">
+			<and>
+				<istrue value="${use_link}" />
+				<or>
+					<istrue value="${os_is_nt6}" />
+				</or>
+			</and>
+		</condition>
+		
+		<echo>${process_pvr},${ctrl.pvr},${ctrl.dxt},${ctrl.atc},${ctrl.png},${ctrl.link},</echo>
+	</target>
+
+	<!--清理-->
+	<target name="clear">
+		<antcall target="clear_with_link">
+			<param name="link" value="${build_target_loc_prefix}${res_format}/${res_language}/${res_format}" />
+			<param name="target" value="${res_target_loc}/${res_language}_${res_format}/${res_language}/${res_format}" />
+		</antcall>
+		<antcall target="clear_without_link" />
+	</target>
+
+	<!--创建可运行包的同时扫描并生成版本号-->
+	<target name="build_and_version">
+		<antcall target="build">
+			<param name="ctrl.version" value="yes" />
+		</antcall>
+	</target>
+
+	<!--创建可在设备上运行的包-->
+	<target name="build" depends="init">
+		<antcall target="build_pvr" />
+		<antcall target="build_dxt" />
+		<antcall target="build_atc" />
+		<antcall target="build_png" />
+	</target>
+
+
+	<target name="build_pvr" if="ctrl.pvr">
+		<antcall target="make_res">
+			<param name="res_format" value="pvr" />
+		</antcall>
+		<antcall target="copy_res">
+			<param name="res_format" value="pvr" />
+		</antcall>
+		<antcall target="make_version">
+			<param name="res_format" value="pvr" />
+		</antcall>
+	</target>
+
+	<target name="build_png" if="ctrl.png">
+		<antcall target="make_res">
+			<param name="res_format" value="png" />
+		</antcall>
+		<antcall target="copy_res">
+			<param name="res_format" value="png" />
+		</antcall>
+		<antcall target="make_version">
+			<param name="res_format" value="png" />
+		</antcall>
+	</target>
+
+	<target name="build_dxt" if="ctrl.dxt">
+		<antcall target="make_res">
+			<param name="res_format" value="dxt" />
+		</antcall>
+		<antcall target="copy_res">
+			<param name="res_format" value="dxt" />
+		</antcall>
+		<antcall target="make_version">
+			<param name="res_format" value="dxt" />
+		</antcall>
+	</target>
+
+	<target name="build_atc" if="ctrl.atc">
+		<antcall target="make_res">
+			<param name="res_format" value="atc" />
+		</antcall>
+		<antcall target="copy_res">
+			<param name="res_format" value="atc" />
+		</antcall>
+		<antcall target="make_version">
+			<param name="res_format" value="atc" />
+		</antcall>
+	</target>
+
+
+	<!-- 使用pvrtool编译资源为不同版本 -->
+	<target name="make_res">
+		<echo>使用pvrtool处理资源，输出到${res_target_loc}</echo>
+		<java jar="${pvrtool_loc}" fork="true" failonerror="true">
+			<!-- 指定源路径，工具会在其中寻找zh_CN/pc文件夹 -->
+			<arg value="-s" />
+			<arg value='"${basedir}${sorce_path}"' />
+			<!-- 指定输出路径 -->
+			<arg value="-o" />
+			<arg value='"${res_target_loc}"' />
+			<!-- 指定配置文件路径 -->
+			<arg value="-c" />
+			<arg value='"${basedir}${sorce_path}/${res_language}/${sorce_format}${res_config_path}"' />
+			<!-- 指定TexturePacker路径 -->
+			<arg value="-p" />
+			<arg value='"${texture_packer_loc}"' />
+			<!-- 指定TexturePacker版本 -->
+			<arg value="-v" />
+			<arg value="3" />
+			<!-- 指定TheCompressonator路径 -->
+			<arg value="-t" />
+			<arg value='"${the_compressonator_loc}"' />
+			<!-- 指定需要的输出格式 -->
+			<arg value="-f" />
+			<arg value="${res_format}" />
+		</java>
+	</target>
+
+
+	<!-- 将资源拷贝到指定目录 -->
+	<target name="copy_res">
+
+		<antcall target="clear" />
+		<antcall target="copy_res_without_link" />
+
+		<!-- 将debug目录下除了资源文件夹之外的文件，拷贝到输出目录 -->
+		<!-- 排除了一些常见的临时文件 -->
+		<echo>发行版输出路径 ${build_target_loc_prefix}${res_format}</echo>
+		<copy todir="${build_target_loc_prefix}${res_format}/" preservelastmodified="true">
+			<fileset dir="${basedir}/${sorce_path}">
+				<exclude name="${res_language}/**" />
+				<exclude name="avmplusCrash.dmp" />
+				<exclude name="config.ini" />
+				<exclude name="loggerConfig.xml" />
+				<exclude name="log.txt" />
+				<exclude name="convert*.md5" />
+			</fileset>
+		</copy>
+
+
+	</target>
+
+	<!-- 如果不使用连接，则拷贝资源文件 -->
+	<target name="copy_res_without_link" unless="ctrl.link">
+		<echo>拷贝资源文件从 ${res_target_loc}/${res_language}_${res_format}/${res_language}</echo>
+		<copy todir="${build_target_loc_prefix}${res_format}/${res_language}" preservelastmodified="true">
+			<fileset dir="${res_target_loc}/${res_language}_${res_format}/${res_language}" />
+		</copy>
+	</target>
+
+	<!-- 加密 -->
+	<target name="encryption">
+		<echo>加密：尚未实现</echo>
+	</target>
+
+	<!-- 执行版本扫描 -->
+	<target name="make_version" if="ctrl.version">
+		<exec executable="${versionTool_loc}">
+			<arg value="scan:${build_target_loc_prefix}${res_format}" />
+			<arg value="output:${scan_target_loc}/${res_language}_${res_format}" />
+			<arg value="pcmbf:${build_target_loc_prefix}${res_format}/${res_language}/${res_format}${res_config_path}" />
+			<arg value="work" />
+			<arg value="exit" />
+		</exec>
+	</target>
+
+
+	<!-- 使用连接的情况下清理 -->
+	<target name="clear_with_link" if="ctrl.link">
+		<antcall target="clear_nt6" />
+	</target>
+
+	<!-- 不使用连接的情况下清理 -->
+	<target name="clear_without_link" unless="ctrl.link">
+		<delete dir="${build_target_loc_prefix}${res_format}" />
+	</target>
+
+
+	<!-- Vista以上的系统使用mklink命令连接 -->
+	<target name="clear_nt6" if="os_is_nt6">
+		<!-- 系统级RD命令删除目录连接 -->
+		<exec executable="cmd.exe">
+			<arg value="/c" />
+			<arg value="rd" />
+			<arg value="/s" />
+			<arg value="/q" />
+			<arg value='"${link}"' />
+		</exec>
+		<echo>mklink /J ${link} ${target}</echo>
+		<!-- 确保目标目录的上层目录存在 -->
+		<mkdir dir="${link}" />
+		<delete dir="${link}" />
+		<!-- 创建目录连接 -->
+		<exec executable="cmd.exe">
+			<arg value="/c" />
+			<arg value="mklink" />
+			<arg value="/J" />
+			<arg value='"${link}"' />
+			<arg value='"${target}"' />
+		</exec>
+	</target>
+</project>

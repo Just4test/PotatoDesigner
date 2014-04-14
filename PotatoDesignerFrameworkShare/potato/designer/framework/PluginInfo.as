@@ -151,7 +151,7 @@ package potato.designer.framework
 				
 				CONFIG::GUEST
 				{
-					var activatorClass:Class = _domain.getClass(startClassName) as Class;
+					var activatorClass:Class = _domain.getClass(startClassName);
 				}
 				
 				activator = new activatorClass();

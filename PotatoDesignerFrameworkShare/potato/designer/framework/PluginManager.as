@@ -1,12 +1,6 @@
 package potato.designer.framework
 {
-	import flash.display.Loader;
-	import flash.events.IOErrorEvent;
-	import flash.events.SecurityErrorEvent;
-	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
-	
-	import potato.designer.framework.deng.fzip.FZipErrorEvent;
 
 	CONFIG::HOST
 	{
@@ -87,15 +81,15 @@ package potato.designer.framework
 		/**清单文件内容示例*/
 		private static const MANIFEST_FILE_EXAMPLE:Object = 
 			{
-//				id:"plugin1",					//指定插件id
-//				version:1,						//指定插件版本。
-				//depend:["GuestManager"],		//指定插件所依赖的其他插件id
-//				startLevel:10,					//指定插件启动顺序。
-//				hostFile:"plugin1Host.swf",	//指定宿主端类文件。
-//				hostClass:"plugin1Host",		//指定宿主端启动类。该类具有无参构造方法，并且实现IPluginLoader
-//				guestFile:"plugin1Guest.mbf",	//指定客户端类文件。通常在桌面上使用。
-//				guestEncryptionFile:
-//						"plugin1GuestE.mbf",	//指定客户端加密类文件。在移动设备上使用。
+				id:"plugin1",					//指定插件id
+				version:1,						//指定插件版本。
+				depend:["GuestManager"],		//指定插件所依赖的其他插件id
+				startLevel:10,					//指定插件启动顺序。
+				hostFile:"plugin1Host.swf",	//指定宿主端类文件。
+				hostClass:"plugin1Host",		//指定宿主端启动类。该类具有无参构造方法，并且实现IPluginLoader
+				guestFile:"plugin1Guest.mbf",	//指定客户端类文件。通常在桌面上使用。
+				guestEncryptionFile:
+						"plugin1GuestE.mbf",	//指定客户端加密类文件。在移动设备上使用。
 				guestClass:"plugin1Guest"		//指定客户端启动类。该类具有无参构造方法，并且实现IPluginLoader
 			};
 		
@@ -192,10 +186,15 @@ package potato.designer.framework
 			{
 				try
 				{
-					var filePath:String = path + "/" + MANIFEST_FILE_NAME;
-					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(filePath));
-					_domain.load(pluginInfo.filePath);
-				
+					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(path + "/" + MANIFEST_FILE_NAME));
+					var filePath:String = pluginInfo.filePath;
+					trace(filePath, filePath.length, filePath.indexOf("swc"));
+					var bytes:ByteArray = File.readByteArray(filePath);
+					if(filePath.indexOf("swc") == filePath.length - 3)
+					{
+						bytes = Utils.unzipSWC(bytes);
+					}
+					_domain.loadBytes(bytes);
 					_pluginMap[pluginInfo.id] = pluginInfo;
 					_pluginList.push(pluginInfo);
 					pluginInfo.setDomain(_domain);

@@ -5,6 +5,8 @@ package potato.designer.plugin.guestManager
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.NativeProcessExitEvent;
+	import flash.events.ProgressEvent;
 	import flash.events.ServerSocketConnectEvent;
 	import flash.filesystem.File;
 	import flash.net.ServerSocket;
@@ -90,16 +92,55 @@ package potato.designer.plugin.guestManager
 		/**启动一个新的本地客户端实例。*/
 		public static function startLocalGuest():Guest
 		{
-			var ret:Guest = new Guest("local", true);
+			var ret:Guest = new Guest(8888, true);
 			var avmFile:File = new File(loaclAvmPath);
+			
+			if(!NativeProcess.isSupported)
+			{
+				log("[GuestManager] NativeProcess not supported.");
+				return null;
+			}
+
+			
 			var startupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
 			startupInfo.executable = avmFile;
 			startupInfo.arguments = new Vector.<String>;
 			startupInfo.arguments[0] = loaclProjectPath + "/" + loaclProjectMainSwfPath;
+			
 			var process:NativeProcess = new NativeProcess();
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, localStdErrHandler);
+			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, localStdOutHandler);
+			process.addEventListener(NativeProcessExitEvent.EXIT, onExit);
+			process.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR, onIOError);
+			process.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR, onIOError);
 			process.start(startupInfo);
+			
 			return ret;
+			
+			function localStdErrHandler(event:ProgressEvent):void
+			{
+				log("[localError]", process.standardError.readMultiByte(process.standardError.bytesAvailable, File.systemCharset));
+			}
+			
+			function localStdOutHandler(event:ProgressEvent):void
+			{
+				log("[localOut]", process.standardOutput.readMultiByte(process.standardOutput.bytesAvailable, File.systemCharset));
+			}
+			
+			function onExit(event:NativeProcessExitEvent):void
+			{
+				trace("Process exited with ", event.exitCode);
+//				log("[localError]", process.standardError.readMultiByte(process.standardError.bytesAvailable, File.systemCharset));
+//				log("[localOut]", process.standardOutput.readMultiByte(process.standardOutput.bytesAvailable, File.systemCharset));
+			}
+			
+			function onIOError(event:IOErrorEvent):void
+			{
+				trace(event.toString());
+			}
 		}
+		
+		
 		
 		public static function get guestList():Array
 		{

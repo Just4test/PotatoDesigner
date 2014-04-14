@@ -222,4 +222,5 @@ pip-log.txt
 .flexProperties
 .project
 .settings/*
+.metadata/*
 bin-debug/*

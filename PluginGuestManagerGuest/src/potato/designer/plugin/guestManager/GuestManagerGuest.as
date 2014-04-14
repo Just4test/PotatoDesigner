@@ -54,14 +54,34 @@ package potato.designer.plugin.guestManager
 		/**
 		 *客户端id。执此id可以重新连接 
 		 */
-		private static var _id:String
+		private static var _id:String;
+		
+		protected var _timer11:Timer;
 		
 		public function start(info:PluginInfo):void
 		{
 			
 			info.started();
-			tryConnect("127.0.0.1");
 			
+			
+			tryConnect("192.168.0.17", "local");
+			
+			EventCenter.addEventListener(EVENT_HOST_CONNECTED, 
+				function(e:Event):void
+				{
+					_timer11 = new Timer(500, int.MAX_VALUE);
+					_timer11.addEventListener(TimerEvent.TIMER, send);
+					_timer11.reset();
+					_timer11.start();
+					log("开始发");
+				});
+			
+			
+			function send(e:Event):void
+			{
+				var n:int = int.MAX_VALUE * Math.random();
+				log(n);
+			}
 		}
 		
 		/**
@@ -125,13 +145,6 @@ package potato.designer.plugin.guestManager
 			_connection.connect(ip, NetConst.PORT);
 		}
 		
-//		protected static function tryConnectedHandler(event:Event):void
-//		{
-//			_timer.removeEventListeners();
-//			_timer.addEventListener(TimerEvent.TIMER, timeoutHandler);
-//			_timer.reset();
-//			_timer.start();
-//		}
 		protected static function tryFailHandler(event:Event):void
 		{
 			_timer.removeEventListeners();
@@ -167,11 +180,6 @@ package potato.designer.plugin.guestManager
 			log("[GuestManager] 尝试对接", ip, "不成功。原因:", reason);
 		}
 		
-//		protected static function timeoutHandler(e:Event):void
-//		{
-//			failed();
-//		}
-		
 		/**
 		 *接收到了服务器Hello事件，说明正确的连接到了服务器。
 		 * @param event
@@ -192,10 +200,6 @@ package potato.designer.plugin.guestManager
 				completeConnect();
 			}
 		}
-//		protected function errorHandler(event:IOErrorEvent):void
-//		{
-//			failed();
-//		}
 		
 		/**
 		 *socket成功建立并收到服务器hello消息后，使用此方法完成连接
@@ -210,10 +214,13 @@ package potato.designer.plugin.guestManager
 			_connection.addEventListener(IOErrorEvent.IO_ERROR, onDisconnectHandler);
 			_connection.addEventListener(Connection.EVENT_CRASH, onDisconnectHandler);
 			
-			_connection.send(NetConst.C2S_HELLO);
+			_connection.send(NetConst.C2S_HELLO, _id);
+			
+			log("[GuestManager] 与来自", _connection.remoteAddress, "的主机对接成功。");
+			EventCenter.addEventListener(EventCenter.EVENT_LOG, log2host);
+			
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_CONNECTED,
 				{ip:_connection.remoteAddress, id:_id}));
-			log("[GuestManager] 对接成功，来自", _connection.remoteAddress);
 		}
 		
 		protected static function onDisconnectHandler(event:Event):void
@@ -238,33 +245,17 @@ package potato.designer.plugin.guestManager
 		 *断开连接的诸多操作
 		 */
 		protected static function completeDisconnect(reason:String):void
-		{	
+		{
+			EventCenter.removeEventListener(EventCenter.EVENT_LOG, log2host);
+			
 			_connected = false;
 			_connection.removeEventListeners();
 			var ip:String = _connection.remoteAddress;
 			_connection = null;
+			
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_DISCONNECTED,
 				{ip:ip, id:_id, reason:reason}));
 			log("[GuestManager] 从主机端断开", ip, "。原因:", reason);
-		}
-		
-		protected function testIP(text:String):Boolean
-		{
-			if(!/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/.test(text))
-			{
-				return false;
-			}
-			
-			
-			for each (var s:String in text.split(".")) 
-			{
-				if(int(s) > 255)
-				{
-					return false;
-				}
-			}
-			
-			return true;
 		}
 		
 		public static function close():void
@@ -286,24 +277,13 @@ package potato.designer.plugin.guestManager
 		{
 			return _connection;
 		}
-
-//		public static function set connection(value:Connection):void
-//		{
-//			_connection = value;
-//			if()
-//			{
-//				
-//			}
-//			else
-//			{
-//				
-//			}
-//			_connection.addEventListener(Event.Connect, onConnect);
-//		}
 		
+		//////////////////////////////////////////////////////////////////
 		
-		
-		
-		
+		protected static function log2host(event:DesignerEvent):void
+		{
+			_connection.send(NetConst.C2S_LOG, event.data);
+			event.preventDefault();
+		}
 	}
 }

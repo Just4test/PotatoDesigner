@@ -5,7 +5,7 @@
 	"startLevel":10,
 	"hostFile":"PluginGuestManageruest.swc",
 	"hostClass":"potato.designer.plugin.guestManager.GuestManagerHost",
-	"guestFile":"GuestManagerGuest.swf",
+	"guestFile":"PluginGuestManagerGuest.swc",
 	"guestEncryptionFile":"plugin1GuestE.mbf",
 	"guestClass":"potato.designer.plugin.guestManager.GuestManagerGuest"	
 }
