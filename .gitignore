@@ -218,9 +218,9 @@ pip-log.txt
 ## Flash Builder
 #############
 
-.actionScriptProperties
-.flexProperties
-.project
-.settings/*
-.metadata/*
-bin-debug/*
+*/.actionScriptProperties
+*/.flexProperties
+*/.project
+*/.settings/*
+*/.metadata/*
+*/bin-debug/*

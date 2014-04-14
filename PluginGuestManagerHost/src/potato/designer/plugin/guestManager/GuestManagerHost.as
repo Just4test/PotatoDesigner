@@ -97,7 +97,7 @@ package potato.designer.plugin.guestManager
 			
 			if(!NativeProcess.isSupported)
 			{
-				log("[GuestManager] NativeProcess not supported.");
+				log("[GuestManager] 当前客户端的安装不支持启动本地客户端。");
 				return null;
 			}
 
@@ -108,36 +108,35 @@ package potato.designer.plugin.guestManager
 			startupInfo.arguments[0] = loaclProjectPath + "/" + loaclProjectMainSwfPath;
 			
 			var process:NativeProcess = new NativeProcess();
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, localStdErrHandler);
-			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, localStdOutHandler);
 			process.addEventListener(NativeProcessExitEvent.EXIT, onExit);
-			process.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR, onIOError);
-			process.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR, onIOError);
+			//目前avm不支持标准输出流和标准错误流。
+//			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, localStdErrHandler);
+//			process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, localStdOutHandler);
+//			process.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR, onIOError);
+//			process.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR, onIOError);
 			process.start(startupInfo);
 			
 			return ret;
 			
-			function localStdErrHandler(event:ProgressEvent):void
-			{
-				log("[localError]", process.standardError.readMultiByte(process.standardError.bytesAvailable, File.systemCharset));
-			}
-			
-			function localStdOutHandler(event:ProgressEvent):void
-			{
-				log("[localOut]", process.standardOutput.readMultiByte(process.standardOutput.bytesAvailable, File.systemCharset));
-			}
+//			function localStdErrHandler(event:ProgressEvent):void
+//			{
+//				log("[localError]", process.standardError.readMultiByte(process.standardError.bytesAvailable, File.systemCharset));
+//			}
+//			
+//			function localStdOutHandler(event:ProgressEvent):void
+//			{
+//				log("[localOut]", process.standardOutput.readMultiByte(process.standardOutput.bytesAvailable, File.systemCharset));
+//			}
 			
 			function onExit(event:NativeProcessExitEvent):void
 			{
-				trace("Process exited with ", event.exitCode);
-//				log("[localError]", process.standardError.readMultiByte(process.standardError.bytesAvailable, File.systemCharset));
-//				log("[localOut]", process.standardOutput.readMultiByte(process.standardOutput.bytesAvailable, File.systemCharset));
+				log("[GuestManager] 本地客户端退出，退出代码：", event.exitCode);
 			}
 			
-			function onIOError(event:IOErrorEvent):void
-			{
-				trace(event.toString());
-			}
+//			function onIOError(event:IOErrorEvent):void
+//			{
+//				log(event.toString());
+//			}
 		}
 		
 		

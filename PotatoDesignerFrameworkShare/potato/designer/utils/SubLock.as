@@ -8,9 +8,14 @@ package potato.designer.utils
 	public class SubLock
 	{
 		private var _parent:MultiLock;
-		public function SubLock(parent:MultiLock)
+		private var _info:*;
+		
+		
+		/**请勿手动调用初始化方法*/
+		public function SubLock(parent:MultiLock, info:*)
 		{
 			_parent = parent;
+			_info = info;
 		}
 		
 		/**释放子锁*/
@@ -24,5 +29,12 @@ package potato.designer.utils
 		{
 			_parent.kill(this);
 		}
+		
+		/**锁的信息，以便其他代码可以理解是何种对象加了锁*/
+		public function get info():*
+		{
+			return _info;
+		}
+
 	}
 }

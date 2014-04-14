@@ -7,6 +7,7 @@
 		<![CDATA[
 			import mx.events.FlexEvent;
 			
+			import potato.designer.framework.DataCenter;
 			import potato.designer.framework.DesignerEvent;
 			import potato.designer.framework.EventCenter;
 			import potato.designer.framework.PluginManager;
@@ -18,6 +19,11 @@
 			{
 				EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, loadPluginWhenLoaded);
 				PluginManager.scan();
+				
+				
+				DataCenter.instance.regProperty("mydata", String, "1", "mydataChanged");
+				DataCenter.instance.mydata = "10"; //throw new Error("属性[mydata]被设置为不相容的类型。预期类型为[class int]");
+				DataCenter.instance.mydata = null; //EventCenter.dispatchEvent(new DesignerEvent("mydataChanged", 10));
 			}
 			
 			protected function loadPluginWhenLoaded(e:DesignerEvent):void

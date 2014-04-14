@@ -188,9 +188,8 @@ package potato.designer.framework
 				{
 					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(path + "/" + MANIFEST_FILE_NAME));
 					var filePath:String = pluginInfo.filePath;
-					trace(filePath, filePath.length, filePath.indexOf("swc"));
 					var bytes:ByteArray = File.readByteArray(filePath);
-					if(filePath.indexOf("swc") == filePath.length - 3)
+					if(filePath.indexOf(".swc") == filePath.length - 4)
 					{
 						bytes = Utils.unzipSWC(bytes);
 					}

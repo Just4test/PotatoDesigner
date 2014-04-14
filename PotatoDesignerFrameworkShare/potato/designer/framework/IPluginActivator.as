@@ -1,7 +1,7 @@
 package potato.designer.framework
 {
 	/**
-	 *插件启动类 
+	 *插件启动接口
 	 * @author Administrator
 	 * 
 	 */

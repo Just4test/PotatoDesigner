@@ -46,12 +46,6 @@ package
 			
 			
 			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_START, startHandler);
-			
-			
-			
-			
-			
-			
 		}
 		
 		protected function loadPluginWhenLoaded(e:DesignerEvent):void
