@@ -1,13 +1,24 @@
 package potato.designer.framework
 {
-	import flash.events.Event;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
 	
 	import potato.designer.utils.MultiLock;
+	
+	
+	CONFIG::HOST
+	{
+		import flash.events.Event;
+		import flash.filesystem.File;
+		import flash.filesystem.FileMode;
+		import flash.filesystem.FileStream;
+	}
+	
+	CONFIG::GUEST
+	{
+		import core.events.Event;
+		import core.filesystem.File;
+	}
 	
 	/**
 	 * 
@@ -63,6 +74,7 @@ package potato.designer.framework
 			return _workSpaceFolderPath;
 		}
 		
+		
 		/**
 		 *载入或创建工作空间
 		 * <br>必须在工作空间已经关闭的情况下执行。载入工作是同步的。
@@ -78,40 +90,68 @@ package potato.designer.framework
 			
 			_workSpaceFolderPath = path;
 			
-			var folder:File = new File(_workSpaceFolderPath);
-			if(folder.exists && !folder.isDirectory)
-			{
-				log("[DataCenter] 载入工作空间失败。路径是一个已经存在的文件\n", _workSpaceFolderPath);
-				return false;
-			}
 			
-			try
+			CONFIG::HOST
 			{
-				if(!folder.exists)
+				var folder:File = new File(_workSpaceFolderPath);
+				if(folder.exists && !folder.isDirectory)
 				{
-					var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
-					template.copyTo(folder);
+					log("[DataCenter] 载入工作空间失败。路径是一个已经存在的文件\n", _workSpaceFolderPath);
+					return false;
 				}
-			} 
-			catch(error:Error) 
-			{
-				log("[DataCenter] 拷贝工作空间模板时发生错误：\n", error);
-				return false;
+				
+				try
+				{
+					if(!folder.exists)
+					{
+						var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
+						template.copyTo(folder);
+					}
+				} 
+				catch(error:Error) 
+				{
+					log("[DataCenter] 拷贝工作空间模板时发生错误：\n", error);
+					return false;
+				}
+				
+				try
+				{
+					var workspaceFile:File = folder.resolvePath(WORKSPACE_FILE_NAME);
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(workspaceFile, FileMode.READ);
+					var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
+					fileStream.close();
+					var data:Object = JSON.parse(str);
+				} 
+				catch(error:Error) 
+				{
+					log("[DataCenter] 载入工作空间时发生错误：\n", error);
+					return false;
+				}
 			}
 			
-			try
+			CONFIG::GUEST
 			{
-				var workspaceFile:File = folder.resolvePath(WORKSPACE_FILE_NAME);
-				var fileStream:FileStream = new FileStream();
-				fileStream.open(workspaceFile, FileMode.READ);
-				var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
-				fileStream.close();
-				var data:Object = JSON.parse(str);
-			} 
-			catch(error:Error) 
+				if(!_workSpaceFolderPath || "" == _workSpaceFolderPath)
+				{
+					_workSpaceFolderPath = ".";
+				}
+				
+				try
+				{
+					var str:String = File.read(_workSpaceFolderPath + "/" + WORKSPACE_FILE_NAME);
+					var data:Object = JSON.parse(str);
+				} 
+				catch(error:Error) 
+				{
+					log("[DataCenter] 载入工作空间时发生错误：\n", error);
+					return false;
+				}
+			}
+			
+			for each(var key:String in data)
 			{
-				log("[DataCenter] 载入工作空间时发生错误：\n", error);
-				return false;
+				instance._data[key] = data[key];
 			}
 			
 			EventCenter.dispatchEvent(new Event(EVENT_LOADED));
@@ -176,16 +216,35 @@ package potato.designer.framework
 				}
 			}
 			
-			var jStr:String = JSON.stringify(data);
+			try
+			{
+				
+				var jStr:String = JSON.stringify(data);
+				
+				CONFIG::HOST
+				{
+					var folder:File = new File(_workSpaceFolderPath);
+					var workspaceFile:File = folder.resolvePath(WORKSPACE_FILE_NAME);
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(workspaceFile, FileMode.WRITE);
+					fileStream.writeMultiByte(jStr, File.systemCharset);
+					fileStream.close();
+				}
+				
+				CONFIG::GUEST
+				{
+					File.write(WORKSPACE_FILE_NAME, jStr);
+				}
+				
+			} 
+			catch(error:Error) 
+			{
+				
+				EventCenter.dispatchEvent(new Event(EVENT_SAVE_FAIL));
+				return;
+			}
 			
-			var folder:File = new File(_workSpaceFolderPath);
-			var workspaceFile:File = folder.resolvePath(WORKSPACE_FILE_NAME);
-			var fileStream:FileStream = new FileStream();
-			fileStream.open(workspaceFile, FileMode.WRITE);
-			fileStream.writeMultiByte(jStr, File.systemCharset);
-			fileStream.close();
-			
-			EventCenter.dispatchEvent(new Event(EVENT_SAVE_FAIL));
+			EventCenter.dispatchEvent(new Event(EVENT_SAVED));
 		}
 		
 		/**
@@ -222,31 +281,48 @@ package potato.designer.framework
 		
 		
 		
-		override flash_proxy function callProperty(methodName:*, ... args):* {
+		override flash_proxy function callProperty(methodName:*, ... args):*
+		{
 			return _data[methodName].apply(_data, args);
 		}
 		
-		override flash_proxy function getProperty(name:*):* {
+		override flash_proxy function getProperty(name:*):*
+		{
 			return _data[name];
 		}
 		
-		override flash_proxy function setProperty(name:*, value:*):void {
+		override flash_proxy function setProperty(name:*, value:*):void
+		{
 			var regPropInfo:RegPropInfo = _regTable[name];
 			if(regPropInfo)
 			{
-				if(!(value is regPropInfo.type))
+				if(!(value is regPropInfo.type) && (value !== null) && (value !== undefined))
 				{
 					throw new Error("属性[" + name + "]被设置为不相容的类型。预期类型为" + regPropInfo.type)
 				}
 				
 				_data[name] = value;
 				
-				EventCenter.dispatchEvent(new DesignerEvent(regPropInfo.eventType, value));
+				if(regPropInfo.eventType)
+				{
+					EventCenter.dispatchEvent(new DesignerEvent(regPropInfo.eventType, value));
+				}
 			}
 			else
 			{
 				_data[name] = value;
 			}
+		}
+
+		override flash_proxy function hasProperty(name:*):Boolean
+		{
+			return _data.hasOwnProperty(name);
+		}
+		
+		
+		override flash_proxy function deleteProperty(name:*):Boolean
+		{
+			return delete _data[name];
 		}
 		
 		/**
@@ -260,7 +336,7 @@ package potato.designer.framework
 		 * @param type 属性的数据类型。如果在写属性时指定了不相容的数据类型将报错。
 		 * @param value 属性的新值。为保证属性的值符合其数据类型，故要求重新赋值。
 		 * @param save 指定该属性是否存储到工作空间。
-		 * <br>&emsp;<b>注意</b>工作空间主配置文件使用json存储，所以请确保属性的数据类型可以被json化和反json化。仅仅建议使用字符串、数字、布尔值等基础类型。
+		 * <br>&emsp;<b>注意</b>工作空间主配置文件使用json存储，所以仅仅建议使用字符串、数字、布尔值等基础类型。
 		 * @param eventType 如果指定这个值，将在变量被set为新值时派发事件。
 		 * 
 		 */

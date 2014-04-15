@@ -21,9 +21,11 @@
 				PluginManager.scan();
 				
 				
-				DataCenter.instance.regProperty("mydata", String, "1", "mydataChanged");
-				DataCenter.instance.mydata = "10"; //throw new Error("属性[mydata]被设置为不相容的类型。预期类型为[class int]");
+				DataCenter.instance.regProperty("mydata", String, "1", true, "mydataChanged");
+				DataCenter.prototype.mydata = 100;
+//				DataCenter.instance.mydata = "10"; //throw new Error("属性[mydata]被设置为不相容的类型。预期类型为[class int]");
 				DataCenter.instance.mydata = null; //EventCenter.dispatchEvent(new DesignerEvent("mydataChanged", 10));
+				trace("isisisissi", DataCenter.instance is int)
 			}
 			
 			protected function loadPluginWhenLoaded(e:DesignerEvent):void
