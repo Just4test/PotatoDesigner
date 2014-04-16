@@ -15,47 +15,20 @@
 			protected var avmPath:String = "C:\\Users\\Administrator\\Documents\\Flash Working Folder\\avm\\avm.exe";
 			protected var ghostPath:String = "C:\\Users\\Administrator\\Documents\\GitHub\\PotatoDesigner\\PotatoDesignerGhost\\bin-debug\\Main.swf";
 			
+			protected var workSpaceFolder:String = "C:\\Users\\Administrator\\Documents\\GitHub\\PotatoDesigner\\DesignerWorkSpace";
+			
 			protected function windowedapplication1_initializeHandler(event:FlexEvent):void
 			{
+				DataCenter.loadWorkSpace(workSpaceFolder);
+				
 				EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, loadPluginWhenLoaded);
 				PluginManager.scan();
-				
-				
-				DataCenter.instance.regProperty("mydata", String, "1", true, "mydataChanged");
-				DataCenter.prototype.mydata = 100;
-//				DataCenter.instance.mydata = "10"; //throw new Error("属性[mydata]被设置为不相容的类型。预期类型为[class int]");
-				DataCenter.instance.mydata = null; //EventCenter.dispatchEvent(new DesignerEvent("mydataChanged", 10));
-				trace("isisisissi", DataCenter.instance is int)
 			}
 			
 			protected function loadPluginWhenLoaded(e:DesignerEvent):void
 			{
 				PluginManager.startPlugin(e.data.id);
 			}
-			
-//			protected function connectHandler(e:ServerSocketConnectEvent):void
-//			{
-//				trace("已经连接");
-//				connection = new Connection(e.socket);
-//				connection.send(NetConst.S2C_HELLO, "hello world!");
-//				connection.addEventListener(NetConst.C2S_HELLO, clientInitHandler);
-//			}
-//			protected function clientInitHandler(e:Message):void
-//			{
-//				connection.send(NetConst.S2C_REQ_DESCRIBE_TYPE, "core.display.Image", onDescribeTypeHandler);
-//				function onDescribeTypeHandler(msg:Message):void
-//				{
-//					trace("收到解析", msg.data);
-//					var cp:ClassProfile = new ClassProfile(msg.data as XML);
-//					trace(cp);
-//				}
-//				
-//				connection.addEventListener(NetConst.C2S_LOG, onLogHandler);
-//				function onLogHandler(msg:Message):void
-//				{
-//					trace("[Ghost]", msg.data);
-//				}
-//			}
 			
 		]]>
 	</fx:Script>

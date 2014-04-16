@@ -78,7 +78,7 @@ package potato.designer.framework
 		/**
 		 *载入或创建工作空间
 		 * <br>必须在工作空间已经关闭的情况下执行。载入工作是同步的。
-		 * @param path 工作空间的目录。如果指定目录下没有工作空间主文件，则以默认设置创建工作空间主文件并载入它。
+		 * @param path 工作空间的目录。在服务端，如果指定目录下没有工作空间主文件，则以默认设置创建工作空间主文件并载入它。
 		 * 
 		 */
 		public static function loadWorkSpace(path:String):Boolean
@@ -102,10 +102,10 @@ package potato.designer.framework
 				
 				try
 				{
-					if(!folder.exists)
+					if(!folder.exists || 0 == folder.getDirectoryListing().length)
 					{
 						var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
-						template.copyTo(folder);
+						template.copyTo(folder, true);
 					}
 				} 
 				catch(error:Error) 
@@ -233,7 +233,7 @@ package potato.designer.framework
 				
 				CONFIG::GUEST
 				{
-					File.write(WORKSPACE_FILE_NAME, jStr);
+					File.write(_workSpaceFolderPath + "/" + WORKSPACE_FILE_NAME, jStr);
 				}
 				
 			} 
@@ -247,13 +247,13 @@ package potato.designer.framework
 			EventCenter.dispatchEvent(new Event(EVENT_SAVED));
 		}
 		
-		/**
-		 *丢弃工作空间。将派发事件以便所有插件能够丢弃工作空间。
-		 * <br>丢弃后将关闭工作空间，并且卸载所有插件。将派发工作空间关闭事件。请注意，任何插件都不能接收到工作空间关闭事件。
-		 */
-		public static function discardWorkSpace():void
-		{
-		}
+//		/**
+//		 *丢弃工作空间。将派发事件以便所有插件能够丢弃工作空间。
+//		 * <br>丢弃后将关闭工作空间，并且卸载所有插件。将派发工作空间关闭事件。请注意，任何插件都不能接收到工作空间关闭事件。
+//		 */
+//		public static function discardWorkSpace():void
+//		{
+//		}
 		
 		/**
 		 *终止任何正在进行的工作
@@ -340,13 +340,10 @@ package potato.designer.framework
 		 * @param eventType 如果指定这个值，将在变量被set为新值时派发事件。
 		 * 
 		 */
-		public function regProperty(name:String, type:Class, value:*, needSave:Boolean = false, eventType:String = null):void
+		public function regProperty(name:String, type:Class, needSave:Boolean = false, eventType:String = null):void
 		{
 			_regTable[name] = new RegPropInfo(type, needSave, eventType);
-			this[name] = value;
 		}
-
-
 	}
 }
 

@@ -9,6 +9,8 @@ package potato.designer.plugin.guestManager
 	import flash.events.ProgressEvent;
 	import flash.events.ServerSocketConnectEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.net.ServerSocket;
 	
 	import potato.designer.framework.IPluginActivator;
@@ -38,7 +40,7 @@ package potato.designer.plugin.guestManager
 			log("[GuestManager] 开始监听连接");
 			
 			info.started();
-			startLocalGuest();
+			startLocalGuest(960,640);
 		}
 		
 		/**
@@ -89,8 +91,14 @@ package potato.designer.plugin.guestManager
 		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";
 		public static const loaclProjectPath:String = "C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PotatoDesignerGuest";
 		public static const loaclProjectMainSwfPath:String = "bin-debug/Main.swf";
-		/**启动一个新的本地客户端实例。*/
-		public static function startLocalGuest():Guest
+		/**
+		 * 启动本地客户端实例
+		 * @param width [可选]指定客户端的舞台宽度
+		 * @param height [可选]指定客户端的舞台高度
+		 * @return 客户端实例
+		 * 
+		 */
+		public static function startLocalGuest(width:int = 0, height:int = 0):Guest
 		{
 			var ret:Guest = new Guest(8888, true);
 			var avmFile:File = new File(loaclAvmPath);
@@ -99,6 +107,17 @@ package potato.designer.plugin.guestManager
 			{
 				log("[GuestManager] 当前客户端的安装不支持启动本地客户端。");
 				return null;
+			}
+			if(width > 0 && height > 0)
+			{
+				var str:String = "[config]\r\n" +
+					"width=" + width + "\r\n" +
+					"height=" + height;
+				var file:File = new File(loaclProjectPath + "/" + loaclProjectMainSwfPath + "/../config.ini");
+				var fileStream:FileStream = new FileStream;
+				fileStream.open(file, FileMode.WRITE);
+				fileStream.writeMultiByte(str, File.systemCharset);
+				fileStream.close();
 			}
 
 			
