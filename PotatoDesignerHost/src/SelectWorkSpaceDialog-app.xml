@@ -15,14 +15,14 @@
 
 	<!-- A universally unique application identifier. Must be unique across all AIR applications.
 	Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-	<id>PotatoDesignerHost</id>
+	<id>SelectWorkSpaceDialog</id>
 
 	<!-- Used as the filename for the application. Required. -->
-	<filename>PotatoDesignerHost</filename>
+	<filename>SelectWorkSpaceDialog</filename>
 
 	<!-- The name that is displayed in the AIR application installer. 
 	May have multiple values for each language. See samples or xsd schema file. Optional. -->
-	<name>PotatoDesignerHost</name>
+	<name>SelectWorkSpaceDialog</name>
 	
 	<!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade. 
 	Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
@@ -116,7 +116,6 @@
 	<!-- (i.e., to only mobile devices) then add this element and list -->
 	<!-- only the profiles which your application does support. -->
 	<!-- <supportedProfiles>desktop extendedDesktop mobileDevice extendedMobileDevice</supportedProfiles> -->
-	<supportedProfiles>extendedDesktop</supportedProfiles><!-- 为了支持自动启动Ghost端 -->
 
 	<!-- The subpath of the standard default installation location to use. Optional. -->
 	<!-- <installFolder></installFolder> -->

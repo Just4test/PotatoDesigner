@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<actionScriptProperties analytics="false" mainApplicationPath="Main.as" projectUUID="6f17b57d-7685-4cd8-bbd5-5647d4cc2c06" version="11">
-  <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::HOST,true&#13;&#10;-define=CONFIG::GUEST,false&#13;&#10;-define=CONFIG::DEBUG,false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="true" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
-    <compilerSourcePath>
-      <compilerSourcePathEntry kind="1" linkType="1" path="C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PotatoDesignerShare"/>
-      <compilerSourcePathEntry kind="1" linkType="1" path="assets"/>
-    </compilerSourcePath>
+<actionScriptProperties analytics="false" mainApplicationPath="SelectWorkSpaceDialog.mxml" projectUUID="6b197516-cff0-4ea9-881f-59b60ac30110" version="10">
+  <compiler additionalCompilerArguments="-locale en_US" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="true" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
+    <compilerSourcePath/>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
         <excludedEntries>
@@ -12,31 +9,27 @@
           <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/core.swc" useDefaultLinkType="false"/>
         </excludedEntries>
       </libraryPathEntry>
+      <libraryPathEntry kind="1" linkType="1" path="libs"/>
       <libraryPathEntry kind="3" linkType="1" path="/PotatoDesignerHostFramework/bin/PotatoDesignerHostFramework.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="Main.as">
+    <application path="SelectWorkSpaceDialog.mxml">
       <airExcludes/>
     </application>
-    <application path="PotatoDesignerHost.mxml">
+    <application path="Main.as">
       <airExcludes/>
     </application>
   </applications>
   <modules/>
-  <workers/>
   <buildCSSFiles/>
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
-    <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="C:/Users/Administrator/Documents/Flash Working Folder/wangyu.p12" airTimestamp="true" anePathSet="true" version="1">
+    <buildTarget buildTargetName="default">
+      <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
         <airExcludes/>
         <anePaths/>
-        <newLaunchParams/>
-        <modifiedLaunchParams/>
-        <newPackagingParams/>
-        <modifiedPackagingParams/>
       </airSettings>
       <actionScriptSettings version="1"/>
     </buildTarget>

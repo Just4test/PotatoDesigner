@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="640" height="400"
+					   fontSize="16" fontFamily="微软雅黑"
+					   creationComplete="window_creationCompleteHandler(event)">
+	
+	
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup id="rootGroup" left="10" right="10" top="10" bottom="10">
+		<s:HGroup width="100%">
+			<s:Button id="workSpaceBtn" label="工作空间路径"/>
+			<s:ComboBox id="workSpaceInput" width="100%" change="workSpaceInput_changeHandler(event)"/>
+		</s:HGroup>
+		<s:Label id="infoLabel" width="100%" text="这里显示一些信息" textAlign="right"/>
+		<s:HGroup id="loadGroup" width="100%">
+			<s:CheckBox id="loadSetDefaultCheck" label="设为默认"/>
+			<s:HGroup width="100%" horizontalAlign="right">
+				<s:Button id="loadBtn" label="载入工作空间" click="loadBtn_clickHandler(event)"/>
+			</s:HGroup>
+		</s:HGroup>
+		<s:VGroup id="creatGroup" width="100%" height="100%">
+			<s:Label text="在当前路径下找不到工作空间。你要创建一个吗？"/>
+			<s:HGroup width="100%" height="100%">
+				<s:VGroup width="100%" height="100%">
+					<s:HGroup width="100%">
+						<s:Button width="90" label="AVM 路径"/>
+						<s:TextInput id="avmPathInput" width="100%"
+									 change="avmPathInput_changeHandler(event)" prompt="留空则使用默认"/>
+					</s:HGroup>
+					<s:HGroup width="100%">
+						<s:Button width="90" label="项目路径"/>
+						<s:TextInput id="projectPathInput" width="100%"/>
+					</s:HGroup>
+				</s:VGroup>
+				<s:VGroup width="200" height="100%">
+					<s:Label text="启用以下插件"/>
+					<s:List width="100%" height="100%"></s:List>
+				</s:VGroup>
+			</s:HGroup>
+			<s:HGroup width="100%">
+				<s:CheckBox id="creatSetDefaultCheck" label="设为默认"/>
+				<s:HGroup width="100%" horizontalAlign="right">
+					<s:Button id="creatBtn" label="创建工作空间" click="creatBtn_clickHandler(event)"/>
+				</s:HGroup>
+			</s:HGroup>
+		</s:VGroup>
+	</s:VGroup>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			
+			import potato.designer.framework.DataCenter;
+			
+			import spark.components.Group;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			protected var workSpaceArray:Array;
+			protected var timer:Timer;
+			
+			protected function hideAll():void
+			{
+				infoLabel.parent && rootGroup.removeElement(infoLabel);
+				loadGroup.parent && rootGroup.removeElement(loadGroup);
+				creatGroup.parent && rootGroup.removeElement(creatGroup);
+				height = 65;
+			}
+			
+			protected function showLoad():void
+			{
+				infoLabel.parent && rootGroup.removeElement(infoLabel);
+				rootGroup.addElement(loadGroup);
+				creatGroup.parent && rootGroup.removeElement(creatGroup);
+				height = 100;
+			}
+			
+			protected function showCreat():void
+			{
+				infoLabel.parent && rootGroup.removeElement(infoLabel);
+				loadGroup.parent && rootGroup.removeElement(loadGroup);
+				rootGroup.addElement(creatGroup);
+				height = 400;
+			}
+			
+			protected function showInfo(info:String):void
+			{
+				rootGroup.addElement(infoLabel);
+				loadGroup.parent && rootGroup.removeElement(loadGroup);
+				creatGroup.parent && rootGroup.removeElement(creatGroup);
+				height = 90;
+				
+				infoLabel.text = info;
+			}
+			
+			
+			
+			protected function testWorkSpace():void
+			{
+				var path:String = workSpaceInput.textInput.text;
+				
+				if("" == path)
+				{
+					showInfo("请输入工作空间路径");
+					return;
+				}
+				try
+				{
+					var folder:File = new File(workSpaceInput.textInput.text);
+					if(!folder.exists)
+					{
+						folder.createDirectory();
+						folder.deleteDirectory();
+					}
+					var file:File = new File(workSpaceInput.textInput.text + "/" + DataCenter.WORKSPACE_FILE_NAME);
+				} 
+				catch(error:Error) 
+				{
+					showInfo("工作空间路径似乎无效");
+					return;
+				}
+				
+				if(file.exists && !file.isDirectory)
+				{
+					showLoad();
+				}
+				else
+				{
+					showCreat();
+				}
+			}
+			
+			protected function loadWorkSpaceHistory():void
+			{
+				var file:File = File.applicationStorageDirectory.resolvePath("history.json");
+				if(!file.exists)
+				{
+					workSpaceArray = new Array;
+					return;
+				}
+				var fileStream:FileStream = new FileStream();
+				fileStream.open(file, FileMode.READ);
+				var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
+				fileStream.close();
+				var data:Object = JSON.parse(str);
+				workSpaceArray = data.array
+				workSpaceInput.dataProvider = new ArrayList(workSpaceArray);
+				workSpaceInput.selectedIndex = 0;
+				workSpaceInput.textInput.text = workSpaceArray[0];
+				if(true == data.isDefault)
+				{
+					loadWorkSpace(true);
+				}
+			}
+			
+			protected function loadWorkSpace(isDefault:Boolean):void
+			{
+				var path:String = workSpaceInput.textInput.text;
+				if(DataCenter.loadWorkSpace(path))
+				{
+					var index:int = workSpaceArray.indexOf(path);
+					if(-1 != index)
+					{
+						workSpaceArray.splice(index, 1);
+					}
+					workSpaceArray.unshift(path);
+					var data:Object = {array:workSpaceArray, isDefault:isDefault};
+					var jStr:String = JSON.stringify(data);
+					var file:File = File.applicationStorageDirectory.resolvePath("history.json");
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(file, FileMode.WRITE);
+					fileStream.writeMultiByte(jStr, File.systemCharset);
+					fileStream.close();
+					
+//					close();
+				}
+				else
+				{
+					showInfo("载入工作空间时发生错误");
+				}
+			}
+			
+			
+			
+			////////////////////////////////////////////////////////////////////////////
+			
+			protected function window_creationCompleteHandler(event:FlexEvent):void
+			{
+				workSpaceInput.textInput.addEventListener(TextOperationEvent.CHANGE, workSpaceInput_textInput_changeHandler);
+				loadWorkSpaceHistory();
+				testWorkSpace();
+			}
+			
+			protected function workSpaceInput_changeHandler(event:IndexChangeEvent):void
+			{
+				testWorkSpace();
+			}
+			
+			protected function workSpaceInput_textInput_changeHandler(event:TextOperationEvent):void
+			{
+				if(!timer)
+				{
+					timer = new Timer(1000, 1);
+				}
+				
+				timer.addEventListener(TimerEvent.TIMER, timerHandler);
+				timer.reset();
+				timer.start();
+			}
+			
+			protected function timerHandler(event:TimerEvent):void
+			{
+				//执行这段代码的时候输入文本框一定有focus。
+				var p0:int = workSpaceInput.textInput.selectionActivePosition;
+				var p1:int = workSpaceInput.textInput.selectionAnchorPosition;
+				//执行这一句后，在界面重排时输入文本框会重置输入焦点，不知道为啥。
+				testWorkSpace();
+				
+				stage.addEventListener(Event.ENTER_FRAME, recoverSelectRange);
+				function recoverSelectRange(event:Event):void
+				{
+					stage.removeEventListener(Event.ENTER_FRAME, recoverSelectRange);
+					workSpaceInput.textInput.selectRange(p0, p1);
+				}
+				
+			}
+			
+			
+			protected function loadBtn_clickHandler(event:MouseEvent):void
+			{
+				loadWorkSpace(loadSetDefaultCheck.selected);
+			}
+			
+			protected function creatBtn_clickHandler(event:MouseEvent):void
+			{
+				loadWorkSpace(creatSetDefaultCheck.selected);
+			}
+			
+			protected function avmPathInput_changeHandler(event:TextOperationEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:WindowedApplication>

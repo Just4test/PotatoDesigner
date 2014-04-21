@@ -296,9 +296,16 @@ package potato.designer.framework
 			var regPropInfo:RegPropInfo = _regTable[name];
 			if(regPropInfo)
 			{
-				if(!(value is regPropInfo.type) && (value !== null) && (value !== undefined))
+				if(regPropInfo.filter is Class)
 				{
-					throw new Error("属性[" + name + "]被设置为不相容的类型。预期类型为" + regPropInfo.type)
+					if(!(value is regPropInfo.filter) && (value !== null) && (value !== undefined))
+					{
+						throw new Error("属性[" + name + "]被设置为不相容的类型。预期类型为" + regPropInfo.filter)
+					}
+				}
+				else
+				{
+					value = regPropInfo.filter(value);
 				}
 				
 				_data[name] = value;
@@ -332,30 +339,39 @@ package potato.designer.framework
 		 * <br>DataCenter.instance.regProperty("mydata", int, "mydataChanged");
 		 * <br>DataCenter.instance.mydata = 10; //EventCenter.dispatchEvent(new DesignerEvent("mydataChanged", 10));
 		 * <br>DataCenter.instance.mydata = "10"; //throw new Error("属性[mydata]被设置为不相容的类型。预期类型为[class int]");
+		 * <br>function fileFilter(name:String):File
+		 * <br>{
+		 * <br>&emsp;return new File(name);
+		 * <br>}
+		 * <br>DataCenter.instance.regProperty("file", int, fileFilter);
+		 * <br>DataCenter.instance.file = "a.txt";
+		 * <br>trace(DataCenter.instance.file is File);// true
+		 * 
 		 * @param name 属性名。
-		 * @param type 属性的数据类型。如果在写属性时指定了不相容的数据类型将报错。
-		 * @param value 属性的新值。为保证属性的值符合其数据类型，故要求重新赋值。
+		 * @param filter 属性过滤。
+		 * <br>&emsp;可以指定为一种数据类型Class，则写属性时必须与指定的类型相容，否则将报错。
+		 * <br>&emsp;可以指定为Function，则写属性时此值将被function过滤。参考示例代码。
 		 * @param save 指定该属性是否存储到工作空间。
 		 * <br>&emsp;<b>注意</b>工作空间主配置文件使用json存储，所以仅仅建议使用字符串、数字、布尔值等基础类型。
 		 * @param eventType 如果指定这个值，将在变量被set为新值时派发事件。
 		 * 
 		 */
-		public function regProperty(name:String, type:Class, needSave:Boolean = false, eventType:String = null):void
+		public function regProperty(name:String, filter:*, needSave:Boolean = false, eventType:String = null):void
 		{
-			_regTable[name] = new RegPropInfo(type, needSave, eventType);
+			_regTable[name] = new RegPropInfo(filter, needSave, eventType);
 		}
 	}
 }
 
 class RegPropInfo
 {
-	internal var type:Class;
+	internal var filter:*;
 	internal var needSave:Boolean;
 	internal var eventType:String;
 	
-	function RegPropInfo(type:Class, needSave:Boolean, eventType:String)
+	function RegPropInfo(filter:*, needSave:Boolean, eventType:String)
 	{
-		this.type = type;
+		this.filter = filter;
 		this.needSave = needSave;
 		this.eventType = eventType;
 	}
