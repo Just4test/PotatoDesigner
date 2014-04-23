@@ -18,6 +18,8 @@ package potato.designer.plugin.guestManager
 	import potato.designer.net.Connection;
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
+	
+	import spark.components.Window;
 
 	public class GuestManagerHost implements IPluginActivator
 	{

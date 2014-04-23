@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009"
 					   xmlns:s="library://ns.adobe.com/flex/spark"
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   width="640" height="400"
 					   fontSize="16" fontFamily="微软雅黑"
-					   creationComplete="window_creationCompleteHandler(event)">
+					   creationComplete="window_creationCompleteHandler(event)"
+					   windowComplete="windowCompleteHandler(event)"
+					   >
 	
 	
 	
@@ -12,12 +14,12 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:VGroup id="rootGroup" left="10" right="10" top="10" bottom="10">
-		<s:HGroup width="100%">
+		<s:HGroup width="100%" verticalAlign="middle">
 			<s:Button id="workSpaceBtn" label="工作空间路径"/>
 			<s:ComboBox id="workSpaceInput" width="100%" change="workSpaceInput_changeHandler(event)"/>
 		</s:HGroup>
 		<s:Label id="infoLabel" width="100%" text="这里显示一些信息" textAlign="right"/>
-		<s:HGroup id="loadGroup" width="100%">
+		<s:HGroup id="loadGroup" width="100%" verticalAlign="middle">
 			<s:CheckBox id="loadSetDefaultCheck" label="设为默认"/>
 			<s:HGroup width="100%" horizontalAlign="right">
 				<s:Button id="loadBtn" label="载入工作空间" click="loadBtn_clickHandler(event)"/>
@@ -27,12 +29,12 @@
 			<s:Label text="在当前路径下找不到工作空间。你要创建一个吗？"/>
 			<s:HGroup width="100%" height="100%">
 				<s:VGroup width="100%" height="100%">
-					<s:HGroup width="100%">
+					<s:HGroup width="100%" verticalAlign="middle">
 						<s:Button width="90" label="AVM 路径"/>
 						<s:TextInput id="avmPathInput" width="100%"
 									 change="avmPathInput_changeHandler(event)" prompt="留空则使用默认"/>
 					</s:HGroup>
-					<s:HGroup width="100%">
+					<s:HGroup width="100%" verticalAlign="middle">
 						<s:Button width="90" label="项目路径"/>
 						<s:TextInput id="projectPathInput" width="100%"/>
 					</s:HGroup>
@@ -54,6 +56,7 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayList;
+			import mx.events.AIREvent;
 			import mx.events.FlexEvent;
 			
 			import potato.designer.framework.DataCenter;
@@ -178,11 +181,21 @@
 					fileStream.writeMultiByte(jStr, File.systemCharset);
 					fileStream.close();
 					
-//					close();
+					closeNextFrame();
 				}
 				else
 				{
 					showInfo("载入工作空间时发生错误");
+				}
+			}
+			
+			protected function closeNextFrame():void
+			{
+				addEventListener(Event.ENTER_FRAME, work);
+				function work(e:Event):void
+				{
+					removeEventListener(Event.ENTER_FRAME, work);
+					close();
 				}
 			}
 			
@@ -192,9 +205,6 @@
 			
 			protected function window_creationCompleteHandler(event:FlexEvent):void
 			{
-				workSpaceInput.textInput.addEventListener(TextOperationEvent.CHANGE, workSpaceInput_textInput_changeHandler);
-				loadWorkSpaceHistory();
-				testWorkSpace();
 			}
 			
 			protected function workSpaceInput_changeHandler(event:IndexChangeEvent):void
@@ -248,7 +258,16 @@
 				
 			}
 			
+			protected function windowCompleteHandler(event:AIREvent):void
+			{
+				// TODO Auto-generated method stub
+				workSpaceInput.textInput.addEventListener(TextOperationEvent.CHANGE, workSpaceInput_textInput_changeHandler);
+				loadWorkSpaceHistory();
+				testWorkSpace();
+				
+			}
+			
 		]]>
 	</fx:Script>
 	
-</s:WindowedApplication>
+</s:Window>

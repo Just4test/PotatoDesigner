@@ -2,6 +2,8 @@ package potato.designer.framework
 {
 	import flash.events.Event;
 	
+	import spark.components.Window;
+	
 	public class DesignerEvent extends Event
 	{
 		protected var _data:*;

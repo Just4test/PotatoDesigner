@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="application1_applicationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import potato.designer.framework.DataCenter;
+			import potato.designer.framework.DesignerEvent;
+			import potato.designer.framework.EventCenter;
+			import potato.designer.framework.PluginInfo;
+			import potato.designer.framework.PluginManager;
+			
+			protected function application1_applicationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
+				var newWindow:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
+				newWindow.open(true);
+			}
+			
+			protected function loadedHandler(e:Event):void
+			{
+				EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, pluginInstalledHandler);
+				PluginManager.scan();
+			}
+			
+			protected function pluginInstalledHandler(e:DesignerEvent):void
+			{
+				var pluginInfo:PluginInfo = e.data;
+				PluginManager.startPlugin(pluginInfo.id);
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+</s:Application>

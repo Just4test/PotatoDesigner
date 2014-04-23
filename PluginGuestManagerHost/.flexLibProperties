@@ -3,6 +3,7 @@
   <includeClasses>
     <classEntry path="potato.designer.plugin.guestManager.Guest"/>
     <classEntry path="potato.designer.plugin.guestManager.GuestManagerHost"/>
+    <classEntry path="potato.designer.plugin.guestManager.ClassEditorDialog"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

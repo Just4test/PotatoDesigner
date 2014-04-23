@@ -1,4 +1,4 @@
-package potato.designer.classdescribe
+package potato.designer.plugin.uidesigner.classdescribe
 {
 	/**
 	 * 变量和存取器描述符

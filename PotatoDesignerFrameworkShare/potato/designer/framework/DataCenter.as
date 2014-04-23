@@ -27,10 +27,10 @@ package potato.designer.framework
 	 */
 	dynamic public class DataCenter extends Proxy
 	{
-		/**
-		 *工作空间模板在应用程序安装目录中的路径 
-		 */
-		public static const WORKSPACE_TEMPLATE_FOLDER:String = "designer/workspaceTemplate";
+//		/**
+//		 *工作空间模板在应用程序安装目录中的路径 
+//		 */
+//		public static const WORKSPACE_TEMPLATE_FOLDER:String = "designer/workspaceTemplate";
 		public static const WORKSPACE_FILE_NAME:String = "workspace.json";
 		
 		/**已经载入工作空间*/
@@ -94,25 +94,25 @@ package potato.designer.framework
 			CONFIG::HOST
 			{
 				var folder:File = new File(_workSpaceFolderPath);
-				if(folder.exists && !folder.isDirectory)
-				{
-					log("[DataCenter] 载入工作空间失败。路径是一个已经存在的文件\n", _workSpaceFolderPath);
-					return false;
-				}
-				
-				try
-				{
-					if(!folder.exists || 0 == folder.getDirectoryListing().length)
-					{
-						var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
-						template.copyTo(folder, true);
-					}
-				} 
-				catch(error:Error) 
-				{
-					log("[DataCenter] 拷贝工作空间模板时发生错误：\n", error);
-					return false;
-				}
+//				if(folder.exists && !folder.isDirectory)
+//				{
+//					log("[DataCenter] 载入工作空间失败。路径是一个已经存在的文件\n", _workSpaceFolderPath);
+//					return false;
+//				}
+//				
+//				try
+//				{
+//					if(!folder.exists || 0 == folder.getDirectoryListing().length)
+//					{
+//						var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
+//						template.copyTo(folder, true);
+//					}
+//				} 
+//				catch(error:Error) 
+//				{
+//					log("[DataCenter] 拷贝工作空间模板时发生错误：\n", error);
+//					return false;
+//				}
 				
 				try
 				{
@@ -349,7 +349,7 @@ package potato.designer.framework
 		 * 
 		 * @param name 属性名。
 		 * @param filter 属性过滤。
-		 * <br>&emsp;可以指定为一种数据类型Class，则写属性时必须与指定的类型相容，否则将报错。
+		 * <br>&emsp;可以指定为Class，则写属性时必须与指定的类型相容，否则将报错。
 		 * <br>&emsp;可以指定为Function，则写属性时此值将被function过滤。参考示例代码。
 		 * @param save 指定该属性是否存储到工作空间。
 		 * <br>&emsp;<b>注意</b>工作空间主配置文件使用json存储，所以仅仅建议使用字符串、数字、布尔值等基础类型。
@@ -358,6 +358,10 @@ package potato.designer.framework
 		 */
 		public function regProperty(name:String, filter:*, needSave:Boolean = false, eventType:String = null):void
 		{
+			if(filter is Class || filter is Function)
+			{
+				throw new Error("传入的属性过滤器必须是类或方法");
+			}
 			_regTable[name] = new RegPropInfo(filter, needSave, eventType);
 		}
 	}

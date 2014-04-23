@@ -105,9 +105,10 @@
 
 		<!-- Whether or not to pan when a soft keyboard is raised or lowered (either "pan" or "none").  Optional.  Defaults "pan." -->
 		<!-- <softKeyboardBehavior></softKeyboardBehavior> -->
-	<autoOrients>false</autoOrients>
+	<autoOrients>true</autoOrients>
         <fullScreen>false</fullScreen>
         <visible>false</visible>
+        <softKeyboardBehavior>none</softKeyboardBehavior>
     </initialWindow>
 
 	<!-- We recommend omitting the supportedProfiles element, -->
@@ -116,7 +117,7 @@
 	<!-- (i.e., to only mobile devices) then add this element and list -->
 	<!-- only the profiles which your application does support. -->
 	<!-- <supportedProfiles>desktop extendedDesktop mobileDevice extendedMobileDevice</supportedProfiles> -->
-	<supportedProfiles>extendedDesktop</supportedProfiles><!-- 为了支持自动启动Ghost端 -->
+	<supportedProfiles>extendedDesktop</supportedProfiles>
 
 	<!-- The subpath of the standard default installation location to use. Optional. -->
 	<!-- <installFolder></installFolder> -->

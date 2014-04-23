@@ -3,6 +3,8 @@ package potato.designer.framework
 	import flash.utils.ByteArray;
 	
 	import potato.designer.framework.zip.ZipFile;
+	
+	import spark.components.Window;
 
 	public class Utils
 	{

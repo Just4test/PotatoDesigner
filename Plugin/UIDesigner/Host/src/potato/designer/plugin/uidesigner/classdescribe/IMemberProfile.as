@@ -1,7 +1,7 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.classdescribe{
+package potato.designer.plugin.uidesigner.classdescribe{
     public interface IMemberProfile {
         function initByXML(xml:XML):void;
 		

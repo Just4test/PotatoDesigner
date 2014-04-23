@@ -1,7 +1,7 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.classdescribe{
+package potato.designer.plugin.uidesigner.classdescribe{
 /**
  *类配置文件
  * <br>通过对应类的描述XML初始化。其中包含了该类的构造方法、实例方法与变量和存取器。

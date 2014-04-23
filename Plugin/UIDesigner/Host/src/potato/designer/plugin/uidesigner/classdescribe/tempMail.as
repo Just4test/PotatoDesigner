@@ -1,9 +1,10 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.classdescribe{
+package potato.designer.plugin.uidesigner.classdescribe{
 
-public class tempMail  extends{
+public class tempMail
+{
 
     public const xml:XML =
             <type name="core.display::Image" base="core.display::DisplayObject" isDynamic="false" isFinal="false" isStatic="false">
