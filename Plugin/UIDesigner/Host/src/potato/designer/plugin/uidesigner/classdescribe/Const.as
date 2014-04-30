@@ -23,26 +23,26 @@ package potato.designer.plugin.uidesigner.classdescribe
 		public static const TYPE_TEXTURE:int = 6;
 		
 		
-		public static const TYPE_MAP:Object =
-			{
-				"String":
-				TYPE_STRING,
-				"int":
-				TYPE_INT,
-				"Number":
-				TYPE_NUMBER,
-				"Boolean":
-				TYPE_BOOLEAN,
-				"Array":
-				TYPE_ARRAY,
-				"core.display::Texture":
-				TYPE_TEXTURE
-			};
+//		public static const TYPE_MAP:Object =
+//			{
+//				"String":
+//				TYPE_STRING,
+//				"int":
+//				TYPE_INT,
+//				"Number":
+//				TYPE_NUMBER,
+//				"Boolean":
+//				TYPE_BOOLEAN,
+//				"Array":
+//				TYPE_ARRAY,
+//				"core.display::Texture":
+//				TYPE_TEXTURE
+//			};
 		
-		public static function type2typeCode(type:String):int
-		{
-			return TYPE_MAP[type] || 0;
-		}
+//		public static function type2typeCode(type:String):int
+//		{
+//			return TYPE_MAP[type] || 0;
+//		}
 		
 		
 		public static function getShortClassName(fullName:String):String

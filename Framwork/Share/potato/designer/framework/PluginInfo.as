@@ -199,7 +199,13 @@ package potato.designer.framework
 			return false;
 		}
 		
-		/**该插件在当前环境下的文件路径*/
+		/**该插件的文件夹路径*/
+		public function get path():String
+		{
+			return _path;
+		}
+		
+		/**该插件在当前环境下的执行文件路径*/
 		public function get filePath():String
 		{
 			CONFIG::HOST

@@ -134,14 +134,27 @@ package potato.designer.net
 		}
 		
 		/**
-		 *发送或应答一条消息 
+		 *发送一条消息 
 		 * @param type 消息类型
 		 * @param data 消息数据体
 		 * @param callbackHandle 指定应答回调方法。如果指定此方法，则消息的接收方可以对此消息进行应答，应答消息由回调方法处理。
-		 * @param answerIndex 表示这是对某条消息的应答。
-		 * 
 		 */
-		public function send(type:String, data:* = null, callbackHandle:Function = null, answerIndex:uint = 0):void
+		public function send(type:String, data:* = null, callbackHandle:Function = null):void
+		{
+			actualSend(type, data, callbackHandle, 0);
+		}
+		
+		public function answer(type:String, data:*, callbackHandle:Function, msg:Message):void
+		{
+			if(!msg.answerable)
+			{
+				throw new Error("无法应答一个不需要应答的消息，或者多次应答同一条消息");
+			}
+			actualSend(type, data, callbackHandle, msg._index);
+			msg._index = 0;
+		}
+		
+		protected function actualSend(type:String, data:*, callbackHandle:Function, answerIndex:uint):void
 		{
 			//encode
 			var ba:ByteArray = new ByteArray;

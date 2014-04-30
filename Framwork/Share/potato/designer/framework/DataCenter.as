@@ -21,8 +21,11 @@ package potato.designer.framework
 	}
 	
 	/**
-	 * 
-	 * @author Administrator
+	 * 数据中心
+	 * <br/>使用数据中心存储插件之间的共享数据，或者将其保存到工作空间。
+	 * <br/>请注意即使插件间没有依赖关系，他们也共享同一份数据。请多加注意避免命名冲突。
+	 * <br/>数据中心需要先载入工作空间才能使用
+	 * @author Just4test
 	 * 
 	 */
 	dynamic public class DataCenter extends Proxy
@@ -153,8 +156,10 @@ package potato.designer.framework
 			{
 				instance._data[key] = data[key];
 			}
-			
+			_isWorkSpaceLoaded = true;
+			log("[DataCenter] 载入了工作空间，位于", path);
 			EventCenter.dispatchEvent(new Event(EVENT_LOADED));
+			
 			return true;
 		}
 		

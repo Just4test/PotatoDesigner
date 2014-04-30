@@ -1,0 +1,11 @@
+{
+	"id":"GuestManager",
+	"version":1,
+	"depend":[],
+	"startLevel":10,
+	"hostFile":"PluginGuestManagerHost.swc",
+	"hostClass":"potato.designer.plugin.guestManager.GuestManagerHost",
+	"guestFile":"plugin1Guest.mbf",
+	"guestEncryptionFile":"plugin1GuestE.mbf",
+	"guestClass":"plugin1Guest"	
+}

@@ -2,8 +2,8 @@
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="log"/>
-    <classEntry path="potato.designer.framework.PluginLoader"/>
     <classEntry path="potato.designer.framework.DesignerEvent"/>
+    <classEntry path="potato.designer.framework.PluginLoader"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

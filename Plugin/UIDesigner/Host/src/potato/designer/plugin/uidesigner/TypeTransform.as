@@ -17,7 +17,7 @@ package potato.designer.plugin.uidesigner
 		/**
 		 *注册类型
 		 * @param className 指向的类的完全限定名
-		 * @param nickName 类型名。
+		 * @param nickName 类型名。类型名不得包含逗号。
 		 * @return 类型的id
 		 * 
 		 */
@@ -83,6 +83,26 @@ package potato.designer.plugin.uidesigner
 		public static function getTypesByClass(name:String):Vector.<TypeProfile>
 		{
 			return classMap[name] && classMap[name].concat();
+		}
+		
+		public static function getDefaultTypeByClass(name:String):TypeProfile
+		{
+			if(classMap[name])
+			{
+				return classMap[name][0]
+			}
+			else
+				return null;
+		}
+		
+		public static function getDefaultCodeByClass(name:String):uint
+		{
+			if(classMap[name])
+			{
+				return classMap[name][0].code
+			}
+			else
+				return 0;
 		}
 	}
 }

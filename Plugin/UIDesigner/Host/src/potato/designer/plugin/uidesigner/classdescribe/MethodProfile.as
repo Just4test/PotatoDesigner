@@ -13,6 +13,35 @@ package potato.designer.plugin.uidesigner.classdescribe
 		/**可用的参数个数。此值只有在方法可用时才有效*/
 		protected var _availableLength:int;
 		protected var _paras:Vector.<ParameterProfile>;
+		
+		protected var _suggest:SuggestProfile;
+		protected var _numParameterMin:uint;
+
+		public function get suggest():SuggestProfile
+		{
+			return _suggest;
+		}
+		
+		public function set suggest(value:SuggestProfile):void
+		{
+			_suggest = value;
+		}
+		
+		
+		/**参数的个数*/
+		public function get numParameter():uint
+		{
+			return _paras.length;
+		}
+		
+		
+		/**必须的参数个数，*/
+		public function get numParameterMin():uint
+		{
+			return _numParameterMin;
+		}
+
+		
 		public function MethodProfile(xml:XML)
 		{
 			initByXML(xml);
@@ -37,6 +66,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 			_availability = true;
 			_paras = new Vector.<ParameterProfile>;
 			_availableLength = 0;
+			_numParameterMin = 0;
 			for each(var paraXml:XML in xml.elements("parameter"))
 			{
 				var parameter:ParameterProfile = new ParameterProfile(paraXml);
@@ -51,8 +81,11 @@ package potato.designer.plugin.uidesigner.classdescribe
 				}
 				_paras[parameter.index - 1] = parameter;
 				_availableLength ++;
+				_numParameterMin += parameter.optional ? 0 : 1;
 			}
-			trace(this);
+			
+			//检查suggest
+			_suggest = SuggestProfile.makeSuggestByXml(this, xml);
 		}
 		
 		public function get visible():Boolean
@@ -95,7 +128,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 			var tempStr:String;
 			for each(var p:ParameterProfile in _paras)
 			{
-				tempStr = tempStr ? tempStr + ", " + p.type : p.type;
+				tempStr = tempStr ? tempStr + ", " + Const.getShortClassName(p.className) : Const.getShortClassName(p.className);
 			}
 //			var trmpArr:Array = getShortClassName(_xml.@returnType.toString()).split("::");
 			

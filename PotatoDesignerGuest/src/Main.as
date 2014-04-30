@@ -4,6 +4,7 @@ package
 	import core.display.DisplayObjectContainer;
 	import core.display.Stage;
 	
+	import potato.designer.framework.DataCenter;
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.PluginManager;
@@ -29,7 +30,7 @@ package
 //			
 //			var connectHelper:ConnectHelper = new ConnectHelper;
 //			addChild(connectHelper);
-			
+			DataCenter.loadWorkSpace("designer");
 			
 			textHost = new TextInput("", 300, 30, UIGlobal.defaultFont, 32, 0xffffffff);
 			textHost.text = "123123123123";

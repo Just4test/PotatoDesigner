@@ -1,0 +1,15 @@
+{
+	"core.display::DisplayObject":
+	{
+		"x":
+		{
+			"type":"Number",
+			"value":"0"
+		},
+		"y":
+		{
+			"type":"Number",
+			"value":"0"
+		}
+	}
+}

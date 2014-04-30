@@ -18,6 +18,12 @@ package potato.designer.framework
 	}
 	
 
+	/**
+	 * 插件管理器
+	 * <br/>需要先载入工作空间才能使用
+	 * @author Just4test
+	 * 
+	 */
 	public class PluginManager
 	{
 		/**当有一个新的插件被安装后派发此事件*/
@@ -27,7 +33,7 @@ package potato.designer.framework
 		/**指定清单文件的文件名*/
 		public static const MANIFEST_FILE_NAME:String = "Manifest.json";
 		
-		public static const PLUGIN_FOLDER:String = "designer/plugins";
+		public static const PLUGIN_FOLDER:String = "plugins";
 		
 		private static const _pluginList:Vector.<PluginInfo> = new Vector.<PluginInfo>;
 		private static const _pluginMap:Object = new Object;
@@ -96,16 +102,28 @@ package potato.designer.framework
 		/**扫描 Plugin文件夹以便发现所有插件*/
 		public static function scan():void
 		{
+			if(!DataCenter.isWorkSpaceLoaded)
+			{
+				throw new Error("尚未载入工作空间，不能扫描插件");
+			}
+			
 			log("[Plugin] 开始扫描插件");
 			CONFIG::HOST
 			{
 				//扫描程序安装目录
-				scanThisDir(File.applicationDirectory.resolvePath(PLUGIN_FOLDER));
+//				scanThisDir(File.applicationDirectory.resolvePath(PLUGIN_FOLDER));
 				//扫描工程目录
+				scanThisDir(new File(DataCenter.workSpaceFolderPath + "/" + PLUGIN_FOLDER));
 				//TODO
 				
 				function scanThisDir(dir:File):void
 				{
+					if(!dir.exists)
+					{
+						log("[Plugin] 插件文件夹不存在");
+						return;
+					}
+					
 					var nodes:Array = dir.getDirectoryListing();
 					for (var i:uint = 0; i < nodes.length; i++)  
 					{ 
@@ -121,13 +139,15 @@ package potato.designer.framework
 			CONFIG::GUEST
 			{
 				//如果插件目录不存在或者不是目录则返回
+				var dirPath:String = DataCenter.workSpaceFolderPath + "/" + PLUGIN_FOLDER;
 				try
 				{
-					var array:Array = File.getDirectoryListing(PLUGIN_FOLDER);
+					var array:Array = File.getDirectoryListing(dirPath);
 				}
 				catch(error:Error)
 				{
 					//文件夹不存在
+					log("[Plugin] 插件文件夹不存在");
 					return;
 				}
 				
@@ -138,7 +158,7 @@ package potato.designer.framework
 						continue;
 					}
 					
-					loadPlugin(PLUGIN_FOLDER + "/" + i.name);
+					loadPlugin(dirPath + "/" + i.name);
 				}
 			}
 			

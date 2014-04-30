@@ -3,6 +3,8 @@ package potato.designer.plugin.guestManager
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
+	import potato.designer.framework.DesignerEvent;
+	import potato.designer.framework.EventCenter;
 	import potato.designer.net.Connection;
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
@@ -25,6 +27,8 @@ package potato.designer.plugin.guestManager
 			_isLocal = isLocal;
 			
 			addEventListener(NetConst.C2S_LOG, logGuest);
+			
+			EventCenter.dispatchEvent( new DesignerEvent(GuestManagerHost.EVENT_GUEST_CREATED, this));
 		}
 		
 		/**向客户端发送关闭请求*/
@@ -74,6 +78,17 @@ package potato.designer.plugin.guestManager
 		public function get isLocal():Boolean
 		{
 			return _isLocal;
+		}
+		
+		/**
+		 *发送一条消息 
+		 * @param type 消息类型
+		 * @param data 消息数据体
+		 * @param callbackHandle 指定应答回调方法。如果指定此方法，则消息的接收方可以对此消息进行应答，应答消息由回调方法处理。
+		 */
+		public function send(type:String, data:* = null, callbackHandle:Function = null):void
+		{
+			_connection.send(type, data, callbackHandle);
 		}
 	}
 }

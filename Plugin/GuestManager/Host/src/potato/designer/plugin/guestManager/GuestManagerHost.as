@@ -13,13 +13,13 @@ package potato.designer.plugin.guestManager
 	import flash.filesystem.FileStream;
 	import flash.net.ServerSocket;
 	
+	import potato.designer.framework.DesignerEvent;
+	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Connection;
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
-	
-	import spark.components.Window;
 
 	public class GuestManagerHost implements IPluginActivator
 	{
@@ -88,6 +88,8 @@ package potato.designer.plugin.guestManager
 			//创建Guest对象
 			var guest:Guest = new Guest();
 			guest.connection = connection;
+			
+			EventCenter.dispatchEvent( new DesignerEvent(EVENT_GUEST_CONNECTED, guest));
 		}
 		
 		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";

@@ -1,6 +1,7 @@
 package potato.designer.plugin.guestManager
 {
 	import core.events.Event;
+	import core.events.EventDispatcher;
 	import core.events.IOErrorEvent;
 	import core.events.TimerEvent;
 	import core.utils.Timer;
@@ -54,17 +55,18 @@ package potato.designer.plugin.guestManager
 		/**
 		 *客户端id。执此id可以重新连接 
 		 */
-		private static var _id:String;
+		protected static var _id:String;
 		
 		protected var _timer11:Timer;
+		
+		protected static const _messageTarget:EventDispatcher = new EventDispatcher;
 		
 		public function start(info:PluginInfo):void
 		{
 			
 			info.started();
 			
-			
-			tryConnect("192.168.0.17", "local");
+			tryConnect("localhost", "local");
 			
 			EventCenter.addEventListener(EVENT_HOST_CONNECTED, 
 				function(e:Event):void
@@ -209,6 +211,7 @@ package potato.designer.plugin.guestManager
 			_testOnly = false;
 			
 			_connected = true;
+			_connection.messageTarget = _messageTarget;
 			_connection.removeEventListeners();
 			_connection.addEventListener(Event.CLOSE, onDisconnectHandler);
 			_connection.addEventListener(IOErrorEvent.IO_ERROR, onDisconnectHandler);
@@ -241,6 +244,21 @@ package potato.designer.plugin.guestManager
 			completeDisconnect(reason);
 		}
 		
+		public static function addEventListener(type:String, listener:Function):void
+		{
+			_messageTarget.addEventListener(type, listener);
+		}
+		
+		public static function removeEventListener(type:String, listener:Function):void
+		{
+			_messageTarget.removeEventListener(type, listener);
+		}
+		
+		public static function dispatchEvent(event:Event):void
+		{
+			_messageTarget.dispatchEvent(event);
+		}
+		
 		/**
 		 *断开连接的诸多操作
 		 */
@@ -264,8 +282,7 @@ package potato.designer.plugin.guestManager
 			if(_connected)
 			{
 				completeDisconnect("本地断开连接");
-			}
-				
+			}	
 		}
 		
 		public static function get connected():Boolean
@@ -273,10 +290,11 @@ package potato.designer.plugin.guestManager
 			return _connected;
 		}
 
-		public static function get connection():Connection
-		{
-			return _connection;
-		}
+//		/**访问用于通讯的connect对象。可以侦听此connect对象的控制事件，但是所有消息都不会派发到connect上。如果有断线重连*/
+//		public static function get connection():Connection
+//		{
+//			return _connection;
+//		}
 		
 		//////////////////////////////////////////////////////////////////
 		

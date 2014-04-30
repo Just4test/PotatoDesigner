@@ -82,8 +82,10 @@ package potato.designer.framework
 			switch(e.type)
 			{
 				case IOErrorEvent.IO_ERROR:
-					reason = "IO错误"
-					break;
+					reason = "IO错误";
+					break
+				default:
+					reason = e.toString();
 			}
 			dispatchEvent(new DesignerEvent(EVENT_FAIL, reason));
 		}

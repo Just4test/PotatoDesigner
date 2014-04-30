@@ -1,5 +1,7 @@
 package potato.designer.plugin.uidesigner.classdescribe
 {
+	import potato.designer.plugin.uidesigner.TypeTransform;
+
 	/**
 	 * 变量和存取器描述符
 	 * @author Just4test
@@ -12,6 +14,19 @@ package potato.designer.plugin.uidesigner.classdescribe
 		protected var _access:int;
 		protected var _availability:Boolean;
 		protected var _typeCode:int;
+		protected var _className:String;
+		
+		protected var _suggest:SuggestProfile;
+		
+		public function get suggest():SuggestProfile
+		{
+			return _suggest;
+		}
+		
+		public function set suggest(value:SuggestProfile):void
+		{
+			_suggest = value;
+		}
 		
 		public function AccessorProfile(xml:XML)
 		{
@@ -23,7 +38,8 @@ package potato.designer.plugin.uidesigner.classdescribe
 			_xml = xml;
 			
 			_name = xml.@name;
-			_typeCode = Const.type2typeCode(_xml.@type);
+			_className = _xml.@type;
+			_typeCode = TypeTransform.getDefaultCodeByClass(_xml.@type);
 			if("accessor" == xml.name())
 			{
 				_access = Const.ACCESS_MAP[xml.@access];
@@ -38,6 +54,9 @@ package potato.designer.plugin.uidesigner.classdescribe
 				_access = Const.ACCESS_READWRITE;
 			}
 			_availability = Const.TYPE_UNSUPPORT != _typeCode;
+			
+			//检查suggest
+			_suggest = SuggestProfile.makeSuggestByXml(this, xml);
 		}
 		
 		public function get visible():Boolean
@@ -68,6 +87,12 @@ package potato.designer.plugin.uidesigner.classdescribe
 		{
 			return _access;
 		}
+
+		public function get className():String
+		{
+			return _className;
+		}
+
 
 	}
 }

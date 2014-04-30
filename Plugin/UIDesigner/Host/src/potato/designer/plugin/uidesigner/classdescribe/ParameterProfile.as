@@ -1,5 +1,7 @@
 package potato.designer.plugin.uidesigner.classdescribe
 {
+	import potato.designer.plugin.uidesigner.TypeTransform;
+
 	/**
 	 * 参数描述
 	 * @author Just4test
@@ -8,6 +10,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 	public class ParameterProfile
 	{
 		protected var _xml:XML;
+		protected var _typeCode:uint;
 		public function ParameterProfile(xml:XML)
 		{
 			initByXML(xml);
@@ -16,7 +19,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 		public function initByXML(xml:XML):void
 		{
 			_xml = xml;
-//			xml = <parameter index="1" type="String" optional="true"/>
+			_typeCode = TypeTransform.getDefaultCodeByClass(_xml.@type);
 		}
 		
 		public function get index():int
@@ -26,12 +29,17 @@ package potato.designer.plugin.uidesigner.classdescribe
 		
 		public function get typeCode():int
 		{
-			return Const.type2typeCode(_xml.@type);
+			return _typeCode;
 		}
 		
-		public function get type():String
+//		public function get type():String
+//		{
+//			return Const.getShortClassName(_xml.@type);
+//		}
+		
+		public function get className():String
 		{
-			return Const.getShortClassName(_xml.@type);
+			return _xml.@type;
 		}
 		
 		public function get optional():Boolean

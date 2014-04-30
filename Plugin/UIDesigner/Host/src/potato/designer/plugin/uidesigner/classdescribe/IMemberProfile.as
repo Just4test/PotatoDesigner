@@ -1,13 +1,18 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.plugin.uidesigner.classdescribe{
-    public interface IMemberProfile {
+package potato.designer.plugin.uidesigner.classdescribe
+{
+    public interface IMemberProfile
+	{
         function initByXML(xml:XML):void;
 		
 		/**指定该属性在设计器中是否可见*/
 		function get visible():Boolean;
 		function set visible(value:Boolean):void;
+		
+		function get suggest():SuggestProfile;
+		function set suggest(value:SuggestProfile):void;
 		
         function get name():String;
 		/**

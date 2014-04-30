@@ -2,7 +2,7 @@
 <actionScriptProperties analytics="false" mainApplicationPath="PotatoDesignerHostFramework.as" projectUUID="d3cdc52c-e596-4c80-af0b-43bf55d06fe4" version="11">
   <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::HOST,true&#13;&#10;-define=CONFIG::GUEST,false&#13;&#10;-define=CONFIG::DEBUG,false" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
     <compilerSourcePath>
-      <compilerSourcePathEntry kind="1" linkType="1" path="C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PotatoDesignerFrameworkShare"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="C:/Users/Administrator/Documents/GitHub/PotatoDesigner/Framwork/Share"/>
     </compilerSourcePath>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
@@ -22,4 +22,3 @@
   <buildCSSFiles/>
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
 </actionScriptProperties>
-
