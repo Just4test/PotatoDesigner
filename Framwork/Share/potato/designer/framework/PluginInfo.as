@@ -205,8 +205,19 @@ package potato.designer.framework
 			return _path;
 		}
 		
+		/**
+		 * 获取插件文件夹中文件的绝对路径
+		 * @param relativePath 文件于插件文件夹的相对路径
+		 * @return 绝对路径
+		 * 
+		 */
+		public function getAbsolutePath(relativePath:String):String
+		{
+			return _path + "/" + relativePath;
+		}
+		
 		/**该插件在当前环境下的执行文件路径*/
-		public function get filePath():String
+		public function get startFilePath():String
 		{
 			CONFIG::HOST
 			{

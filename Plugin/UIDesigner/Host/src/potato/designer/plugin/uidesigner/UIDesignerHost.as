@@ -30,7 +30,7 @@ package potato.designer.plugin.uidesigner
 				fileStream.open(file, FileMode.READ);
 				var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
 				fileStream.close();
-				ClassProfile.loadSuggest(str);
+//				ClassProfile.loadSuggest(str);
 			} 
 			catch(error:Error) 
 			{
@@ -43,9 +43,9 @@ package potato.designer.plugin.uidesigner
 		private function guestConnectedHandler(event:DesignerEvent):void
 		{
 			var guest:Guest = event.data;
-			guest.send(S2C_REQ_DESCRIBE_TYPE, "potato.designer.framework::DataCenter", describeTypeAnswerHandler);
+//			guest.send(S2C_REQ_DESCRIBE_TYPE, "potato.designer.framework::DataCenter", describeTypeAnswerHandler);
+			guest.send(S2C_REQ_DESCRIBE_TYPE, "B", describeTypeAnswerHandler);
 		}
-		
 		
 		private function describeTypeAnswerHandler(msg:Message):void
 		{

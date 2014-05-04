@@ -14,15 +14,15 @@ package potato.designer.plugin.uidesigner.classdescribe
 		protected var _availableLength:int;
 		protected var _paras:Vector.<ParameterProfile>;
 		
-		protected var _suggest:SuggestProfile;
+		protected var _suggest:*;
 		protected var _numParameterMin:uint;
 
-		public function get suggest():SuggestProfile
+		public function get suggest():*
 		{
 			return _suggest;
 		}
 		
-		public function set suggest(value:SuggestProfile):void
+		public function set suggest(value:*):void
 		{
 			_suggest = value;
 		}

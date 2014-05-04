@@ -11,8 +11,8 @@ package potato.designer.plugin.uidesigner.classdescribe
 		function get visible():Boolean;
 		function set visible(value:Boolean):void;
 		
-		function get suggest():SuggestProfile;
-		function set suggest(value:SuggestProfile):void;
+//		function get suggest():SuggestProfile;
+//		function set suggest(value:SuggestProfile):void;
 		
         function get name():String;
 		/**

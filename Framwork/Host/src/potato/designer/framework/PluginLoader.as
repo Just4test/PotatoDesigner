@@ -38,7 +38,7 @@ package potato.designer.framework
 			_domain = domain;
 			
 			
-			var pluginFile:File = new File(pluginInfo.filePath);
+			var pluginFile:File = new File(pluginInfo.startFilePath);
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(pluginFile, FileMode.READ);
 			

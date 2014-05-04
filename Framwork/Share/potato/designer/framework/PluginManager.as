@@ -70,7 +70,7 @@ package potato.designer.framework
 				var pluginLoader:PluginLoader = e.target as PluginLoader;
 				pluginLoader.removeEventListener(Event.COMPLETE, pluginLoadedHandler);
 				pluginLoader.removeEventListener(PluginLoader.EVENT_FAIL, pluginLoadFailHandler);
-				log("[Plugin] 加载位于", pluginLoader.pluginInfo.filePath, "的插件时发生错误，原因:", e.data);
+				log("[Plugin] 加载位于", pluginLoader.pluginInfo.startFilePath, "的插件时发生错误，原因:", e.data);
 			}
 		}
 		
@@ -207,7 +207,7 @@ package potato.designer.framework
 				try
 				{
 					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(path + "/" + MANIFEST_FILE_NAME));
-					var filePath:String = pluginInfo.filePath;
+					var filePath:String = pluginInfo.startFilePath;
 					var bytes:ByteArray = File.readByteArray(filePath);
 					if(filePath.indexOf(".swc") == filePath.length - 4)
 					{
