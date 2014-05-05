@@ -8,18 +8,10 @@ package potato.designer.plugin.uidesigner.classdescribe
         function initByXML(xml:XML):void;
 		
 		/**指定该属性在设计器中是否可见*/
-		function get visible():Boolean;
-		function set visible(value:Boolean):void;
-		
-//		function get suggest():SuggestProfile;
-//		function set suggest(value:SuggestProfile):void;
+		function get enable():Boolean;
+		function set enable(value:Boolean):void;
 		
         function get name():String;
-		/**
-		 *  指定类型代码
-		 * <br>对于方法，对应返回值类型；对于存取器/属性，对应值类型。
-		 */
-        function get typeCode():int;
 		
 		/**
 		 *可用性

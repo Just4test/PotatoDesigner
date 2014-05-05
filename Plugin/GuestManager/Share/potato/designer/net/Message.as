@@ -18,11 +18,10 @@ package potato.designer.net
 		protected var _data:*;
 		internal var _index:uint;
 		
-		public function Message(connection:Connection, type:String, index:uint, data:*)
+		public function Message(connection:Connection, type:String, data:*)
 		{
 			super(type);
 			_connection = connection;
-			_index = index;
 			_data = data;
 		}
 		

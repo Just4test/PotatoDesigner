@@ -9,7 +9,8 @@ package potato.designer.plugin.uidesigner.classdescribe
 	{
 		protected var _xml:XML;
 		protected var _name:String;
-		protected var _availability:Boolean;
+		protected var _availability:*;
+		protected var _enable:Boolean;
 		/**可用的参数个数。此值只有在方法可用时才有效*/
 		protected var _availableLength:int;
 		protected var _paras:Vector.<ParameterProfile>;
@@ -70,16 +71,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 			for each(var paraXml:XML in xml.elements("parameter"))
 			{
 				var parameter:ParameterProfile = new ParameterProfile(paraXml);
-				if(!parameter.typeCode)//不受支持的参数
-				{
-					if(parameter.optional)//此参数可选
-					{
-						break;
-					}
-					_availability = false;
-					return;
-				}
-				_paras[parameter.index - 1] = parameter;
+				_paras.push(parameter);
 				_availableLength ++;
 				_numParameterMin += parameter.optional ? 0 : 1;
 			}
@@ -88,13 +80,14 @@ package potato.designer.plugin.uidesigner.classdescribe
 			_suggest = SuggestProfile.makeSuggestByXml(this, xml);
 		}
 		
-		public function get visible():Boolean
+		public function get enable():Boolean
 		{
-			return true;
+			return _enable;
 		}
 		
-		public function set visible(value:Boolean):void
+		public function set enable(value:Boolean):void
 		{
+			_enable = value;
 		}
 		
 		public function get name():String
@@ -107,8 +100,22 @@ package potato.designer.plugin.uidesigner.classdescribe
 			return 0;
 		}
 		
+		protected function refreshAvailability():void
+		{
+			_availability = true;
+			for(var i:int = 0; i < _numParameterMin; i++)
+			{
+				if(!_paras[i])
+				{
+					_availability = false;
+					return;
+				}
+			}
+		}
+		
 		public function get availability():Boolean
 		{
+			refreshAvailability();
 			return _availability;
 		}
 		

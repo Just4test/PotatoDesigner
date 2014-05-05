@@ -55,35 +55,35 @@ package potato.designer.plugin.uidesigner.classdescribe
 				{
 					var classObj:Object = obj[className];
 					
-					var cp:SuggestClassProfile = new SuggestClassProfile;
-					cp.name = className;
+					var sc:SuggestClass = new SuggestClass;
+					sc.name = className;
 					
 					for(var memberName:String in classObj) 
 					{
 						var memberObj:Object = classObj[memberName];
 						var memberArray:Array = memberObj as Array;
 						
-						var mp:SuggestMemberProfile = new SuggestMemberProfile;
-						cp.memberMap[memberName] = mp;
-						cp.members.push(mp);
+						var sm:SuggestMember = new SuggestMember;
+						sc.memberMap[memberName] = sm;
+						sc.members.push(sm);
 						
-						var pp:SuggestParameterProfile;
+						var sp:SuggestParameter;
 						if(memberArray)
 						{
 							for each(var parameterObj:Object in memberArray) 
 							{
-								pp = new SuggestParameterProfile;
-								mp.parameters.push(pp);
-								pp.type = parameterObj.type;
-								pp.value = parameterObj.value;
+								sp = new SuggestParameter;
+								sm.parameters.push(sp);
+								sp.type = parameterObj.type;
+								sp.value = parameterObj.value;
 							}
 							
 						}
 						else if(memberObj && memberObj.type)
 						{
-							pp = new SuggestParameterProfile;
-							pp.type = memberObj.type;
-							pp.value = memberObj.value;
+							sp = new SuggestParameter;
+							sp.type = memberObj.type;
+							sp.value = memberObj.value;
 						}
 					}
 				}
@@ -103,12 +103,12 @@ package potato.designer.plugin.uidesigner.classdescribe
 		 * @return 类的建议值，包含所有父类和接口的建议。
 		 * 
 		 */
-		public static function parseMetadata(xml:XML):SuggestClassProfile
+		public static function parseMetadata(xml:XML):SuggestClass
 		{
 			
 //			var metadatas:XMLList = xml.factory[0]..metadata.(METADATA_TAG == @name);
 			
-			var ret:SuggestClassProfile = new SuggestClassProfile;
+			var ret:SuggestClass = new SuggestClass;
 			
 			for each(var metaXml:XML in xml.factory[0]..metadata.(METADATA_TAG == @name))
 			{
@@ -164,20 +164,20 @@ package potato.designer.plugin.uidesigner.classdescribe
 					continue;
 				}
 				
-				var mp:SuggestMemberProfile = new SuggestMemberProfile;
-				mp.name = memberXml.@name;
+				var sm:SuggestMember = new SuggestMember;
+				sm.name = memberXml.@name;
 				
 				values.length = types.length;
 				for (var i:int = 0; i < types.length; i++) 
 				{
-					var pp:SuggestParameterProfile = new SuggestParameterProfile;
-					pp.type = types[i];
-					pp.value = values[i];
+					var sp:SuggestParameter = new SuggestParameter;
+					sp.type = types[i];
+					sp.value = values[i];
 					
-					mp.parameters.push(pp);
+					sm.parameters.push(sp);
 				}
 				
-				ret.memberMap[mp.name] = mp;
+				ret.memberMap[sm.name] = sm;
 			}
 			
 			return ret;
@@ -195,28 +195,78 @@ package potato.designer.plugin.uidesigner.classdescribe
 			_suggestMap ||= {};
 			
 			//由[Suggest]元数据标签指定的建议值
-			var suggest:SuggestClassProfile = parseMetadata(classProfile.xml);
+			var suggest:SuggestClass = parseMetadata(classProfile.xml);
 			
 			//填充由suggest文件指定的建议值
 			for each(var i:String in classProfile.isList)
 			{
-				var tempCp:SuggestClassProfile = _suggestMap[i];
-				if(tempCp)
+				var suggestInFile:SuggestClass = _suggestMap[i];
+				if(suggestInFile)
 				{
-					for each(var mp:SuggestMemberProfile in tempCp)
+					for each(var sm:SuggestMember in suggestInFile)
 					{
-						suggest[mp.name] ||= mp;
+						suggest[sm.name] ||= sm;
 					}
 				}
 			}
 			
 			//使用建议值设定classProfile
-			
-			for each(mp in suggest.memberMap)
+			for each(sm in suggest.memberMap)
 			{
-				var member:IMemberProfile = classProfile.getMember(mp.name);
-				//TODO
+				var member:IMemberProfile = classProfile.getMember(sm.name);
+				if(!member)
+				{
+					log("[Suggest] 指定了[" + sm.name + "]的建议值，但是无法找到对应的成员");
+					continue;
+				}
+				
+				applySuggestMember(member, sm);
 			}
+		}
+		
+		protected static function applySuggestMember(member:IMemberProfile, suggest:SuggestMember):Boolean
+		{
+			var length:uint = suggest.parameters.length;
+			if(member is AccessorProfile)
+			{
+				if(length > 1)
+				{
+					log("[Suggest] 指定的参数数量比需要的多。");
+					return false;
+				}
+				
+				member.enable = true;
+				if(1 == length)
+				{
+					(member as AccessorProfile).type = suggest.parameters[0].type;
+				}
+			}
+			else if(member is MethodProfile)
+			{
+				if(length > (member as MethodProfile).numParameter)
+				{
+					log("[Suggest] 指定的参数数量比需要的多。");
+					return false;
+				}
+				if(length > 0 && length < (member as MethodProfile).numParameterMin)
+				{
+					log("[Suggest] 指定的参数数量比需要的少。");
+					return false;
+				}
+				member.enable = true;
+				
+				var parameters:Vector.<ParameterProfile> = (member as MethodProfile).parameters;
+				for (var i:int = 0; i < length; i++) 
+				{
+					parameters[i].type = suggest.parameters[i].type;
+				}
+			}
+			else
+			{
+				return false;
+			}
+			
+			return true;
 		}
 		
 		
@@ -227,7 +277,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 		 * @param xml 包含元数据标签的xml
 		 * @return 如果元数据与成员对象格式匹配，返回建议配置文件。否则返回null
 		 */
-		public static function makeSuggestByXml(member:IMemberProfile, xml:XML):SuggestMemberProfile
+		public static function makeSuggestByXml(member:IMemberProfile, xml:XML):SuggestMember
 		{
 			var xmlList:XMLList = xml.metadata.(METADATA_TAG == @name);
 			if(1 != xmlList.length())
@@ -280,7 +330,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 				}
 			}
 			
-			var parameters:Vector.<SuggestParameterProfile> = new Vector.<SuggestParameterProfile>;
+			var parameters:Vector.<SuggestParameter> = new Vector.<SuggestParameter>;
 			
 			if(member is AccessorProfile)
 			{
@@ -289,7 +339,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 					log("[SuggestProfile] 指定的类型数或默认值数比需要的多。");
 					return null;
 				}
-				var para:SuggestParameterProfile = getParameter(0, (member as AccessorProfile).className);
+				var para:SuggestParameter = getParameter(0, (member as AccessorProfile).className);
 				if(!para)
 				{
 					log("[SuggestProfile] 无法将[" + (member as AccessorProfile).className + "]转换为类型");
@@ -324,13 +374,13 @@ package potato.designer.plugin.uidesigner.classdescribe
 				return null;
 			}
 			
-			var ret:SuggestMemberProfile = new SuggestMemberProfile;
+			var ret:SuggestMember = new SuggestMember;
 			ret.parameters = parameters;
 			return ret;
 			
-			function getParameter(p:int, className:String):SuggestParameterProfile
+			function getParameter(p:int, className:String):SuggestParameter
 			{
-				var ret:SuggestParameterProfile = new SuggestParameterProfile;
+				var ret:SuggestParameter = new SuggestParameter;
 				
 				if(types.length >= p)
 				{
@@ -368,33 +418,33 @@ package potato.designer.plugin.uidesigner.classdescribe
 	}
 }
 
-class SuggestClassProfile
+class SuggestClass
 {
 	public var name:String;
-	public var members:Vector.<SuggestMemberProfile>;
+	public var members:Vector.<SuggestMember>;
 	public var memberMap:Object;
 	
-	public function SuggestClassProfile()
+	public function SuggestClass()
 	{
-		members = new Vector.<SuggestMemberProfile>;
+		members = new Vector.<SuggestMember>;
 		memberMap = {};
 	}
 }
 
 /**成员对象建议值数据结构*/
-class SuggestMemberProfile
+class SuggestMember
 {
 	public var name:String;
-	public var parameters:Vector.<SuggestParameterProfile>;
+	public var parameters:Vector.<SuggestParameter>;
 	
-	public function SuggestMemberProfile()
+	public function SuggestMember()
 	{
-		parameters = new Vector.<SuggestParameterProfile>;
+		parameters = new Vector.<SuggestParameter>;
 	}
 }
 
 /**参数建议值数据结构*/
-class SuggestParameterProfile
+class SuggestParameter
 {
 	public var type:String;
 	public var value:String;

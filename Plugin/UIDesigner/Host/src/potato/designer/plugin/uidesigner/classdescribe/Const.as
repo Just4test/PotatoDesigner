@@ -2,25 +2,25 @@ package potato.designer.plugin.uidesigner.classdescribe
 {
 	public class Const
 	{
-		/**不支持的类型*/
-		public static const TYPE_UNSUPPORT:int = 0;
-		/**
-		 * 默认的类型
-		 * <br>设计器会猜测其类型，并在字符串、整数、浮点、布尔值中选择一个。
-		 */
-		//    public static const TYPE_DEFULT:int = 0;
-		/**字符串类型*/
-		public static const TYPE_STRING:int = 1;
-		/**整数类型*/
-		public static const TYPE_INT:int = 2;
-		/**浮点类型*/
-		public static const TYPE_NUMBER:int = 3;
-		/**布尔值类型*/
-		public static const TYPE_BOOLEAN:int = 4;
-		/**字符串数组类型。分隔符默认为","*/
-		public static const TYPE_ARRAY:int = 5;
-		/**图片材质类型*/
-		public static const TYPE_TEXTURE:int = 6;
+//		/**不支持的类型*/
+//		public static const TYPE_UNSUPPORT:int = 0;
+//		/**
+//		 * 默认的类型
+//		 * <br>设计器会猜测其类型，并在字符串、整数、浮点、布尔值中选择一个。
+//		 */
+//		//    public static const TYPE_DEFULT:int = 0;
+//		/**字符串类型*/
+//		public static const TYPE_STRING:int = 1;
+//		/**整数类型*/
+//		public static const TYPE_INT:int = 2;
+//		/**浮点类型*/
+//		public static const TYPE_NUMBER:int = 3;
+//		/**布尔值类型*/
+//		public static const TYPE_BOOLEAN:int = 4;
+//		/**字符串数组类型。分隔符默认为","*/
+//		public static const TYPE_ARRAY:int = 5;
+//		/**图片材质类型*/
+//		public static const TYPE_TEXTURE:int = 6;
 		
 		
 //		public static const TYPE_MAP:Object =
@@ -52,16 +52,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 		
 		
 		
-		public static const ACCESS_READONLY:int = 1;
-		public static const ACCESS_READWRITE:int = 0;
-		public static const ACCESS_WRITEONLY:int = 3;
 		
-		public static const ACCESS_MAP:Object =
-			{
-				"readonly":     ACCESS_READONLY,
-				"readwrite":    ACCESS_READWRITE,
-				"writeonly":    ACCESS_WRITEONLY
-			};
 
 	}
 }

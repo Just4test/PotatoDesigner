@@ -11,22 +11,23 @@ package potato.designer.plugin.uidesigner.classdescribe
 	{
 		protected var _xml:XML;
 		protected var _name:String;
+		
 		protected var _access:int;
-		protected var _availability:Boolean;
-		protected var _typeCode:int;
+		/**访问修饰符。确定存取器是只读、只写还是读写。对于变量，此值总是读写。*/
+		public static const ACCESS_READONLY:int = 1;
+		public static const ACCESS_READWRITE:int = 0;
+		public static const ACCESS_WRITEONLY:int = 2;
+		protected static const ACCESS_MAP:Object =
+			{
+				"readonly":     ACCESS_READONLY,
+				"readwrite":    ACCESS_READWRITE,
+				"writeonly":    ACCESS_WRITEONLY
+			};
+		
+		protected var _availability:*;
+		protected var _enable:Boolean;
 		protected var _className:String;
-		
-		protected var _suggest:*;
-		
-		public function get suggest():*
-		{
-			return _suggest;
-		}
-		
-		public function set suggest(value:*):void
-		{
-			_suggest = value;
-		}
+		protected var _type:String;
 		
 		public function AccessorProfile(xml:XML)
 		{
@@ -39,50 +40,43 @@ package potato.designer.plugin.uidesigner.classdescribe
 			
 			_name = xml.@name;
 			_className = _xml.@type;
-			_typeCode = TypeTransform.getDefaultCodeByClass(_xml.@type);
 			if("accessor" == xml.name())
 			{
-				_access = Const.ACCESS_MAP[xml.@access];
-				if(Const.ACCESS_READONLY == _access)
-				{
-					_availability = false;
-					return;
-				}
+				_access = ACCESS_MAP[xml.@access];
+				_availability = null;
 			}
 			else//variable
 			{
-				_access = Const.ACCESS_READWRITE;
+				_access = ACCESS_READWRITE;
 			}
-			_availability = Const.TYPE_UNSUPPORT != _typeCode;
-			
-			//检查suggest
-			_suggest = SuggestProfile.makeSuggestByXml(this, xml);
 		}
 		
-		public function get visible():Boolean
+		public function get enable():Boolean
 		{
-			return false;
+			return _enable;
 		}
 		
-		public function set visible(value:Boolean):void
+		public function set enable(value:Boolean):void
 		{
+			_enable = value;
 		}
 		
 		public function get name():String
 		{
-			return null;
-		}
-		
-		public function get typeCode():int
-		{
-			return _typeCode;
+			return _name;
 		}
 		
 		public function get availability():Boolean
 		{
-			return false;
+			if(null == _availability)
+			{
+				_availability = (ACCESS_READONLY != _access) && _type;
+			}
+			return _availability;
+			
 		}
-
+		
+		/**确定存取器是只读、只写还是读写。对于变量，此值总是读写 */
 		public function get access():int
 		{
 			return _access;
@@ -91,6 +85,17 @@ package potato.designer.plugin.uidesigner.classdescribe
 		public function get className():String
 		{
 			return _className;
+		}
+
+		public function get type():String
+		{
+			return _type;
+		}
+
+		public function set type(value:String):void
+		{
+			_availability = null;
+			_type = value;
 		}
 
 

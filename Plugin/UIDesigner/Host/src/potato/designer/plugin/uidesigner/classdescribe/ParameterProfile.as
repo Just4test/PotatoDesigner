@@ -10,7 +10,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 	public class ParameterProfile
 	{
 		protected var _xml:XML;
-		protected var _typeCode:uint;
+		protected var _type:String;
 		public function ParameterProfile(xml:XML)
 		{
 			initByXML(xml);
@@ -19,7 +19,6 @@ package potato.designer.plugin.uidesigner.classdescribe
 		public function initByXML(xml:XML):void
 		{
 			_xml = xml;
-			_typeCode = TypeTransform.getDefaultCodeByClass(_xml.@type);
 		}
 		
 		public function get index():int
@@ -27,9 +26,14 @@ package potato.designer.plugin.uidesigner.classdescribe
 			return _xml.@index;
 		}
 		
-		public function get typeCode():int
+		public function get type():String
 		{
-			return _typeCode;
+			return _type;
+		}
+		
+		public function set type(value:String):void
+		{
+			_type = value;
 		}
 		
 //		public function get type():String
@@ -46,5 +50,6 @@ package potato.designer.plugin.uidesigner.classdescribe
 		{
 			return _xml.@optional;
 		}
+
 	}
 }
