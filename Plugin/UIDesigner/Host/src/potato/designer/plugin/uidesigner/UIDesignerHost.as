@@ -4,7 +4,7 @@ package potato.designer.plugin.uidesigner
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-
+	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
@@ -13,6 +13,7 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
+	import potato.designer.plugin.uidesigner.classdescribe.Suggest;
 	
 	public class UIDesignerHost implements IPluginActivator
 	{
@@ -23,19 +24,7 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
-			try
-			{
-				var file:File = new File(info.path + "/" + SUGGEST_FILE_PATH);
-				var fileStream:FileStream = new FileStream;
-				fileStream.open(file, FileMode.READ);
-				var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
-				fileStream.close();
-//				ClassProfile.loadSuggest(str);
-			} 
-			catch(error:Error) 
-			{
-				
-			}
+			Suggest.loadSuggestFile(info.getAbsolutePath(SUGGEST_FILE_PATH));
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			info.started();
 		}
@@ -44,7 +33,8 @@ package potato.designer.plugin.uidesigner
 		{
 			var guest:Guest = event.data;
 //			guest.send(S2C_REQ_DESCRIBE_TYPE, "potato.designer.framework::DataCenter", describeTypeAnswerHandler);
-			guest.send(S2C_REQ_DESCRIBE_TYPE, "B", describeTypeAnswerHandler);
+//			guest.send(S2C_REQ_DESCRIBE_TYPE, "B", describeTypeAnswerHandler);
+			guest.send(S2C_REQ_DESCRIBE_TYPE, "core.display::Quad", describeTypeAnswerHandler);
 		}
 		
 		private function describeTypeAnswerHandler(msg:Message):void

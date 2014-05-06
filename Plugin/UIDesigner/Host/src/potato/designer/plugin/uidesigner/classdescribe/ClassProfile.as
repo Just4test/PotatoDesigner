@@ -11,7 +11,7 @@ package potato.designer.plugin.uidesigner.classdescribe{
 public class ClassProfile {
 
     protected var _xml:XML;
-	protected var _availability:Boolean;
+//	protected var _availability:Boolean;
     protected var _className:String;
 //    protected var _nickName:String;
 //	protected var _propMap:Object;
@@ -26,40 +26,11 @@ public class ClassProfile {
 	/**实现映射表*/
 	protected var _isMap:Object;
 	protected var _isList:Vector.<String>;
-//	/**建议属性/方法映射表*/
-//	protected var _suggestMap:Object;
-//	
-//	protected static var _suggest:Object = {};
 
     public function ClassProfile(xml:XML)
 	{
         initByXML(xml);
     }
-	
-//	public static function loadSuggest(json:String):void
-//	{
-//		try
-//		{
-//			_suggest = JSON.parse(json);
-//		} 
-//		catch(error:Error) 
-//		{
-//			_suggest = {};
-//		}
-//		
-//		var map:Object = {};
-//		var temp:Object = JSON.parse(json);
-//		for each (var iObj:Object in temp)//分离单个类的建议
-//		{
-//			for each (var jObj:int in iObj)//单个建议
-//			{
-//				
-//			}
-//			
-//		}
-//		
-//		
-//	}
 
     public function initByXML(xml:XML):void
     {
@@ -74,80 +45,53 @@ public class ClassProfile {
 		
 		var factoryXml:XML = _xml.factory[0];
 		
-		var suggest:Object;
-		try
-		{
-			var file:File = new File()
-		} 
-		catch(error:Error) 
-		{
-			suggest = {};
-		}
-		
+		//填充构造方法
 		_memberMap = {};
-		
-		var iXml:XML;
-		
-		_availability = true;
 		var constructorXmlList:XMLList = factoryXml.constructor;
 		if(!constructorXmlList.length())
 		{
-			//没有定义构造方法。
 			_constructor = null;
 		}
 		else
 		{
 			_constructor = new MethodProfile(constructorXmlList[0]);
-			if(!_constructor.availability)
-			{
-				_availability = false;
-				return;
-			}
 			_memberMap[Const.getShortClassName(_className)] = _constructor;
 		}
 		
+		//填充存取器
 		var member:IMemberProfile
 		_accessors = new Vector.<AccessorProfile>;
+		var iXml:XML;
 		for each(iXml in factoryXml.accessor)
 		{
 			member = new AccessorProfile(iXml);
 			_memberMap[member.name] = member;
-			if(member.availability)
-			{
-				_accessors.push(member);
-			}
+			_accessors.push(member);
 		}
+		//填充变量
 		for each(iXml in factoryXml.variable)
 		{
 			member = new AccessorProfile(iXml);
 			_memberMap[member.name] = member;
-			if(member.availability)
-			{
-				_accessors.push(member);
-			}
+			_accessors.push(member);
 		}
-		
+		//填充方法
 		_methods = new Vector.<MethodProfile>;
 		for each(iXml in factoryXml.method)
 		{
 			member = new MethodProfile(iXml);
 			_memberMap[member.name] = member;
-			if(member.availability)
-			{
-				_methods.push(member);
-			}
+			_methods.push(member);
 		}
 		
 		
 		
-		//检查类型
+		//填充类型
 		_isMap = {};
 		_isList = new Vector.<String>;
 		addIs(_xml.@name);
-		var i:int;
 		for each (iXml in factoryXml.extendsClass)//优先遍历子类
 		{
-			iXml = factoryXml.extendsClass[i];
 			addIs(iXml.@type);
 		}
 		for each (iXml in factoryXml.implementsInterface) 
@@ -166,13 +110,12 @@ public class ClassProfile {
 			}
 		}
 
-
-
+		Suggest.applySuggest(this);
     }
 	
 	public function get availability():Boolean
 	{
-		return _availability;
+		return !_constructor || _constructor.availability;
 	}
 	
 	/**
@@ -183,10 +126,16 @@ public class ClassProfile {
 	{
 		return _isList.concat();
 	}
-	
-	public function isClass(className:String):Boolean
+
+	/**
+	 *检测类是否是指定类的子类，或者实现了指定的接口 
+	 * @param name 类名或接口名
+	 * @return 
+	 * 
+	 */
+	public function testIs(name:String):Boolean
 	{
-		return _isMap[className];
+		return _isMap[name];
 	}
 	
 	/**指示此类是否是显示对象*/

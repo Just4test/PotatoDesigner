@@ -75,9 +75,6 @@ package potato.designer.plugin.uidesigner.classdescribe
 				_availableLength ++;
 				_numParameterMin += parameter.optional ? 0 : 1;
 			}
-			
-			//检查suggest
-			_suggest = SuggestProfile.makeSuggestByXml(this, xml);
 		}
 		
 		public function get enable():Boolean

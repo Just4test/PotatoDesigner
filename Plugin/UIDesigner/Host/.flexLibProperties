@@ -10,7 +10,7 @@
     <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ParameterProfile"/>
     <classEntry path="potato.designer.plugin.uidesigner.TypeTransform"/>
     <classEntry path="potato.designer.plugin.uidesigner.TypeProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.SuggestProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.Suggest"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
