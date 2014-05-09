@@ -2,8 +2,9 @@
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="potato.designer.plugin.uidesigner.UIDesignerGuest"/>
-    <classEntry path="A"/>
     <classEntry path="B"/>
+    <classEntry path="potato.designer.plugin.uidesigner.Const"/>
+    <classEntry path="potato.designer.plugin.uidesigner.UI"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

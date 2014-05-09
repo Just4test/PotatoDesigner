@@ -260,6 +260,17 @@ package potato.designer.plugin.guestManager
 		}
 		
 		/**
+		 *发送一条消息 
+		 * @param type 消息类型
+		 * @param data 消息数据体
+		 * @param callbackHandle 指定应答回调方法。如果指定此方法，则消息的接收方可以对此消息进行应答，应答消息由回调方法处理。
+		 */
+		public static function send(type:String, data:* = null, callbackHandle:Function = null):void
+		{
+			_connection.send(type, data, callbackHandle);
+		}
+		
+		/**
 		 *断开连接的诸多操作
 		 */
 		protected static function completeDisconnect(reason:String):void
