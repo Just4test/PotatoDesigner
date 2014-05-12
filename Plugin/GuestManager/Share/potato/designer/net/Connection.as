@@ -300,14 +300,14 @@ package potato.designer.net
 				}
 			
 				var msg:Message;
+				msg = new Message(this, type, data);
+				msg._index = index;
 				if(answerIndex)
 				{
 					var answerHandle:Function = _callbackMap[answerIndex];
 					if(answerHandle is Function)
 					{
 						CONFIG::DEBUG{trace("[Connection] 收到对消息号", answerIndex, "的应答[" + type + "]");}
-						msg = new Message(this, type, data);
-						msg._index = index;
 						answerHandle(msg);
 						delete _callbackMap[answerIndex];
 					}
@@ -319,8 +319,6 @@ package potato.designer.net
 				else
 				{
 					CONFIG::DEBUG{trace("[Connection] 收到消息 [" + type + "]");}
-					msg = new Message(this, type, data);
-					msg._index = index;
 					(messageTarget || this).dispatchEvent(msg);
 				}
 				_packageLength = 0;

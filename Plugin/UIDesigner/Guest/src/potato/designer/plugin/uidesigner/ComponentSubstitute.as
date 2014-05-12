@@ -30,10 +30,15 @@ public class ComponentSubstitute extends UIComponent
 {
     /**替身的原形*/
     protected var _prototype:*;
+	/**子替身列表*/
     protected const _subSubstitutes:Vector.<ComponentSubstitute> = new <ComponentSubstitute>[];
+	/**父替身*/
     protected var _parrentSubstitute:ComponentSubstitute;
+	/**指示该替身是否处于选中状态*/
     protected var _selected:Boolean;
+	/**指示该替身是否处于展开状态*/
 	protected var _unfolded:Boolean;
+	/**替身的代图*/
 	protected var _image:Image;
 	
 	protected var isDrugging:Boolean;

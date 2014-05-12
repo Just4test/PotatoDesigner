@@ -5,6 +5,12 @@
     <classEntry path="B"/>
     <classEntry path="potato.designer.plugin.uidesigner.Const"/>
     <classEntry path="potato.designer.plugin.uidesigner.UI"/>
+    <classEntry path="potato.designer.plugin.uidesigner.Factory"/>
+    <classEntry path="potato.designer.plugin.uidesigner.ComponentTree"/>
+    <classEntry path="potato.designer.plugin.uidesigner.IConstructor"/>
+    <classEntry path="potato.designer.plugin.uidesigner.ConstructProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.ComponentMemberProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.Constructor"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

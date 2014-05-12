@@ -9,11 +9,7 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	
 	public class UIDesignerGuest implements IPluginActivator
-	{
-		/**请求指定的类描述*/		
-		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";
-		
-		
+	{	
 		[Suggest(type="String", "int", "Number", value="Hello, World!", null, 0)]
 		public function start1(s:String, x:int, y:int):void
 		{
@@ -21,10 +17,21 @@ package potato.designer.plugin.uidesigner
 		}
 		public function start(info:PluginInfo):void
 		{
-			GuestManagerGuest.addEventListener(S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
+			//注册消息
+			GuestManagerGuest.addEventListener(Const.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
+			GuestManagerGuest.addEventListener(Const.S2C_INIT, initDesignerHandler);
+			GuestManagerGuest.addEventListener(Const.S2C_UPDATE, updateHandler);
+			
+			//初始化UI
+			
+			
 			info.started();
 		}
 		
+		
+		/////////////////////////////////////////////////////////////////
+		
+		/**Host请求类描述*/
 		protected function reqDescribeTypeHandler(msg:Message):void
 		{
 			var xml:XML;
@@ -34,10 +41,28 @@ package potato.designer.plugin.uidesigner
 			} 
 			catch(error:Error) 
 			{
-				trace("Error", error);
 			}
-			trace("解析", msg.data, xml);
 			msg.answer("", xml);
+		}
+		
+		/**
+		 *初始化UIDesigner。 
+		 * @param msg
+		 * 
+		 */
+		protected function initDesignerHandler(msg:Message):void
+		{
+			
+		}
+		
+		/**
+		 *组件更新 
+		 * @param msg 附件为组件构建文件
+		 * 
+		 */
+		protected function updateHandler(msg:Message):void
+		{
+			
 		}
 	}
 }
