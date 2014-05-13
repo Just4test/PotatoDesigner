@@ -43,7 +43,7 @@ package potato.designer.net
 		
 		
 		/**
-		 *指定消息目标。所有广播消息都将被派发到指定的目标对象上。这并不包括控制事件。
+		 *指定消息目标。所有广播消息都将被派发到指定的目标对象上。这并不包括控制事件。如果不指定该目标，消息将被派发到Connection自身。
 		 */
 		public var messageTarget:EventDispatcher;
 		
