@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
-    <classEntry path="potato.designer.plugin.uidesigner.UIDesignerGuest"/>
-    <classEntry path="B"/>
     <classEntry path="potato.designer.plugin.uidesigner.Const"/>
     <classEntry path="potato.designer.plugin.uidesigner.UI"/>
-    <classEntry path="potato.designer.plugin.uidesigner.construct.Factory"/>
-    <classEntry path="potato.designer.plugin.uidesigner.construct.ComponentTree"/>
-    <classEntry path="potato.designer.plugin.uidesigner.construct.IConstructor"/>
+    <classEntry path="potato.designer.plugin.uidesigner.UIDesignerGuest"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.BasicClassProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.construct.BasicComponentMemberProfile"/>
     <classEntry path="potato.designer.plugin.uidesigner.construct.BasicComponentProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.ComponentMemberProfile"/>
     <classEntry path="potato.designer.plugin.uidesigner.construct.BasicConstructor"/>
-    <classEntry path="potato.designer.plugin.uidesigner.construct.BasicClassProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.construct.ComponentTree"/>
+    <classEntry path="potato.designer.plugin.uidesigner.construct.Factory"/>
     <classEntry path="potato.designer.plugin.uidesigner.construct.IComponentProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.construct.IConstructor"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

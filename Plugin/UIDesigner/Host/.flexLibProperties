@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.tempMail"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.MethodProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.Const"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.AccessorProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.IMemberProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ClassProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ParameterProfile"/>
-    <classEntry path="potato.designer.plugin.uidesigner.TypeTransform"/>
     <classEntry path="potato.designer.plugin.uidesigner.TypeProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.TypeTransform"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.AccessorProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ClassProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.Const"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.IMemberProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.MethodProfile"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ParameterProfile"/>
     <classEntry path="potato.designer.plugin.uidesigner.classdescribe.Suggest"/>
+    <classEntry path="potato.designer.plugin.uidesigner.classdescribe.tempMail"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

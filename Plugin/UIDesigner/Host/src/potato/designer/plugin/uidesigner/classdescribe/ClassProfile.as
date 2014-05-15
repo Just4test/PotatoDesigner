@@ -174,6 +174,44 @@ public class ClassProfile {
 	{
 		return _memberMap[name];
 	}
+	
+	public function getTypeProfile():BasicClassProfile
+	{
+		var ret:BasicClassProfile = new BasicClassProfile(_className);
+		ret.constructorPatameters = getTypes(_constructor);
+		
+		for each (var i:AccessorProfile in _accessors) 
+		{
+			if(i.availability)
+			{
+				ret.setAccessor(i.name, i.type);
+			}
+		}
+		
+		for each (var j:MethodProfile in _methods) 
+		{
+			if(j.availability)
+			{
+				ret.setMethod(j.name, getTypes(j));
+			}
+		}
+		
+		return ret; 
+		
+		function getTypes(method:MethodProfile):Vector.<String>
+		{
+			var ret:Vector.<String> = new Vector.<String>;
+			if(method)
+			{
+				for (var i:int = 0; i < method.parameters.length; i++) 
+				{
+					ret[i] = method.parameters[i].type;
+				}
+				
+			}
+			return ret;
+		}
+	}
 
 
 }

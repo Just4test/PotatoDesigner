@@ -1,6 +1,5 @@
 package potato.designer.plugin.uidesigner.construct
 {
-	import potato.designer.plugin.uidesigner.ComponentMemberProfile;
 
 	/**
 	 * 构建用组件描述文件
@@ -8,13 +7,19 @@ package potato.designer.plugin.uidesigner.construct
 	 * <br>本类是动态类，因而可以自由的扩充您所需要的参数。
 	 * @author Just4test
 	 */
-	public dynamic class BasicComponentProfile
+	public dynamic class BasicComponentProfile implements IComponentProfile
 	{
 		protected var _className:String;
+		
+		protected var _constructorPatameters:Vector.<String>;
+		
+		protected var _memberTable:Object = {};
+		
 		protected var _children:Vector.<BasicComponentProfile>;
-		protected var _member:Vector.<ComponentMemberProfile>;
+//		protected var _member:Vector.<BasicComponentMemberProfile>;
 		
 		public static const CLASS_NAME:String = "className";
+		public static const CONSTRUCTOR:String = "constructor";
 		public static const MEMBERS:String = "members";
 		public static const MEMBER_NAME:String = "name";
 		public static const MEMBER_VALUES:String = "values";
@@ -40,10 +45,10 @@ package potato.designer.plugin.uidesigner.construct
 			
 			var array:Array;
 			array = obj[MEMBERS];
-			_member = new Vector.<ComponentMemberProfile>(array.length);
+			_memberTable = {};
 			for (i = 0; i < array.length; i++) 
 			{
-				_member[i] = new ComponentMemberProfile(array[i][MEMBER_NAME], array[i][MEMBER_VALUES])
+				_memberTable[array[i][MEMBER_NAME]] = Vector.<String>(array[i][MEMBER_VALUES]);
 			}
 			
 			array = obj[CHILDREN];
@@ -67,19 +72,35 @@ package potato.designer.plugin.uidesigner.construct
 		
 		
 		
-		public function get member():Vector.<ComponentMemberProfile>
+		public function getMember(name:String):Vector.<String>
 		{
-			return _member;
+			return _memberTable[name];
+		}
+		public function getConstructor():Vector.<String>
+		{
+			return _constructorPatameters;
 		}
 		
-		public function get children():Vector.<BasicComponentProfile>
+		public function get children():Vector.<IComponentProfile>
 		{
-			return _children;
+			return _children as Vector.<IComponentProfile>;
 		}
 		
 		public function get className():String
 		{
 			return _className;
+		}
+		
+		/**
+		 * 返回memberTypeTable的副本
+		 * @return 
+		 * 
+		 */
+		public function get memberTable():Object
+		{
+			function a():void{};
+			a.prototype = _memberTable;
+			return new a();
 		}
 	}
 }

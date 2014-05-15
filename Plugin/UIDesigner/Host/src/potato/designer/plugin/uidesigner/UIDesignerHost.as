@@ -4,6 +4,7 @@ package potato.designer.plugin.uidesigner
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.net.registerClassAlias;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
@@ -12,11 +13,18 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
+	import potato.designer.plugin.uidesigner.classdescribe.BasicClassProfile;
 	import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.classdescribe.Suggest;
 	
 	public class UIDesignerHost implements IPluginActivator
 	{
+		
+		
+		{
+			registerClassAlias("BasicClassProfile", BasicClassProfile);
+		}
+		
 		/**请求指定的类描述*/		
 		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";
 		public static const SUGGEST_FILE_PATH:String = "suggest.json";
