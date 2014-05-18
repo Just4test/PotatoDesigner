@@ -6,6 +6,9 @@ package potato.designer.framework
 	import potato.designer.utils.MultiLock;
 	
 	
+	use namespace flash_proxy;
+	
+	
 	CONFIG::HOST
 	{
 		import flash.events.Event;

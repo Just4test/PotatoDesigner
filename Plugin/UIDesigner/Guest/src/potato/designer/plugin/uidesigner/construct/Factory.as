@@ -22,7 +22,7 @@ package potato.designer.plugin.uidesigner.construct
 		
 		protected static const CHILDREN:String = "children";
 		
-		protected static const componentTable:Object = {};
+		protected static var componentTable:Object = {};
 		
 		/**
 		 *构建器链
@@ -32,6 +32,21 @@ package potato.designer.plugin.uidesigner.construct
 		public static const constructorList:Vector.<IConstructor> = new Vector.<IConstructor>;
 		
 		
+		/**
+		 *设置数据 
+		 * <br>不同的构建器需要不同格式的数据。数据可能被组织为一整个Object对象，内部包含了各种对象：构建配置文件或其他。
+		 * <br>构建器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
+		 * <br>约定：如果传入null，则清理所有已设置数据。
+		 * @param data
+		 * 
+		public static function setData(data:*):void
+		{
+			for (var i:int = 0; i < constructorList.length; i++) 
+			{
+				if(constructorList[i].setData(data))
+					break;
+			}
+		}
 		
 		/**
 		 *设置组件描述文件
@@ -48,6 +63,13 @@ package potato.designer.plugin.uidesigner.construct
 		public static function getComponentProfile(name:String):IComponentProfile
 		{
 			return componentTable[name];
+		}
+		/**
+		 *清除所有已设置的组件描述文件
+		 */
+		public static function clearComponentProfile():void
+		{
+			componentTable = {};
 		}
 		
 		public static function compileProfile(profile:IComponentProfile):ComponentTree

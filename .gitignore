@@ -223,4 +223,4 @@ pip-log.txt
 */.project
 */.settings/*
 */.metadata/*
-*/bin-debug/*
+bin-debug/*

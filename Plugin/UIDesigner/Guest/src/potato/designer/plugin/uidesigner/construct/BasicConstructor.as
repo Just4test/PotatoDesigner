@@ -1,10 +1,12 @@
 package potato.designer.plugin.uidesigner.construct
 {
-	import flash.utils.getDefinitionByName;
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	
-	import potato.designer.plugin.uidesigner.classdescribe.BasicClassProfile;
+	import flash.utils.getDefinitionByName;
+	
+	import potato.designer.plugin.uidesigner.Const;
+	
 	
 	
 	/**
@@ -15,15 +17,14 @@ package potato.designer.plugin.uidesigner.construct
 	 */
 	public class BasicConstructor implements IConstructor
 	{
-		
-		protected static const classTable:Object = {};
-		protected static const classMemberTable:Object = {};
+		protected static var classTable:Object = {};
+		protected static var classMemberTable:Object = {};
 		/**
 		 *设置类描述文件
 		 * <br>使用类描述文件来让构建器确定如何配合组件描述文件来构建组件。
 		 * <br>部分构建器可能不需要类描述文件。
 		 */
-		public static function setClassProfile(profile:BasicClassProfile):void
+		public static function setClassTypeProfile(profile:BasicClassTypeProfile):void
 		{
 			classTable[profile.className] = profile;
 			classMemberTable[profile.className] = {};
@@ -39,25 +40,12 @@ package potato.designer.plugin.uidesigner.construct
 		 * <br>使用类描述文件来让构建器确定如何配合组件描述文件来构建组件。
 		 * <br>部分构建器可能不需要类描述文件。
 		 */
-		public static function getClassProfile(className:String):BasicClassProfile
+		public static function getClassTypeProfile(className:String):BasicClassTypeProfile
 		{
 			return classTable[className];
 		}
 		
-		protected static const _nextConstructorTable:Object = new Object;
-		
 		public static const instance:BasicConstructor = new BasicConstructor;
-		
-		/**
-		 *注册次级构建器 
-		 * @param className 类名
-		 * @param next 次级处理器。当前构建器的构建结果会直接注入次级构建器的construct方法的第三个参数中
-		 * 
-		 */
-		public static function regNextConstructor(className:String, next:IConstructor):void
-		{
-			_nextConstructorTable[className] = next;
-		}
 		
 		public function construct(profile:IComponentProfile, tree:ComponentTree):Boolean
 		{
@@ -67,7 +55,7 @@ package potato.designer.plugin.uidesigner.construct
 			{
 				return false;
 			}
-			var classProfile:BasicClassProfile = getClassProfile(basicProfile.className);
+			var classProfile:BasicClassTypeProfile = getClassTypeProfile(basicProfile.className);
 			if(!classProfile)
 			{
 				throw new Error("组件配置文件中使用的类[" + basicProfile.className + "]找不到对应的类配置文件");
@@ -120,6 +108,7 @@ package potato.designer.plugin.uidesigner.construct
 				tree.component = component;
 			}
 			
+			//遍历
 			var memberTable:Object = classMemberTable[basicProfile.className];
 			for each (var member:BasicComponentMemberProfile in basicProfile.member) 
 			{
@@ -129,10 +118,10 @@ package potato.designer.plugin.uidesigner.construct
 					case 0:
 						throw new Error();
 						break;
-					case BasicClassProfile.TYPE_ACCESSOR:
+					case BasicClassTypeProfile.TYPE_ACCESSOR:
 						component[member.name] = memberTable[member.name](member.values[0]);
 						break;
-					case BasicClassProfile.TYPE_METHOD:
+					case BasicClassTypeProfile.TYPE_METHOD:
 						
 						Function(component[member.name]).apply(null, memberTable[member.name](member.values));
 						break;
@@ -143,10 +132,6 @@ package potato.designer.plugin.uidesigner.construct
 			}
 
 			return false;
-			
-			///////////////////
-			
-			
 		}
 		
 		public function addChildren(profile:IComponentProfile, tree:ComponentTree):Boolean
@@ -166,7 +151,7 @@ package potato.designer.plugin.uidesigner.construct
 		
 		protected static function makeMemberFunction(className:String, memberName:String):Function
 		{
-			var classProfile:BasicClassProfile = getClassProfile(className);
+			var classProfile:BasicClassTypeProfile = getClassTypeProfile(className);
 			var memberTable:Object = classMemberTable[className];
 			
 			var f:Function;
@@ -176,10 +161,10 @@ package potato.designer.plugin.uidesigner.construct
 				case 0:
 					throw new Error();
 					break;
-				case BasicClassProfile.TYPE_ACCESSOR:
+				case BasicClassTypeProfile.TYPE_ACCESSOR:
 //					var getter:Function =  TODO
 					break;
-				case BasicClassProfile.TYPE_METHOD:
+				case BasicClassTypeProfile.TYPE_METHOD:
 					break;
 				
 				default:
@@ -187,6 +172,44 @@ package potato.designer.plugin.uidesigner.construct
 			}
 			
 			return null;
+		}
+		
+		public function setData(data:*):Boolean
+		{
+			if(null == data)
+			{
+				classTable = {};
+				classMemberTable = {};
+				Factory.clearComponentProfile();
+				return false;
+			}
+			try
+			{
+				//读取类描述文件
+				if(data.hasOwnProperty(Const.CONSTRUCTOR_CLASS_TYPE_PROFILE))
+				{
+					var types:Vector.<BasicClassTypeProfile> = Vector.<BasicClassTypeProfile>(data[Const.CONSTRUCTOR_CLASS_TYPE_PROFILE]);
+					for each(var typeProfile:BasicClassTypeProfile in types)
+					{
+						setClassTypeProfile(typeProfile);
+					}
+				}
+				
+				//读取并设置组件描述文件
+				if(data.hasOwnProperty(Const.CONSTRUCTOR_COMPONENT_PROFILE))
+				{
+					var componentTable:Object = data[Const.CONSTRUCTOR_COMPONENT_PROFILE]
+					for each(var name:String in componentTable)
+					{
+						Factory.setComponentProfile(componentTable[name], name);
+					}
+				}
+			} 
+			catch(error:Error) 
+			{
+				
+			}
+			return false;
 		}
 	}
 }

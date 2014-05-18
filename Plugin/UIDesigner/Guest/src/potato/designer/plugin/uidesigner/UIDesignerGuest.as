@@ -8,13 +8,13 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
-	import potato.designer.plugin.uidesigner.classdescribe.BasicClassProfile;
+	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 	
 	public class UIDesignerGuest implements IPluginActivator
 	{	
 		
 		{
-			registerClassAlias("BasicClassProfile", BasicClassProfile);
+			registerClassAlias("BasicClassProfile", BasicClassTypeProfile);
 		}
 		
 		[Suggest(type="String", "int", "Number", value="Hello, World!", null, 0)]

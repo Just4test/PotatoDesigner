@@ -13,16 +13,16 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
-	import potato.designer.plugin.uidesigner.classdescribe.BasicClassProfile;
 	import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.classdescribe.Suggest;
+	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 	
 	public class UIDesignerHost implements IPluginActivator
 	{
 		
 		
 		{
-			registerClassAlias("BasicClassProfile", BasicClassProfile);
+			registerClassAlias("BasicClassProfile", potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile);
 		}
 		
 		/**请求指定的类描述*/		

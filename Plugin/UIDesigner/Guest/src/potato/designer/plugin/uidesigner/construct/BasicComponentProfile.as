@@ -11,12 +11,12 @@ package potato.designer.plugin.uidesigner.construct
 	{
 		protected var _className:String;
 		
-		protected var _constructorPatameters:Vector.<String>;
+		protected var _constructorParameters:Vector.<String>;
 		
-		protected var _memberTable:Object = {};
+//		protected var _memberTable:Object = {};
+		protected var _members:Vector.<BasicComponentMemberProfile>;
 		
 		protected var _children:Vector.<BasicComponentProfile>;
-//		protected var _member:Vector.<BasicComponentMemberProfile>;
 		
 		public static const CLASS_NAME:String = "className";
 		public static const CONSTRUCTOR:String = "constructor";
@@ -25,6 +25,12 @@ package potato.designer.plugin.uidesigner.construct
 		public static const MEMBER_VALUES:String = "values";
 		public static const CHILDREN:String = "children";
 		
+		/**
+		 *由JSON构建一个组件描述文件 
+		 * @param json
+		 * @return 
+		 * 
+		 */
 		public static function MakeProfile(json:String):BasicComponentProfile
 		{
 			try
@@ -34,8 +40,8 @@ package potato.designer.plugin.uidesigner.construct
 			catch(error:Error) 
 			{
 				log("[UIDesigner] 内部错误：无法将组件的JSON描述转换为组件描述文件\n", error);
-				return null;
 			}
+			return null;
 		}
 
 		
@@ -45,10 +51,10 @@ package potato.designer.plugin.uidesigner.construct
 			
 			var array:Array;
 			array = obj[MEMBERS];
-			_memberTable = {};
+			_members = new Vector.<BasicComponentMemberProfile>;
 			for (i = 0; i < array.length; i++) 
 			{
-				_memberTable[array[i][MEMBER_NAME]] = Vector.<String>(array[i][MEMBER_VALUES]);
+				_members.push(new BasicComponentMemberProfile(array[i][MEMBER_NAME],  Vector.<String>(array[i][MEMBER_VALUES])));
 			}
 			
 			array = obj[CHILDREN];
@@ -71,14 +77,14 @@ package potato.designer.plugin.uidesigner.construct
 		}
 		
 		
-		
-		public function getMember(name:String):Vector.<String>
-		{
-			return _memberTable[name];
-		}
+		/**
+		 *获取构造方法的参数类型列表
+		 * @return 
+		 * 
+		 */
 		public function getConstructor():Vector.<String>
 		{
-			return _constructorPatameters;
+			return _constructorParameters;
 		}
 		
 		public function get children():Vector.<IComponentProfile>
@@ -86,21 +92,26 @@ package potato.designer.plugin.uidesigner.construct
 			return _children as Vector.<IComponentProfile>;
 		}
 		
+		/**
+		 *获取类的完全限定名 
+		 * @return 
+		 * 
+		 */
 		public function get className():String
 		{
 			return _className;
 		}
 		
+
 		/**
-		 * 返回memberTypeTable的副本
+		 *生成members的副本 
 		 * @return 
 		 * 
 		 */
-		public function get memberTable():Object
+		public function get members():Vector.<BasicComponentMemberProfile>
 		{
-			function a():void{};
-			a.prototype = _memberTable;
-			return new a();
+			return _members.concat();
 		}
+
 	}
 }
