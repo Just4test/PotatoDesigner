@@ -30,12 +30,12 @@
 			<s:HGroup width="100%" height="100%">
 				<s:VGroup width="100%" height="100%">
 					<s:HGroup width="100%" verticalAlign="middle">
-						<s:Button width="90" label="AVM 路径"/>
+						<s:Button width="100" label="AVM 路径"/>
 						<s:TextInput id="avmPathInput" width="100%"
 									 change="avmPathInput_changeHandler(event)" prompt="留空则使用默认"/>
 					</s:HGroup>
 					<s:HGroup width="100%" verticalAlign="middle">
-						<s:Button width="90" label="项目路径"/>
+						<s:Button width="100" label="项目路径"/>
 						<s:TextInput id="projectPathInput" width="100%"/>
 					</s:HGroup>
 				</s:VGroup>

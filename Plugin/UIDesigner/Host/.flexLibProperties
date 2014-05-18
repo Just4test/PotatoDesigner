@@ -11,6 +11,8 @@
     <classEntry path="potato.designer.plugin.uidesigner.classdescribe.ParameterProfile"/>
     <classEntry path="potato.designer.plugin.uidesigner.classdescribe.Suggest"/>
     <classEntry path="potato.designer.plugin.uidesigner.classdescribe.tempMail"/>
+    <classEntry path="potato.designer.plugin.uidesigner.ClassTypeEditor"/>
+    <classEntry path="potato.designer.plugin.uidesigner.MemberTypeEditor"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

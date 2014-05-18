@@ -19,6 +19,9 @@
     <application path="Main.mxml">
       <airExcludes/>
     </application>
+    <application path="Main.as">
+      <airExcludes/>
+    </application>
   </applications>
   <modules/>
   <buildCSSFiles/>

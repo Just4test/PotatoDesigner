@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" fontSize="16"
+				dataChange="dataChangeHandler(event)"
+				click="clickHandler(event)">
+	<s:layout>
+		<s:HorizontalLayout verticalAlign="middle"/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import potato.designer.plugin.uidesigner.classdescribe.AccessorProfile;
+			import potato.designer.plugin.uidesigner.classdescribe.MethodProfile;
+			import potato.designer.plugin.uidesigner.classdescribe.ParameterProfile;
+			
+			import spark.events.TextOperationEvent;
+			
+			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
+			protected var editPoint:int = -1;
+			
+			protected function input_changeHandler(event:TextOperationEvent):void
+			{
+				testType();
+			}
+			
+			protected function testType():void
+			{
+				
+				if(TypeTransform.getTypeByName(type_input.text))
+				{
+					type_input.setStyle("contentBackgroundColor", 0xffffff);
+				}
+				else
+				{
+					type_input.setStyle("contentBackgroundColor", 0xB62222);
+				}
+			}
+			
+			protected function dataChangeHandler(event:FlexEvent):void
+			{
+				editPoint = -1;
+				redraw();
+			}
+			
+			/**重绘*/
+			protected function redraw():void
+			{
+				var access:AccessorProfile = AccessorProfile(data);
+				var method:MethodProfile;
+				if(access)
+				{
+					if(-1 == editPoint)
+					{
+						label0.text = access.name + ":" + access.type || "?";
+						
+					}
+					else
+					{
+						label0.text = access.name + ":";
+						type_input.text = access.type || "?";
+					}
+					label1.text = "";
+				}
+				else
+				{
+					method = MethodProfile(data);
+					var paras:Vector.<ParameterProfile> = method.parameters;
+					var text:String = method.name + "(";
+					for(var i:int = 0; i <paras.length; i++)
+					{
+						if(i == editPoint)
+						{
+							label0.text = text;
+							text = "";
+							type_input.text = paras[i].type || "?";
+						}
+						else
+						{
+							text += (paras[i].type || "?");
+							if(i < paras.length)
+							{
+								text += ", ";
+							}
+						}
+					}
+					text += ")";
+					if(-1 == editPoint)
+					{
+						label0.text = text;
+					}
+					else
+					{
+						label1.text = text;
+					}
+				}
+				
+				if(-1 == editPoint)
+				{
+					type_input.parent && removeChild(type_input);
+					label1.parent && removeChild(label1);
+				}
+				else
+				{
+					addChild(type_input);
+					addChild(label1);
+				}
+				
+				label0.text = text;
+				
+			}
+			
+			/**导航至下一个参数*/
+			protected function next():void
+			{
+				editPoint ++;
+				if(AccessorProfile(data))
+				{
+					editPoint = 0;
+				}
+				if(MethodProfile(data) && editPoint >= MethodProfile(data).numParameter)
+				{
+					editPoint = MethodProfile(data).numParameter -1;
+				}
+				redraw();
+			}
+			
+			/**导航至上一个参数*/
+			protected function previous():void
+			{
+				editPoint --;
+				if(AccessorProfile(data))
+				{
+					editPoint = 0;
+				}
+				if(editPoint < 0 && MethodProfile(data))
+				{
+					editPoint = MethodProfile(data).numParameter -1;
+				}
+				redraw();
+			}
+			
+			/**点击时显示编辑文本框*/
+			protected function clickHandler(event:MouseEvent):void
+			{
+				if(AccessorProfile(data) || (MethodProfile(data) && MethodProfile(data).numParameter))
+				{
+					editPoint = 0;
+				}
+				
+			}
+			
+			protected function input_keyDownHandler(event:KeyboardEvent):void
+			{
+				
+				if(Keyboard.LEFT == event.keyCode || (Keyboard.TAB == event.keyCode && event.shiftKey))
+				{
+					previous();
+				}
+				else if(Keyboard.RIGHT == event.keyCode || (Keyboard.TAB == event.keyCode && !event.shiftKey))
+				{
+					next();
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<s:CheckBox id="inUse_check"/>
+	<s:Label id="label0" text="function("/>
+	<s:TextInput id="type_input" change="input_changeHandler(event)" keyDown="input_keyDownHandler(event)" text="type"/>
+	<s:Label id="label1" text=" )"/>
+	
+</s:ItemRenderer>
