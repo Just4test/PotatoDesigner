@@ -2,7 +2,7 @@
 <actionScriptProperties analytics="false" mainApplicationPath="PluginUIDesignerHost.as" projectUUID="801a4bdb-9b4a-406a-9cb6-053280a3e337" version="10">
   <compiler additionalCompilerArguments="-locale en_US" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
     <compilerSourcePath>
-      <compilerSourcePathEntry kind="1" linkType="1" path="C:/Users/Administrator/Documents/GitHub/PotatoDesigner/Plugin/UIDesigner/Share"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="e:/Users/Just4test/Documents/GitHub/PotatoDesigner/Plugin/UIDesigner/Share"/>
     </compilerSourcePath>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
