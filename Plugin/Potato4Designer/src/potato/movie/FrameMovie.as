@@ -92,7 +92,7 @@ package potato.movie
 				index ++;
 			}else
 			{
-				if(_actionPlayCompleteCallback)
+				if(null != _actionPlayCompleteCallback)
 				{
 					_actionPlayCompleteCallback();
 				}

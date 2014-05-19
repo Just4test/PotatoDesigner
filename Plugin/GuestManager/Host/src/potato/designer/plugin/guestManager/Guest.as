@@ -2,6 +2,7 @@ package potato.designer.plugin.guestManager
 {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.IOErrorEvent;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
@@ -16,7 +17,9 @@ package potato.designer.plugin.guestManager
 	 */
 	public class Guest extends EventDispatcher
 	{
-		private var _connection:Connection;
+		
+		/**到该客户端的连接控制器。在连接完成之前，这个值可能为空。*/
+		internal var connection:Connection;
 		private var _isLocal:Boolean;
 		
 		private var _id:int;
@@ -34,7 +37,7 @@ package potato.designer.plugin.guestManager
 		/**向客户端发送关闭请求*/
 		public function close():void
 		{
-			_connection.close()
+			GuestManagerHost.close(this);
 		}
 		
 		/**向客户端发送重新启动请求
@@ -42,23 +45,10 @@ package potato.designer.plugin.guestManager
 		 */
 		public function restart():void
 		{
-			
+			//TODO
 		}
 
-		/**到该客户端的连接控制器。在连接完成之前，这个值可能为空。*/
-		public function get connection():Connection
-		{
-			return _connection;
-		}
-
-		/**
-		 * @private
-		 */
-		public function set connection(value:Connection):void
-		{
-			_connection = value;
-			_connection.messageTarget = this;
-		}
+		
 		
 		protected function logGuest(msg:Message):void
 		{
@@ -80,6 +70,11 @@ package potato.designer.plugin.guestManager
 			return _isLocal;
 		}
 		
+		public function get connected():Boolean
+		{
+			return connection && connection.connected;
+		}
+		
 		/**
 		 *发送一条消息 
 		 * @param type 消息类型
@@ -88,7 +83,7 @@ package potato.designer.plugin.guestManager
 		 */
 		public function send(type:String, data:* = null, callbackHandle:Function = null):void
 		{
-			_connection.send(type, data, callbackHandle);
+			connection.send(type, data, callbackHandle);
 		}
 	}
 }

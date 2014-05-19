@@ -1,8 +1,5 @@
 package potato.designer.plugin.uidesigner.construct
 {
-	import core.display.DisplayObject;
-	import core.display.DisplayObjectContainer;
-	
 
 	/**
 	 *组件工厂
@@ -17,11 +14,7 @@ package potato.designer.plugin.uidesigner.construct
 	 * 
 	 */
 	public class Factory
-	{
-		protected static const CURRENT_TARGET_PROFILE_NAME:String = "__currentTarget__";
-		
-		protected static const CHILDREN:String = "children";
-		
+	{	
 		protected static var componentTable:Object = {};
 		
 		/**
@@ -72,6 +65,23 @@ package potato.designer.plugin.uidesigner.construct
 			componentTable = {};
 		}
 		
+		/**
+		 *编译一个已经设置了描述文件的组件。 
+		 * @param name
+		 * @return 
+		 * 
+		 */
+		public static function compile(name:String):ComponentTree
+		{
+			return compileProfile(getComponentProfile(name));
+		}
+		
+		/**
+		 *编译组件描述文件 
+		 * @param profile
+		 * @return 
+		 * 
+		 */		
 		public static function compileProfile(profile:IComponentProfile):ComponentTree
 		{
 			var tree:ComponentTree = new ComponentTree;
@@ -102,11 +112,6 @@ package potato.designer.plugin.uidesigner.construct
 			
 			
 			return tree;
-		}
-		
-		public static function compile(name:String):ComponentTree
-		{
-			return compileProfile(getComponentProfile(name));
 		}
 	}
 }

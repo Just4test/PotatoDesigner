@@ -54,7 +54,7 @@ package potato.designer.plugin.uidesigner.construct
 			_members = new Vector.<BasicComponentMemberProfile>;
 			for (i = 0; i < array.length; i++) 
 			{
-				_members.push(new BasicComponentMemberProfile(array[i][MEMBER_NAME],  Vector.<String>(array[i][MEMBER_VALUES])));
+				_members.push(new BasicComponentMemberProfile(array[i][MEMBER_NAME],  array[i][MEMBER_VALUES]));
 			}
 			
 			array = obj[CHILDREN];

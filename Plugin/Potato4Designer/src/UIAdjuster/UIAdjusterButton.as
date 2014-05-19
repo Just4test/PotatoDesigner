@@ -48,7 +48,7 @@ package UIAdjuster
 		
 		private function onClick(e:GestureEvent):void
 		{
-			if(callFunc) callFunc();
+			if(null != callFunc) callFunc();
 		}
 		private function onDown(e:GestureEvent):void{
 			quad.alpha = 1;

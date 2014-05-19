@@ -25,12 +25,18 @@ package potato.designer.plugin.guestManager
 	{
 		/**客户端创建*/
 		public static const EVENT_GUEST_CREATED:String = "EVENT_GUEST_CREATED";
-		/**客户端连接到宿主*/
+		/**客户端连接到宿主<br>连接起始于管理器将连接设置到Guest对象之时*/
 		public static const EVENT_GUEST_CONNECTED:String = "EVENT_GUEST_CONNECTED";
-		/**客户端从宿主断开*/
+		/**客户端从宿主断开<br>连接终止于连接关闭或者主动断开*/
 		public static const EVENT_GUEST_DISCONNECTED:String = "EVENT_GUEST_DISCONNECTED";
+		/**客户端激活*/
+		public static const EVENT_GUEST_ACTIVATED:String = "EVENT_GUEST_ACTIVATED";
 		
 		private static var serverSocket:ServerSocket;
+		
+		private static const _guestList:Vector.<Guest> = new Vector.<Guest>;
+		
+		private static var _activatedGuest:Guest;
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
@@ -85,11 +91,23 @@ package potato.designer.plugin.guestManager
 			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
 			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
 			
+			
+			connection.addEventListener(Event.CLOSE, GuestManagerHost.closeHandler);
+			connection.addEventListener(Connection.EVENT_CRASH, GuestManagerHost.closeHandler);
+			connection.addEventListener(IOErrorEvent.IO_ERROR, GuestManagerHost.closeHandler);
+			
+			
 			//创建Guest对象
 			var guest:Guest = new Guest();
 			guest.connection = connection;
+			connection.messageTarget = guest;
 			
 			EventCenter.dispatchEvent( new DesignerEvent(EVENT_GUEST_CONNECTED, guest));
+			
+			if(!_activatedGuest)
+			{
+				activate(guest);
+			}
 		}
 		
 		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";
@@ -164,9 +182,89 @@ package potato.designer.plugin.guestManager
 		
 		
 		
-		public static function get guestList():Array
+		/**
+		 *获取已连接的客户端列表的副本。
+		 */
+		public static function get guestList():Vector.<Guest>
 		{
-			return null;
+			return _guestList.concat();
+		}
+		
+		/**
+		 *获取活跃客户端
+		 * <br>主机端允许同时连接多个客户端。但是某些插件不支持同时由多个客户端进行操作。
+		 * <br>此值尽可能的返回一个拥有有效连接的Guest实例。如果不存在这样的实例，将返回null。
+		 * <br>某些原因将导致活跃客户端变更。比如当前活跃客户端断开了连接，或者另外的客户端被主动激活。
+		 */
+		public static function get activatedGuest():Guest
+		{
+			return _activatedGuest;
+		}
+		
+		/**
+		 * 
+		 * @param guest
+		 * @return 成功激活返回true，否则返回false
+		 * 
+		 */
+		public static function activate(guest:Guest):Boolean
+		{
+			if(!guest.connected || -1 == _guestList.indexOf(guest))
+			{
+				return false;
+			}
+			
+			_activatedGuest = guest;
+			
+			EventCenter.dispatchEvent(new DesignerEvent(EVENT_GUEST_ACTIVATED, guest));
+			return _activatedGuest == guest;//万一有个贱B侦听这个消息然后激活一个其他的guest
+		}
+		
+		public static function close(guest:Guest):void
+		{
+			guest.connection.close();
+			completeConnect(guest, "服务端断开连接");
+		}
+		
+		private static function completeConnect(guest:Guest, reason:String):void
+		{
+			if(_activatedGuest == guest)
+			{
+				for each(var i:Guest in _guestList)
+				{
+					if(activate(i))
+						break;
+				}
+			}
+			guest.connection.messageTarget = null;
+			guest.connection = null;
+			
+			log("[GuestManager] 客户端" + guest.id.toString(16) + "关闭。", reason);
+			
+			EventCenter.dispatchEvent(new DesignerEvent(GuestManagerHost.EVENT_GUEST_DISCONNECTED, guest));
+		}
+		
+		/////////////////////////////////////////
+		
+		internal static function closeHandler(event:DesignerEvent):void
+		{
+			var reason:String;
+			switch(event.type)
+			{
+				case Event.CLOSE:
+					reason = "客户端断开连接";
+					break;
+				case Connection.EVENT_CRASH:
+					reason = "连接崩溃";
+					break;
+				case IOErrorEvent.IO_ERROR:
+					reason = "IO错误";
+					break;
+				default:
+					reason = "断开原因:" + event.type;
+			}
+			completeConnect(event.target as Guest, reason);
+			
 		}
 	}
 }

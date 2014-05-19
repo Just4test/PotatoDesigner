@@ -129,7 +129,7 @@ package potato.ui
 
 		private function render(e:Event):void
 		{
-			if (render)
+			if (null != render)
 				update();
 		}
 

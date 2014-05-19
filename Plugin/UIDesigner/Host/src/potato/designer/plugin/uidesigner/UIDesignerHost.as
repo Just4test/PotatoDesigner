@@ -35,11 +35,8 @@ package potato.designer.plugin.uidesigner
 			//
 			Suggest.loadSuggestFile(info.getAbsolutePath(SUGGEST_FILE_PATH));
 			
-			
-			
-			
-			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
+			
 			info.started();
 		}
 		
