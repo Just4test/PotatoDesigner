@@ -4,6 +4,7 @@
 package potato.designer.plugin.uidesigner.classdescribe{
 	import flash.filesystem.File;
 	
+	import potato.designer.plugin.uidesigner.Const;
 	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 
 /**

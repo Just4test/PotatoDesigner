@@ -68,22 +68,22 @@ package potato.designer.plugin.guestManager
 			
 			tryConnect("localhost", "local");
 			
-			EventCenter.addEventListener(EVENT_HOST_CONNECTED, 
-				function(e:Event):void
-				{
-					_timer11 = new Timer(500, int.MAX_VALUE);
-					_timer11.addEventListener(TimerEvent.TIMER, send);
-					_timer11.reset();
-					_timer11.start();
-					log("开始发");
-				});
-			
-			
-			function send(e:Event):void
-			{
-				var n:int = int.MAX_VALUE * Math.random();
-				log(n);
-			}
+//			EventCenter.addEventListener(EVENT_HOST_CONNECTED, 
+//				function(e:Event):void
+//				{
+//					_timer11 = new Timer(500, int.MAX_VALUE);
+//					_timer11.addEventListener(TimerEvent.TIMER, send);
+//					_timer11.reset();
+//					_timer11.start();
+//					log("开始发");
+//				});
+//			
+//			
+//			function send(e:Event):void
+//			{
+//				var n:int = int.MAX_VALUE * Math.random();
+//				log(n);
+//			}
 		}
 		
 		/**

@@ -30,7 +30,7 @@ package potato.designer.plugin.uidesigner.classdescribe
 				var str:String = fileStream.readMultiByte(fileStream.bytesAvailable, File.systemCharset);
 				fileStream.close();
 				var obj:Object = JSON.parse(str);
-			} 
+			}
 			catch(error:Error) 
 			{
 				log("[Suggest] 读取Suggest文件" + filePath + "时出错。\n" + error);
@@ -89,8 +89,6 @@ package potato.designer.plugin.uidesigner.classdescribe
 					continue;
 				}
 			}
-			trace(1);
-			
 		}
 		
 		/**

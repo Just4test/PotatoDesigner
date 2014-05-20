@@ -216,13 +216,13 @@ package potato.designer.plugin.guestManager
 			
 			_activatedGuest = guest;
 			
+			log("[GuestManager] 激活客户端" + guest.id.toString(16) + "。");
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_GUEST_ACTIVATED, guest));
 			return _activatedGuest == guest;//万一有个贱B侦听这个消息然后激活一个其他的guest
 		}
 		
 		public static function close(guest:Guest):void
 		{
-			guest.connection.close();
 			completeConnect(guest, "服务端断开连接");
 		}
 		
@@ -236,6 +236,8 @@ package potato.designer.plugin.guestManager
 						break;
 				}
 			}
+			
+			guest.connection.connected && guest.connection.close();
 			guest.connection.messageTarget = null;
 			guest.connection = null;
 			

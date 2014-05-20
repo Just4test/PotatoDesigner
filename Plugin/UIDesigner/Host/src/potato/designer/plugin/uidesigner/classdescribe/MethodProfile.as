@@ -1,5 +1,7 @@
 package potato.designer.plugin.uidesigner.classdescribe
 {
+	import potato.designer.plugin.uidesigner.Const;
+
 	/**
 	 * 方法描述
 	 * @author Just4test
@@ -15,18 +17,18 @@ package potato.designer.plugin.uidesigner.classdescribe
 		protected var _availableLength:int;
 		protected var _paras:Vector.<ParameterProfile>;
 		
-		protected var _suggest:*;
+//		protected var _suggest:*;
 		protected var _numParameterMin:uint;
 
-		public function get suggest():*
-		{
-			return _suggest;
-		}
-		
-		public function set suggest(value:*):void
-		{
-			_suggest = value;
-		}
+//		public function get suggest():*
+//		{
+//			return _suggest;
+//		}
+//		
+//		public function set suggest(value:*):void
+//		{
+//			_suggest = value;
+//		}
 		
 		
 		/**参数的个数*/

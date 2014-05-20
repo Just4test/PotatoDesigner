@@ -22,5 +22,12 @@ package potato.designer.plugin.uidesigner
 		public static const CONSTRUCTOR_CLASS_TYPE_PROFILE:String = "CONSTRUCTOR_CLASS_TYPE_PROFILE";
 		/**构建器数据中组件描述文件的key*/
 		public static const CONSTRUCTOR_COMPONENT_PROFILE:String = "CONSTRUCTOR_COMPONENT_PROFILE";
+		
+		
+		
+		public static function getShortClassName(fullName:String):String
+		{
+			return fullName.split("::").pop();
+		}
 	}
 }

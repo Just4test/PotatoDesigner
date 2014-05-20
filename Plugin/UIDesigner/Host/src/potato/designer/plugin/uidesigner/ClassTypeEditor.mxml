@@ -1,15 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="640" height="400" backgroundColor="#FFFFFF"
+		  fontFamily="微软雅黑" fontSize="16" initialize="initializeHandler(event)"
+		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import potato.designer.net.Message;
 			import potato.designer.plugin.guestManager.Guest;
 			import potato.designer.plugin.guestManager.GuestManagerHost;
+			import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
 			
 			import spark.events.TextOperationEvent;
 			
 			protected var timer:Timer;
+			protected var members:ArrayCollection = new ArrayCollection;
+			protected const members1:ArrayCollection = new ArrayCollection;
+			
+			
+			
+			protected function showInfo(info:String):void
+			{
+				root_group.addElement(info_label);
+				edit_group.parent && root_group.removeElement(edit_group);
+				height = 80;
+				
+				info_label.text = info;
+			}
+			
+			
+			
+			protected function showEdit():void
+			{
+				root_group.addElement(edit_group);
+				info_label.parent && root_group.removeElement(info_label);
+				height = 480;
+			}
+			
+			
+			
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				members = new ArrayCollection;
+				member_list.dataProvider = members;
+			}
 			
 			protected function className_input_changeHandler(event:TextOperationEvent):void
 			{
@@ -25,21 +64,43 @@
 			
 			protected function timerHandler(event:TimerEvent):void
 			{
-				var guest:Guest;
-				if(GuestManagerHost.guestList.length)
+				var guest:Guest = GuestManagerHost.activatedGuest;
+				if(!guest)
 				{
-					guest = GuestManagerHost.guestList[0];
+					showInfo("无法连接到客户端");
+					return;
 				}
+				
+				guest.send(Const.S2C_REQ_DESCRIBE_TYPE, className_input.text, describeTypeAnswerHandler);
+				
 			}
 			
+			private function describeTypeAnswerHandler(msg:Message):void
+			{
+				log(msg.data);
+				var p:ClassProfile = new ClassProfile(msg.data);
+				trace(p.isDisplayObj);
+				trace(p.isDisplayObjContainer);
+			}
 		]]>
 	</fx:Script>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:VGroup width="100%" height="100%">
+	<s:VGroup id="root_group" width="100%" height="100%">
 		<s:TextInput id="className_input" width="100%" change="className_input_changeHandler(event)"
 					 prompt="输入类的完全限定名"/>
-		<s:List width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.MemberTypeEditor"></s:List>
+		<s:Label id="info_label" width="100%" text="这里显示一些信息" textAlign="right"/>
+		<s:VGroup id="edit_group" width="100%" height="100%">
+			<s:List id="member_list" width="100%" height="100%"
+					itemRenderer="potato.designer.plugin.uidesigner.MemberTypeEditor"></s:List>
+			<s:HGroup width="100%">
+				<s:Button id="showAll_btn" label="显示全部成员"/>
+				<s:Group width="100%">
+				</s:Group>
+				<s:Button id="ok_btn" label="好"/>
+			</s:HGroup>
+		</s:VGroup>
+		
 	</s:VGroup>
-</s:Application>
+</s:Window>

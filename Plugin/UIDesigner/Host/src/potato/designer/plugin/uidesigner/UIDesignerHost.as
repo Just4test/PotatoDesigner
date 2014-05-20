@@ -6,6 +6,8 @@ package potato.designer.plugin.uidesigner
 	import flash.filesystem.FileStream;
 	import flash.net.registerClassAlias;
 	
+	import mx.core.Window;
+	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
@@ -17,12 +19,15 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.uidesigner.classdescribe.Suggest;
 	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 	
+	import spark.skins.spark.SparkChromeWindowedApplicationSkin;
+	import spark.skins.spark.WindowedApplicationSkin;
+	
 	public class UIDesignerHost implements IPluginActivator
 	{
 		
 		
 		{
-			registerClassAlias("BasicClassProfile", potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile);
+			registerClassAlias("BasicClassProfile", BasicClassTypeProfile);
 		}
 		
 		/**请求指定的类描述*/		
@@ -38,14 +43,19 @@ package potato.designer.plugin.uidesigner
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
 			info.started();
+			
 		}
 		
 		private function guestConnectedHandler(event:DesignerEvent):void
 		{
-			var guest:Guest = event.data;
+//			var guest:Guest = event.data;
 //			guest.send(S2C_REQ_DESCRIBE_TYPE, "potato.designer.framework::DataCenter", describeTypeAnswerHandler);
 //			guest.send(S2C_REQ_DESCRIBE_TYPE, "B", describeTypeAnswerHandler);
-			guest.send(S2C_REQ_DESCRIBE_TYPE, "core.display::Quad", describeTypeAnswerHandler);
+//			guest.send(S2C_REQ_DESCRIBE_TYPE, "core.display::Quad", describeTypeAnswerHandler);
+			
+			
+			var newWindow:ClassTypeEditor = new ClassTypeEditor;
+			newWindow.open(true);
 		}
 		
 		private function describeTypeAnswerHandler(msg:Message):void
