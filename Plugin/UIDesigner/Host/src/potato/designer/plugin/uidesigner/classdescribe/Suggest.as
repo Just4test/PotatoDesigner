@@ -193,9 +193,9 @@ package potato.designer.plugin.uidesigner.classdescribe
 				var suggestInFile:SuggestClass = _suggestMap[i];
 				if(suggestInFile)
 				{
-					for each(var sm:SuggestMember in suggestInFile)
+					for each(var sm:SuggestMember in suggestInFile.memberMap)
 					{
-						suggest[sm.name] ||= sm;
+						suggest.memberMap[sm.name] ||= sm;
 					}
 				}
 			}

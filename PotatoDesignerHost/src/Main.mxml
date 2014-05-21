@@ -17,6 +17,8 @@
 			import potato.designer.framework.PluginInfo;
 			import potato.designer.framework.PluginManager;
 			
+			import spark.components.Window;
+			
 			protected function application1_applicationCompleteHandler(event:FlexEvent):void
 			{
 				// TODO Auto-generated method stub
@@ -37,8 +39,6 @@
 				var pluginInfo:PluginInfo = e.data;
 				PluginManager.startPlugin(pluginInfo.id);
 			}
-			
-			
 			
 		]]>
 	</fx:Script>

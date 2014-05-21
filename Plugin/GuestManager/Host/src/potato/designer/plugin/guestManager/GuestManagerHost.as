@@ -99,6 +99,7 @@ package potato.designer.plugin.guestManager
 			
 			//创建Guest对象
 			var guest:Guest = new Guest();
+			_guestList.push(guest);
 			guest.connection = connection;
 			connection.messageTarget = guest;
 			
@@ -123,6 +124,7 @@ package potato.designer.plugin.guestManager
 		public static function startLocalGuest(width:int = 0, height:int = 0):Guest
 		{
 			var ret:Guest = new Guest(8888, true);
+			_guestList.push(ret);
 			var avmFile:File = new File(loaclAvmPath);
 			
 			if(!NativeProcess.isSupported)
@@ -216,7 +218,7 @@ package potato.designer.plugin.guestManager
 			
 			_activatedGuest = guest;
 			
-			log("[GuestManager] 激活客户端" + guest.id.toString(16) + "。");
+			log("[GuestManager] 客户端" + guest.id.toString(16) + "成为当前的激活客户端。");
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_GUEST_ACTIVATED, guest));
 			return _activatedGuest == guest;//万一有个贱B侦听这个消息然后激活一个其他的guest
 		}
@@ -237,9 +239,12 @@ package potato.designer.plugin.guestManager
 				}
 			}
 			
-			guest.connection.connected && guest.connection.close();
-			guest.connection.messageTarget = null;
-			guest.connection = null;
+			if(guest.connection)
+			{
+				guest.connection.connected && guest.connection.close();
+				guest.connection.messageTarget = null;
+				guest.connection = null;
+			}
 			
 			log("[GuestManager] 客户端" + guest.id.toString(16) + "关闭。", reason);
 			
@@ -248,7 +253,7 @@ package potato.designer.plugin.guestManager
 		
 		/////////////////////////////////////////
 		
-		internal static function closeHandler(event:DesignerEvent):void
+		internal static function closeHandler(event:Event):void
 		{
 			var reason:String;
 			switch(event.type)
@@ -265,7 +270,7 @@ package potato.designer.plugin.guestManager
 				default:
 					reason = "断开原因:" + event.type;
 			}
-			completeConnect(event.target as Guest, reason);
+			completeConnect(Guest(Connection(event.target).messageTarget), reason);
 			
 		}
 	}

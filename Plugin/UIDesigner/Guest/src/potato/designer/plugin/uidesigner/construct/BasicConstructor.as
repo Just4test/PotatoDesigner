@@ -1,9 +1,9 @@
 package potato.designer.plugin.uidesigner.construct
 {
+	import flash.utils.getDefinitionByName;
+	
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
-	
-	import flash.utils.getDefinitionByName;
 	
 	import potato.designer.plugin.uidesigner.Const;
 	

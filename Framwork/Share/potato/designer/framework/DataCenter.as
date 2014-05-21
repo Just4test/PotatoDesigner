@@ -33,10 +33,6 @@ package potato.designer.framework
 	 */
 	dynamic public class DataCenter extends Proxy
 	{
-//		/**
-//		 *工作空间模板在应用程序安装目录中的路径 
-//		 */
-//		public static const WORKSPACE_TEMPLATE_FOLDER:String = "designer/workspaceTemplate";
 		public static const WORKSPACE_FILE_NAME:String = "workspace.json";
 		
 		/**已经载入工作空间*/
@@ -53,6 +49,7 @@ package potato.designer.framework
 		public static const EVENT_SAVE_FAIL:String = "EVENT_SAVE_FAIL";
 		
 		private static var _isWorkSpaceLoaded:Boolean;
+		private static var _fileStream:FileStream;
 		
 		private static var _workSpaceFolderPath:String;
 		
@@ -79,7 +76,6 @@ package potato.designer.framework
 		{
 			return _workSpaceFolderPath;
 		}
-		
 		
 		/**
 		 *载入或创建工作空间

@@ -2,7 +2,7 @@
 <s:Window xmlns:fx="http://ns.adobe.com/mxml/2009"
 		  xmlns:s="library://ns.adobe.com/flex/spark"
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
-		  width="640" height="400" backgroundColor="#FFFFFF"
+		  width="640" height="400" backgroundColor="0xffffff"
 		  fontFamily="微软雅黑" fontSize="16" initialize="initializeHandler(event)"
 		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
@@ -14,12 +14,15 @@
 			import potato.designer.plugin.guestManager.Guest;
 			import potato.designer.plugin.guestManager.GuestManagerHost;
 			import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
+			import potato.designer.plugin.uidesigner.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.classdescribe.Suggest;
 			
 			import spark.events.TextOperationEvent;
 			
 			protected var timer:Timer;
-			protected var members:ArrayCollection = new ArrayCollection;
-			protected const members1:ArrayCollection = new ArrayCollection;
+			protected var members:ArrayCollection;
+			
+			protected var _classProfile:ClassProfile;
 			
 			
 			
@@ -30,6 +33,8 @@
 				height = 80;
 				
 				info_label.text = info;
+				
+				members.removeAll();
 			}
 			
 			
@@ -39,6 +44,15 @@
 				root_group.addElement(edit_group);
 				info_label.parent && root_group.removeElement(info_label);
 				height = 480;
+			}
+			
+			protected function showInfoAndEdit(info:String):void
+			{
+				root_group.addElement(info_label);
+				root_group.addElement(edit_group);
+				height = 480;
+				
+				info_label.text = info;
 			}
 			
 			
@@ -71,17 +85,62 @@
 					return;
 				}
 				
-				guest.send(Const.S2C_REQ_DESCRIBE_TYPE, className_input.text, describeTypeAnswerHandler);
+				var className:String = className_input.text;
+				//形如core.display::Quad的类名才能获取，类路径和类名之间由双冒号分隔
+				if(className.split(".").length > 1 && className.split("::").length == 1)
+				{
+					var array:Array = className.split(".");
+					className = "::" + array.pop();
+					className = array.join(".") + className;
+				}
+				
+				guest.send(Const.S2C_REQ_DESCRIBE_TYPE, className, describeTypeAnswerHandler);
 				
 			}
 			
 			private function describeTypeAnswerHandler(msg:Message):void
 			{
-				log(msg.data);
-				var p:ClassProfile = new ClassProfile(msg.data);
-				trace(p.isDisplayObj);
-				trace(p.isDisplayObjContainer);
+				try
+				{
+					_classProfile = new ClassProfile(msg.data);
+				} 
+				catch(error:Error) 
+				{
+					showInfo("请输入有效的类名");
+					return;
+				}
+				
+				Suggest.applySuggest(_classProfile);
+				
+				members.removeAll();
+				_classProfile.constructor && members.addItem(_classProfile.constructor);
+				for each(var i:IMemberProfile in _classProfile.accessors)
+				{
+					members.addItem(i);
+				}
+				for each(i in _classProfile.methods)
+				{
+					members.addItem(i);
+				}
+				
+				showEdit();
+				
 			}
+			
+			protected function ok_btn_clickHandler(event:MouseEvent):void
+			{
+				if(_classProfile.constructor && !_classProfile.constructor.availability)
+				{
+					showInfoAndEdit("必须具有有效的构造方法");
+					return;
+				}
+				
+				UIDesignerHost.regClass(_classProfile);
+				
+				close();
+				
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -98,7 +157,7 @@
 				<s:Button id="showAll_btn" label="显示全部成员"/>
 				<s:Group width="100%">
 				</s:Group>
-				<s:Button id="ok_btn" label="好"/>
+				<s:Button id="ok_btn" label="好" click="ok_btn_clickHandler(event)"/>
 			</s:HGroup>
 		</s:VGroup>
 		

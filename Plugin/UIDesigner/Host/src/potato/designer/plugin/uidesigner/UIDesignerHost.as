@@ -28,6 +28,10 @@ package potato.designer.plugin.uidesigner
 		
 		{
 			registerClassAlias("BasicClassProfile", BasicClassTypeProfile);
+			
+			TypeTransform.regType("String", "String");
+			TypeTransform.regType("int", "int");
+			TypeTransform.regType("Number", "Number");
 		}
 		
 		/**请求指定的类描述*/		
@@ -37,7 +41,6 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
-			//
 			Suggest.loadSuggestFile(info.getAbsolutePath(SUGGEST_FILE_PATH));
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
@@ -48,22 +51,15 @@ package potato.designer.plugin.uidesigner
 		
 		private function guestConnectedHandler(event:DesignerEvent):void
 		{
-//			var guest:Guest = event.data;
-//			guest.send(S2C_REQ_DESCRIBE_TYPE, "potato.designer.framework::DataCenter", describeTypeAnswerHandler);
-//			guest.send(S2C_REQ_DESCRIBE_TYPE, "B", describeTypeAnswerHandler);
-//			guest.send(S2C_REQ_DESCRIBE_TYPE, "core.display::Quad", describeTypeAnswerHandler);
-			
-			
 			var newWindow:ClassTypeEditor = new ClassTypeEditor;
 			newWindow.open(true);
 		}
 		
-		private function describeTypeAnswerHandler(msg:Message):void
+		public static function regClass(classProfile:ClassProfile):void
 		{
-			log(msg.data);
-			var p:ClassProfile = new ClassProfile(msg.data);
-			trace(p.isDisplayObj);
-			trace(p.isDisplayObjContainer);
+			
 		}
+		
+		
 	}
 }

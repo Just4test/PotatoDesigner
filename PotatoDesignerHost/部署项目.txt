@@ -1,0 +1,5 @@
+﻿编译参数：
+-locale en_US
+-include-libraries "C:\Program Files (x86)\Adobe\Adobe Flash Builder 4.6\sdks\4.6.0\frameworks\libs\air\airspark.swc"
+
+由于样式类包含在airspark.swc中，所以强制引入此swc库。以便所有组件在使用皮肤样式时能够获取到类。

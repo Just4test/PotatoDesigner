@@ -9,7 +9,7 @@ package potato.designer.plugin.uidesigner.construct
 	 * <br>2.依次构建组件的所有子组件
 	 * <br>3.调用IConstructor.addChildren()将构建完成的子组件安装在当前组件上
 	 * <br>4.返回当前组件
-	 * 构建为深度优先遍历。
+	 * <br>构建为深度优先遍历。
 	 * @author Administrator
 	 * 
 	 */
@@ -31,7 +31,7 @@ package potato.designer.plugin.uidesigner.construct
 		 * <br>构建器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
 		 * <br>约定：如果传入null，则清理所有已设置数据。
 		 * @param data
-		 * 
+		 */ 
 		public static function setData(data:*):void
 		{
 			for (var i:int = 0; i < constructorList.length; i++) 

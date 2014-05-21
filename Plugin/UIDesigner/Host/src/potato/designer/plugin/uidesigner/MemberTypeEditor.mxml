@@ -13,6 +13,7 @@
 			import mx.events.FlexEvent;
 			
 			import potato.designer.plugin.uidesigner.classdescribe.AccessorProfile;
+			import potato.designer.plugin.uidesigner.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.classdescribe.MethodProfile;
 			import potato.designer.plugin.uidesigner.classdescribe.ParameterProfile;
 			
@@ -28,59 +29,77 @@
 			
 			protected function testType():void
 			{
-				
+				var access:AccessorProfile = data as AccessorProfile;
+				var method:MethodProfile = data as MethodProfile;
 				if(TypeTransform.getTypeByName(type_input.text))
 				{
 					type_input.setStyle("contentBackgroundColor", 0xffffff);
+					if(access)
+					{
+						access.type = type_input.text;
+					}
+					else
+					{
+						method.parameters[editPoint].type = type_input.text;
+					}
 				}
 				else
 				{
 					type_input.setStyle("contentBackgroundColor", 0xB62222);
+					if(access)
+					{
+						access.type = null;
+					}
+					else
+					{
+						method.parameters[editPoint].type = null;
+					}
 				}
 			}
 			
 			protected function dataChangeHandler(event:FlexEvent):void
 			{
 				editPoint = -1;
+				inUse_check.selected = IMemberProfile(data).enable;
 				redraw();
 			}
 			
 			/**重绘*/
 			protected function redraw():void
 			{
-				var access:AccessorProfile = AccessorProfile(data);
+				var access:AccessorProfile = data as AccessorProfile;
 				var method:MethodProfile;
 				if(access)
 				{
 					if(-1 == editPoint)
 					{
-						label0.text = access.name + ":" + access.type || "?";
+						before_label.text = access.name + ":" + (access.type || "?");
 						
 					}
 					else
 					{
-						label0.text = access.name + ":";
+						before_label.text = access.name + ":";
 						type_input.text = access.type || "?";
 					}
-					label1.text = "";
+					after_label.text = "";
 				}
 				else
 				{
-					method = MethodProfile(data);
+					method = data as MethodProfile;
 					var paras:Vector.<ParameterProfile> = method.parameters;
 					var text:String = method.name + "(";
 					for(var i:int = 0; i <paras.length; i++)
 					{
 						if(i == editPoint)
 						{
-							label0.text = text;
+							before_label.text = text;
 							text = "";
 							type_input.text = paras[i].type || "?";
 						}
 						else
 						{
 							text += (paras[i].type || "?");
-							if(i < paras.length)
+							if(i < paras.length - 1)
 							{
 								text += ", ";
 							}
@@ -89,40 +108,41 @@
 					text += ")";
 					if(-1 == editPoint)
 					{
-						label0.text = text;
+						before_label.text = text;
 					}
 					else
 					{
-						label1.text = text;
+						after_label.text = text;
 					}
 				}
 				
 				if(-1 == editPoint)
 				{
-					type_input.parent && removeChild(type_input);
-					label1.parent && removeChild(label1);
+					type_input.parent && removeElement(type_input);
+					after_label.parent && removeElement(after_label);
 				}
 				else
 				{
-					addChild(type_input);
-					addChild(label1);
+					addElement(type_input);
+					addElement(after_label);
 				}
-				
-				label0.text = text;
 				
 			}
 			
 			/**导航至下一个参数*/
 			protected function next():void
 			{
-				editPoint ++;
-				if(AccessorProfile(data))
+				if(data is AccessorProfile)
 				{
 					editPoint = 0;
 				}
-				if(MethodProfile(data) && editPoint >= MethodProfile(data).numParameter)
+				else 
 				{
-					editPoint = MethodProfile(data).numParameter -1;
+					editPoint ++;
+					if(editPoint >= MethodProfile(data).numParameter)
+					{
+						editPoint = 0;
+					}
 				}
 				redraw();
 			}
@@ -130,24 +150,35 @@
 			/**导航至上一个参数*/
 			protected function previous():void
 			{
-				editPoint --;
-				if(AccessorProfile(data))
+				if(data is AccessorProfile)
 				{
 					editPoint = 0;
 				}
-				if(editPoint < 0 && MethodProfile(data))
+				else
 				{
-					editPoint = MethodProfile(data).numParameter -1;
+					editPoint --;
+					if(editPoint < 0)
+					{
+						editPoint = MethodProfile(data).numParameter -1;
+					}
 				}
+				redraw();
+			}
+			
+			protected function inputOverHandler():void
+			{
+				editPoint = -1;
 				redraw();
 			}
 			
 			/**点击时显示编辑文本框*/
 			protected function clickHandler(event:MouseEvent):void
 			{
-				if(AccessorProfile(data) || (MethodProfile(data) && MethodProfile(data).numParameter))
+				if(data is AccessorProfile || (data as MethodProfile).numParameter)
 				{
 					editPoint = 0;
+					redraw();
+					type_input.setFocus();
 				}
 				
 			}
@@ -166,11 +197,17 @@
 				
 			}
 			
+			protected function inUse_check_clickHandler(event:MouseEvent):void
+			{
+				IMemberProfile(data).enable = inUse_check.selected;
+			}
+			
 		]]>
 	</fx:Script>
-	<s:CheckBox id="inUse_check"/>
-	<s:Label id="label0" text="function("/>
-	<s:TextInput id="type_input" change="input_changeHandler(event)" keyDown="input_keyDownHandler(event)" text="type"/>
-	<s:Label id="label1" text=" )"/>
+	<s:CheckBox id="inUse_check" click="inUse_check_clickHandler(event)"/>
+	<s:Label id="before_label" text="function("/>
+	<s:TextInput id="type_input" text="type"
+				 change="input_changeHandler(event)" keyDown="input_keyDownHandler(event)" focusOut="inputOverHandler()"/>
+	<s:Label id="after_label" text=" )"/>
 	
 </s:ItemRenderer>
