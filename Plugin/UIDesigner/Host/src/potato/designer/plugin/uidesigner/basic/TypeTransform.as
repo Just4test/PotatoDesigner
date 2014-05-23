@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner
+package potato.designer.plugin.uidesigner.basic
 {
 	/**
 	 * 数据类型转换

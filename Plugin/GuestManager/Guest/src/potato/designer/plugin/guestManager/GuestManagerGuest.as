@@ -1,15 +1,20 @@
 package potato.designer.plugin.guestManager
 {
+	import flash.utils.ByteArray;
+	
+	import core.display.Stage;
 	import core.events.Event;
 	import core.events.EventDispatcher;
 	import core.events.IOErrorEvent;
 	import core.events.TimerEvent;
+	import core.net.UdpSocket;
 	import core.utils.Timer;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
+	import potato.designer.framework.PluginManager;
 	import potato.designer.net.Connection;
 	import potato.designer.net.Message;
 	import potato.designer.net.NetConst;
@@ -41,7 +46,7 @@ package potato.designer.plugin.guestManager
 		
 		/**
 		 *标记是否真正连接到了主机。
-		 * <br>在socket连接成功后还要进行通讯以确定双方是否能够对接。 
+		 * <br>在connection连接成功后还要进行通讯以确定双方是否能够对接。 
 		 */		
 		protected static var _connected:Boolean;
 		protected static var _testOnly:Boolean;
@@ -57,33 +62,48 @@ package potato.designer.plugin.guestManager
 		 */
 		protected static var _id:String;
 		
-		protected var _timer11:Timer;
-		
 		protected static const _messageTarget:EventDispatcher = new EventDispatcher;
 		
 		public function start(info:PluginInfo):void
 		{
+			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_START, pluginActiveHandler);
 			
 			info.started();
 			
 			tryConnect("localhost", "local");
+			startHostDiscovery();
+		}
+		
+		protected static function pluginActiveHandler(event:DesignerEvent):void
+		{
+			if(_connection.connected)
+			{
+				send(NetConst.C2S_PLUGIN_ACCTIVATED, event.data);
+			}
+		}
+		
+		protected var udpSocket1:UdpSocket;
+		public function startHostDiscovery():void
+		{
+			log("开始检查多播");
+			if(!udpSocket1)
+			{
+				udpSocket1 = new UdpSocket;
+				udpSocket1.bind(NetConst.HOST_MULTICAST_PORT);
+				udpSocket1.jointGroup(NetConst.HOST_MULTICAST_IP, 1);
+				
+				var bytes:ByteArray = new ByteArray;
+			}
 			
-//			EventCenter.addEventListener(EVENT_HOST_CONNECTED, 
-//				function(e:Event):void
-//				{
-//					_timer11 = new Timer(500, int.MAX_VALUE);
-//					_timer11.addEventListener(TimerEvent.TIMER, send);
-//					_timer11.reset();
-//					_timer11.start();
-//					log("开始发");
-//				});
-//			
-//			
-//			function send(e:Event):void
-//			{
-//				var n:int = int.MAX_VALUE * Math.random();
-//				log(n);
-//			}
+			Stage.getStage().addEventListener(Event.ENTER_FRAME, enterFrameHandler);
+			
+			function enterFrameHandler(event:Event):void
+			{
+				var length:int = udpSocket1.receive(bytes);
+				length > 0 && log("收到数据,长度", length, "来自", udpSocket1.remoteAddress, udpSocket1.remotePort);
+				
+			}
+			
 		}
 		
 		/**
@@ -216,15 +236,23 @@ package potato.designer.plugin.guestManager
 			_connection.addEventListener(Event.CLOSE, onDisconnectHandler);
 			_connection.addEventListener(IOErrorEvent.IO_ERROR, onDisconnectHandler);
 			_connection.addEventListener(Connection.EVENT_CRASH, onDisconnectHandler);
+			var plugins:Vector.<String> = new Vector.<String>;
+			for each(var i:PluginInfo in PluginManager.pluginList)
+			{
+				if(PluginInfo.STATE_RUNNING == i.state)
+				{
+					plugins.push(i.id);
+				}
+			}
+			_connection.send(NetConst.C2S_HELLO, {id:_id, plugins:plugins});
 			
-			_connection.send(NetConst.C2S_HELLO, _id);
-			
-			log("[GuestManager] 与来自", _connection.remoteAddress, "的主机对接成功。");
+			log("[GuestManager] 与来自", _connection.remoteAddress, "的主机对接成功。已经接管log");
 			EventCenter.addEventListener(EventCenter.EVENT_LOG, log2host);
 			
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_CONNECTED,
 				{ip:_connection.remoteAddress, id:_id}));
 		}
+		
 		
 		protected static function onDisconnectHandler(event:Event):void
 		{
@@ -300,12 +328,6 @@ package potato.designer.plugin.guestManager
 		{
 			return _connected;
 		}
-
-//		/**访问用于通讯的connect对象。可以侦听此connect对象的控制事件，但是所有消息都不会派发到connect上。如果有断线重连*/
-//		public static function get connection():Connection
-//		{
-//			return _connection;
-//		}
 		
 		//////////////////////////////////////////////////////////////////
 		

@@ -1,6 +1,6 @@
 package potato.designer.plugin.uidesigner
 {
-	public class Const
+	public class DesignerConst
 	{
 		
 		/***/

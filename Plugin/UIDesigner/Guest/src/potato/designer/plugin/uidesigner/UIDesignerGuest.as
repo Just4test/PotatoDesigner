@@ -25,9 +25,9 @@ package potato.designer.plugin.uidesigner
 		public function start(info:PluginInfo):void
 		{
 			//注册消息
-			GuestManagerGuest.addEventListener(Const.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
-			GuestManagerGuest.addEventListener(Const.S2C_INIT, initDesignerHandler);
-			GuestManagerGuest.addEventListener(Const.S2C_UPDATE, updateHandler);
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_INIT, initDesignerHandler);
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_UPDATE, updateHandler);
 			
 			//初始化UI
 			

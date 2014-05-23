@@ -1,13 +1,11 @@
 package potato.designer.plugin.uidesigner
 {
-import flash.geom.Matrix;
 import flash.geom.Rectangle;
 
 import core.display.DisplayObject;
 import core.display.Image;
 import core.display.RenderTexture;
 import core.events.Event;
-import core.events.TouchEvent;
 import core.filters.BorderFilter;
 import core.filters.Filter;
 
@@ -209,22 +207,22 @@ public class ComponentSubstitute extends UIComponent
 	/**选中组件的回调*/
 	protected function selectHandler(e:GestureEvent):void
 	{
-		var controlEvent:DesignerEvent = new DesignerEvent(Const.SUBSTITUTE_CLICK, this);
+		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_CLICK, this);
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(Const.SUBSTITUTE_CLICK, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_CLICK, getPath());
 		}
 	}
 	
 	/**执行默认操作的回调*/
 	protected function operationHandler(e:GestureEvent):void
 	{
-		var controlEvent:DesignerEvent = new DesignerEvent(Const.SUBSTITUTE_LONG_PRESS, this);
+		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_LONG_PRESS, this);
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(Const.SUBSTITUTE_LONG_PRESS, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, getPath());
 		}
 	}
 	
@@ -245,11 +243,11 @@ public class ComponentSubstitute extends UIComponent
 			addEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
 			startDrugX = e.stageX;
 			startDrugY = e.stageY;
-			var controlEvent:DesignerEvent = new DesignerEvent(Const.SUBSTITUTE_MOVE_START, this);
+			var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_MOVE_START, this);
 			EventCenter.dispatchEvent(controlEvent);
 			if(!controlEvent.isDefaultPrevented())
 			{
-				GuestManagerGuest.send(Const.SUBSTITUTE_MOVE_START, getPath());
+				GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_START, getPath());
 			}
 		}
 		
@@ -261,11 +259,11 @@ public class ComponentSubstitute extends UIComponent
 		isDrugEnable = false;
 		removeEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
 		
-		var controlEvent:DesignerEvent = new DesignerEvent(Const.SUBSTITUTE_MOVE_END, this);
+		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_MOVE_END, this);
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(Const.SUBSTITUTE_MOVE_END, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_END, getPath());
 		}
 	}
 	

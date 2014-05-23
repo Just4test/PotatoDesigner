@@ -1,6 +1,6 @@
-package potato.designer.plugin.uidesigner.classdescribe
+package potato.designer.plugin.uidesigner.basic.classdescribe
 {
-	import potato.designer.plugin.uidesigner.Const;
+	import potato.designer.plugin.uidesigner.DesignerConst;
 
 	/**
 	 * 方法描述
@@ -134,11 +134,11 @@ package potato.designer.plugin.uidesigner.classdescribe
 			var tempStr:String;
 			for each(var p:ParameterProfile in _paras)
 			{
-				tempStr = tempStr ? tempStr + ", " + Const.getShortClassName(p.className) : Const.getShortClassName(p.className);
+				tempStr = tempStr ? tempStr + ", " + DesignerConst.getShortClassName(p.className) : DesignerConst.getShortClassName(p.className);
 			}
 //			var trmpArr:Array = getShortClassName(_xml.@returnType.toString()).split("::");
 			
-			return _name + "(" + (tempStr || "") + "):" + Const.getShortClassName(_xml.@returnType);
+			return _name + "(" + (tempStr || "") + "):" + DesignerConst.getShortClassName(_xml.@returnType);
 		}
 	}
 }

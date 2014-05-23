@@ -49,7 +49,6 @@ package potato.designer.framework
 		public static const EVENT_SAVE_FAIL:String = "EVENT_SAVE_FAIL";
 		
 		private static var _isWorkSpaceLoaded:Boolean;
-		private static var _fileStream:FileStream;
 		
 		private static var _workSpaceFolderPath:String;
 		

@@ -7,15 +7,17 @@
 		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
+			import potato.designer.plugin.uidesigner.DesignerConst;
+			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
 			import potato.designer.net.Message;
 			import potato.designer.plugin.guestManager.Guest;
 			import potato.designer.plugin.guestManager.GuestManagerHost;
-			import potato.designer.plugin.uidesigner.classdescribe.ClassProfile;
-			import potato.designer.plugin.uidesigner.classdescribe.IMemberProfile;
-			import potato.designer.plugin.uidesigner.classdescribe.Suggest;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.ClassProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.Suggest;
 			
 			import spark.events.TextOperationEvent;
 			
@@ -94,7 +96,7 @@
 					className = array.join(".") + className;
 				}
 				
-				guest.send(Const.S2C_REQ_DESCRIBE_TYPE, className, describeTypeAnswerHandler);
+				guest.send(DesignerConst.S2C_REQ_DESCRIBE_TYPE, className, describeTypeAnswerHandler);
 				
 			}
 			
@@ -135,7 +137,7 @@
 					return;
 				}
 				
-				UIDesignerHost.regClass(_classProfile);
+				Controler.regClass(_classProfile);
 				
 				close();
 				
@@ -152,7 +154,7 @@
 		<s:Label id="info_label" width="100%" text="这里显示一些信息" textAlign="right"/>
 		<s:VGroup id="edit_group" width="100%" height="100%">
 			<s:List id="member_list" width="100%" height="100%"
-					itemRenderer="potato.designer.plugin.uidesigner.MemberTypeEditor"></s:List>
+					itemRenderer="potato.designer.plugin.uidesigner.basic.MemberTypeEditor"></s:List>
 			<s:HGroup width="100%">
 				<s:Button id="showAll_btn" label="显示全部成员"/>
 				<s:Group width="100%">

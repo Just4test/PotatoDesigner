@@ -12,10 +12,10 @@
 		<![CDATA[
 			import mx.events.FlexEvent;
 			
-			import potato.designer.plugin.uidesigner.classdescribe.AccessorProfile;
-			import potato.designer.plugin.uidesigner.classdescribe.IMemberProfile;
-			import potato.designer.plugin.uidesigner.classdescribe.MethodProfile;
-			import potato.designer.plugin.uidesigner.classdescribe.ParameterProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.AccessorProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.MethodProfile;
+			import potato.designer.plugin.uidesigner.basic.classdescribe.ParameterProfile;
 			
 			import spark.events.TextOperationEvent;
 			

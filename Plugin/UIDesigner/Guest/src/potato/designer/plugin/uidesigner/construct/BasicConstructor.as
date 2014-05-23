@@ -5,7 +5,7 @@ package potato.designer.plugin.uidesigner.construct
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	
-	import potato.designer.plugin.uidesigner.Const;
+	import potato.designer.plugin.uidesigner.DesignerConst;
 	
 	
 	
@@ -174,7 +174,7 @@ package potato.designer.plugin.uidesigner.construct
 			return null;
 		}
 		
-		public function setData(data:*):Boolean
+		public function setData(data:Object):Boolean
 		{
 			if(null == data)
 			{
@@ -186,9 +186,9 @@ package potato.designer.plugin.uidesigner.construct
 			try
 			{
 				//读取类描述文件
-				if(data.hasOwnProperty(Const.CONSTRUCTOR_CLASS_TYPE_PROFILE))
+				if(data.hasOwnProperty(DesignerConst.CONSTRUCTOR_CLASS_TYPE_PROFILE))
 				{
-					var types:Vector.<BasicClassTypeProfile> = Vector.<BasicClassTypeProfile>(data[Const.CONSTRUCTOR_CLASS_TYPE_PROFILE]);
+					var types:Vector.<BasicClassTypeProfile> = Vector.<BasicClassTypeProfile>(data[DesignerConst.CONSTRUCTOR_CLASS_TYPE_PROFILE]);
 					for each(var typeProfile:BasicClassTypeProfile in types)
 					{
 						setClassTypeProfile(typeProfile);
@@ -196,9 +196,9 @@ package potato.designer.plugin.uidesigner.construct
 				}
 				
 				//读取并设置组件描述文件
-				if(data.hasOwnProperty(Const.CONSTRUCTOR_COMPONENT_PROFILE))
+				if(data.hasOwnProperty(DesignerConst.CONSTRUCTOR_COMPONENT_PROFILE))
 				{
-					var componentTable:Object = data[Const.CONSTRUCTOR_COMPONENT_PROFILE]
+					var componentTable:Object = data[DesignerConst.CONSTRUCTOR_COMPONENT_PROFILE]
 					for each(var name:String in componentTable)
 					{
 						Factory.setComponentProfile(componentTable[name], name);

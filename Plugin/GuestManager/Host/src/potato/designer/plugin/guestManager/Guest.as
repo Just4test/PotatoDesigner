@@ -24,6 +24,8 @@ package potato.designer.plugin.guestManager
 		
 		private var _id:int;
 		
+		internal var _activedPlugins:Vector.<String> = new Vector.<String>;
+		
 		public function Guest(id:int = 0, isLocal:Boolean = false)
 		{
 			_id = id || int(Math.random() * 90000 + 10000);
@@ -85,5 +87,21 @@ package potato.designer.plugin.guestManager
 		{
 			connection.send(type, data, callbackHandle);
 		}
+
+		/**
+		 *返回一个列表，指示客户端上已经激活的插件。 
+		 * @return 
+		 * 
+		 */
+		public function get activedPlugins():Vector.<String>
+		{
+			return _activedPlugins.concat();
+		}
+		
+		public function isPluginActived(id:String):Boolean
+		{
+			return -1 != _activedPlugins.indexOf(id);
+		}
+
 	}
 }

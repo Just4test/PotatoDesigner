@@ -8,10 +8,18 @@ package potato.designer.plugin.guestManager
 	import flash.events.NativeProcessExitEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.ServerSocketConnectEvent;
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.net.DatagramSocket;
+	import flash.net.InterfaceAddress;
+	import flash.net.NetworkInfo;
+	import flash.net.NetworkInterface;
 	import flash.net.ServerSocket;
+	import flash.net.Socket;
+	import flash.utils.ByteArray;
+	import flash.utils.Timer;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
@@ -34,9 +42,14 @@ package potato.designer.plugin.guestManager
 		
 		private static var serverSocket:ServerSocket;
 		
-		private static const _guestList:Vector.<Guest> = new Vector.<Guest>;
+		private static var _guestList:Vector.<Guest> = new Vector.<Guest>;
 		
 		private static var _activatedGuest:Guest;
+		
+		/**网络发现使用的timer*/
+		private static var timer:Timer;
+		/**网络发现使用的DatagramSocket数组*/
+		private static var udpSockets:Vector.<DatagramSocket>;
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
@@ -49,66 +62,8 @@ package potato.designer.plugin.guestManager
 			
 			info.started();
 			startLocalGuest(960,640);
-		}
-		
-		/**
-		 *检测到连接。
-		 * <br/>连接后发送服务端问候语
-		 * <br/>等待客户端问候语
-		 */
-		private static function connectHandler(e:ServerSocketConnectEvent):void
-		{
-			var connection:Connection = new Connection(e.socket);
-			log("[GuestManager] 检测到连接，来自 ", connection.remoteAddress);
-			connection.send(NetConst.S2C_HELLO, "hello world!");
 			
-			connection.addEventListener(NetConst.C2S_HELLO, clientInitHandler);
-			connection.addEventListener(Event.CLOSE, connectFailHandler);
-			connection.addEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
-			connection.addEventListener(Connection.EVENT_CRASH, connectFailHandler);
-		}
-		
-		private static function connectFailHandler(e:Event):void
-		{
-			var connection:Connection = e.target as Connection;
-			
-			log("[GuestManager] 连接在对接前失败，来自 ", connection.remoteAddress);
-			
-			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
-			connection.removeEventListener(Event.CLOSE, connectFailHandler);
-			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
-			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
-		}
-		
-		private static function clientInitHandler(e:Message):void
-		{
-			var connection:Connection = e.target as Connection;
-			
-			log("[GuestManager] 客户端对接成功，来自 ", connection.remoteAddress);
-			
-			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
-			connection.removeEventListener(Event.CLOSE, connectFailHandler);
-			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
-			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
-			
-			
-			connection.addEventListener(Event.CLOSE, GuestManagerHost.closeHandler);
-			connection.addEventListener(Connection.EVENT_CRASH, GuestManagerHost.closeHandler);
-			connection.addEventListener(IOErrorEvent.IO_ERROR, GuestManagerHost.closeHandler);
-			
-			
-			//创建Guest对象
-			var guest:Guest = new Guest();
-			_guestList.push(guest);
-			guest.connection = connection;
-			connection.messageTarget = guest;
-			
-			EventCenter.dispatchEvent( new DesignerEvent(EVENT_GUEST_CONNECTED, guest));
-			
-			if(!_activatedGuest)
-			{
-				activate(guest);
-			}
+			startHostMultiCast();
 		}
 		
 		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";
@@ -193,6 +148,21 @@ package potato.designer.plugin.guestManager
 		}
 		
 		/**
+		 *查询激活了指定插件的客户端列表
+		 * @param name 插件名
+		 * 
+		 */
+		public static function getGuestsWithPlugin(id:String):Vector.<Guest>
+		{
+			return _guestList.filter(callback);
+			
+			function callback(item:Guest, index:int, vector:Vector.<Guest>):Boolean
+			{
+				return item.isPluginActived(id);
+			}
+		}
+		
+		/**
 		 *获取活跃客户端
 		 * <br>主机端允许同时连接多个客户端。但是某些插件不支持同时由多个客户端进行操作。
 		 * <br>此值尽可能的返回一个拥有有效连接的Guest实例。如果不存在这样的实例，将返回null。
@@ -225,30 +195,74 @@ package potato.designer.plugin.guestManager
 		
 		public static function close(guest:Guest):void
 		{
-			completeConnect(guest, "服务端断开连接");
+			completeClose(guest, "服务端断开连接");
 		}
 		
-		private static function completeConnect(guest:Guest, reason:String):void
+		public static function startHostMultiCast():void
 		{
-			if(_activatedGuest == guest)
+			if(!DatagramSocket.isSupported)
 			{
-				for each(var i:Guest in _guestList)
+				log("[GuestManager] 当前的客户端AIR配置文件不支持UDP协议。无法启用Host发现服务。");
+				return;
+			}
+			if(!udpSockets)
+			{
+				udpSockets = new Vector.<DatagramSocket>;
+				//发现本机地址
+				if(!NetworkInfo.isSupported)
 				{
-					if(activate(i))
-						break;
+					log("[GuestManager] 当前的客户端AIR配置文件不支持本机地址发现。无法启用Host发现服务。");
+					return;
+				}
+				var interfaces:Vector.<NetworkInterface>= NetworkInfo.networkInfo.findInterfaces(); 
+				if(interfaces)
+				{
+					for each(var interfaceObj:NetworkInterface in interfaces)
+					{
+						if(!interfaceObj.active)
+							continue;
+						
+						for each(var address:InterfaceAddress in interfaceObj.addresses)
+						{
+							if("IPv4" != address.ipVersion)
+								continue;
+							
+							log("发现了本机地址", address.address, address.ipVersion );
+							var socket:DatagramSocket = new DatagramSocket();
+							socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
+							socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
+							udpSockets.push(socket);
+						}
+					}
 				}
 			}
 			
-			if(guest.connection)
+			if(!timer)
 			{
-				guest.connection.connected && guest.connection.close();
-				guest.connection.messageTarget = null;
-				guest.connection = null;
+				timer = new Timer(1000, 0);
+				timer.addEventListener(TimerEvent.TIMER, timerHandler);
 			}
 			
-			log("[GuestManager] 客户端" + guest.id.toString(16) + "关闭。", reason);
+			timer.reset();
+			timer.start();
+			timerHandler(null);
 			
-			EventCenter.dispatchEvent(new DesignerEvent(GuestManagerHost.EVENT_GUEST_DISCONNECTED, guest));
+			
+			function timerHandler(event:TimerEvent):void
+			{
+				for each (var i:DatagramSocket in udpSockets) 
+				{
+					var byteArray:ByteArray = new ByteArray();
+					byteArray.writeUTF(NetConst.S2C_HELLO);
+					byteArray.writeUTF(i.localAddress);
+					i.send(byteArray);
+				}
+			}
+		}
+		
+		public static function stopHostMultiCast():void
+		{
+			timer.stop();
 		}
 		
 		/////////////////////////////////////////
@@ -270,8 +284,103 @@ package potato.designer.plugin.guestManager
 				default:
 					reason = "断开原因:" + event.type;
 			}
-			completeConnect(Guest(Connection(event.target).messageTarget), reason);
+			completeClose(Guest(Connection(event.target).messageTarget), reason);
 			
+		}
+		
+		
+		
+		private static function completeClose(guest:Guest, reason:String):void
+		{
+			if(_activatedGuest == guest)
+			{
+				for each(var i:Guest in _guestList)
+				{
+					if(activate(i))
+						break;
+				}
+			}
+			
+			guest._activedPlugins.length = 0;
+			
+			if(guest.connection)
+			{
+				guest.connection.connected && guest.connection.close();
+				guest.connection.messageTarget = null;
+				guest.connection = null;
+			}
+			
+			log("[GuestManager] 客户端" + guest.id.toString(16) + "关闭。", reason);
+			
+			EventCenter.dispatchEvent(new DesignerEvent(GuestManagerHost.EVENT_GUEST_DISCONNECTED, guest));
+		}
+		
+		/**
+		 *检测到连接。
+		 * <br/>连接后发送服务端问候语
+		 * <br/>等待客户端问候语
+		 */
+		private static function connectHandler(e:ServerSocketConnectEvent):void
+		{
+			var connection:Connection = new Connection(e.socket);
+			log("[GuestManager] 检测到连接，来自 ", connection.remoteAddress);
+			connection.send(NetConst.S2C_HELLO, "hello world!");
+			
+			connection.addEventListener(NetConst.C2S_HELLO, clientInitHandler);
+			connection.addEventListener(Event.CLOSE, connectFailHandler);
+			connection.addEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
+			connection.addEventListener(Connection.EVENT_CRASH, connectFailHandler);
+		}
+		
+		private static function connectFailHandler(e:Event):void
+		{
+			var connection:Connection = e.target as Connection;
+			
+			log("[GuestManager] 连接在对接前失败，来自 ", connection.remoteAddress);
+			
+			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
+			connection.removeEventListener(Event.CLOSE, connectFailHandler);
+			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
+			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
+		}
+		
+		private static function clientInitHandler(msg:Message):void
+		{
+			var connection:Connection = msg.target as Connection;
+			
+			log("[GuestManager] 客户端对接成功，来自 ", connection.remoteAddress);
+			
+			connection.removeEventListener(NetConst.C2S_HELLO, clientInitHandler);
+			connection.removeEventListener(Event.CLOSE, connectFailHandler);
+			connection.removeEventListener(IOErrorEvent.IO_ERROR, connectFailHandler);
+			connection.removeEventListener(Connection.EVENT_CRASH, connectFailHandler);
+			
+			
+			connection.addEventListener(Event.CLOSE, GuestManagerHost.closeHandler);
+			connection.addEventListener(Connection.EVENT_CRASH, GuestManagerHost.closeHandler);
+			connection.addEventListener(IOErrorEvent.IO_ERROR, GuestManagerHost.closeHandler);
+			
+			
+			//创建Guest对象
+			var guest:Guest = new Guest();
+			_guestList.push(guest);
+			guest.connection = connection;
+			connection.messageTarget = guest;
+			
+			guest._activedPlugins = guest._activedPlugins.concat(Vector.<String>(msg.data.plugins));
+			guest.addEventListener(NetConst.C2S_PLUGIN_ACCTIVATED, pluginAcctivatedHandler);
+			
+			EventCenter.dispatchEvent( new DesignerEvent(EVENT_GUEST_CONNECTED, guest));
+			
+			if(!_activatedGuest)
+			{
+				activate(guest);
+			}
+		}
+		
+		private static function pluginAcctivatedHandler(msg:Message):void
+		{
+			Guest(msg.target)._activedPlugins.push(msg.data);
 		}
 	}
 }

@@ -39,6 +39,6 @@ package potato.designer.plugin.uidesigner.construct
 		 * @return 返回true则跳过后面的构建器。通常返回false。
 		 * 
 		 */
-		function setData(data:*):Boolean;
+		function setData(data:Object):Boolean;
 	}
 }

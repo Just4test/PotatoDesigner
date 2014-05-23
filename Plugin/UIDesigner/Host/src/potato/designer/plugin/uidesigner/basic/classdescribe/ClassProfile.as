@@ -1,10 +1,10 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.plugin.uidesigner.classdescribe{
+package potato.designer.plugin.uidesigner.basic.classdescribe{
 	import flash.filesystem.File;
 	
-	import potato.designer.plugin.uidesigner.Const;
+	import potato.designer.plugin.uidesigner.DesignerConst;
 	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 
 /**
@@ -58,7 +58,7 @@ public class ClassProfile {
 		else
 		{
 			_constructor = new MethodProfile(constructorXmlList[0]);
-			_memberMap[Const.getShortClassName(_className)] = _constructor;
+			_memberMap[DesignerConst.getShortClassName(_className)] = _constructor;
 		}
 		
 		//填充存取器

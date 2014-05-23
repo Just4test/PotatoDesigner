@@ -1,7 +1,7 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.plugin.uidesigner.classdescribe{
+package potato.designer.plugin.uidesigner.basic.classdescribe{
 
 public class tempMail
 {
