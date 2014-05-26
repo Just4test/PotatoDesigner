@@ -8,6 +8,7 @@ package potato.designer.net
 		public static const HOST_MULTICAST_PORT:int = 9964;
 		/**主机多播地址<br>主机端在启动时会每秒广播数据包，以便客户端进行设备发现。*/
 		public static const HOST_MULTICAST_IP:String = "224.0.2.199";
+		public static const HOST_MULTICAST_INTERVAL:int = 200;
 		
 		/**服务器向客户端的问候语。包含服务器版本号。*/		
 		public static const S2C_HELLO:String = "S2C_HELLO";

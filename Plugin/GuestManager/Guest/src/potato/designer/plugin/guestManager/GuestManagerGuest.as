@@ -42,7 +42,18 @@ package potato.designer.plugin.guestManager
 		 */
 		public static const EVENT_HOST_DISCONNECTED:String = "EVENT_HOST_DISCONNECTED";
 		
+		/**
+		 *已发现的主机列表
+		 * <br>当发现了主机，以及主机没有响应过期后都将派发
+		 * <br>data:[ip0, ip1....] 
+		 */
+		public static const EVENT_HOST_DISCOVERED:String = "EVENT_HOST_DISCOVERED";
+		
 		protected static var _connection:Connection;
+		
+		protected static var _udpSocket:UdpSocket;
+		protected static var _hostTable:Object;
+
 		
 		/**
 		 *标记是否真正连接到了主机。
@@ -82,28 +93,89 @@ package potato.designer.plugin.guestManager
 			}
 		}
 		
-		protected var udpSocket1:UdpSocket;
-		public function startHostDiscovery():void
+		/**
+		 *启动主机发现
+		 * <br>允许客户端发现位于同一子网的正在进行Host多播的主机。
+		 * <br>
+		 * 
+		 */
+		public static function startHostDiscovery():void
 		{
-			log("开始检查多播");
-			if(!udpSocket1)
+			log("[GuestManager] 开始发现主机");
+			if(!_udpSocket)
 			{
-				udpSocket1 = new UdpSocket;
-				udpSocket1.bind(NetConst.HOST_MULTICAST_PORT);
-				udpSocket1.jointGroup(NetConst.HOST_MULTICAST_IP, 1);
+				_udpSocket = new UdpSocket;
+				_udpSocket.bind(NetConst.HOST_MULTICAST_PORT);
+				_udpSocket.jointGroup(NetConst.HOST_MULTICAST_IP, 1);
 				
-				var bytes:ByteArray = new ByteArray;
+				_hostTable = {};
 			}
 			
-			Stage.getStage().addEventListener(Event.ENTER_FRAME, enterFrameHandler);
+			Stage.getStage().addEventListener(Event.ENTER_FRAME, hostDiscoveryHandler);
 			
-			function enterFrameHandler(event:Event):void
+			
+			
+		}
+		
+		protected static function hostDiscoveryHandler(event:Event):void
+		{
+			var time:Number = new Date().time;
+			var flag:Boolean;
+			var bytes:ByteArray = new ByteArray;
+			
+			while(_udpSocket.receive(bytes) > 0)
 			{
-				var length:int = udpSocket1.receive(bytes);
-				length > 0 && log("收到数据,长度", length, "来自", udpSocket1.remoteAddress, udpSocket1.remotePort);
-				
+				if(NetConst.HOST_MULTICAST_PORT == _udpSocket.remotePort && NetConst.S2C_HELLO == bytes.readUTFBytes(bytes.length))
+				{
+					if(!_hostTable[_udpSocket.remoteAddress])
+						flag = true;
+					if(!_hostTable[_udpSocket.remoteAddress])
+						log("[GuestManager] 发现主机", _udpSocket.remoteAddress);
+					
+					_hostTable[_udpSocket.remoteAddress] = time;
+				}
 			}
 			
+			for (var i:String in _hostTable) 
+			{
+				if(time - _hostTable[i] > NetConst.HOST_MULTICAST_INTERVAL * 2)
+				{
+					flag = true;
+					log("[GuestManager] 主机停止响应", i);
+					delete _hostTable[i];
+				}
+			}
+			
+			if(flag)
+			{
+				EventCenter.dispatchEvent(new DesignerEvent(EVENT_HOST_DISCOVERED, discoveredHosts));
+			}
+			
+		}
+		
+		public static function stopHostDiscovery():void
+		{
+			log("[GuestManager] 停止发现主机");
+			Stage.getStage().removeEventListener(Event.ENTER_FRAME, hostDiscoveryHandler);
+		}
+		
+		/**
+		 *已经发现的主机列表。该列表进行过排序。
+		 * @return 如果没有在进行主机发现，返回null。否则返回已经发现的主机列表。
+		 * 
+		 */
+		public static function get discoveredHosts():Vector.<String>
+		{
+			if(!_hostTable)
+				return null;
+			
+			var ret:Vector.<String> = new Vector.<String>;
+			for(var i:String in _hostTable)
+			{
+				ret.push(i);
+			}
+			ret.sort(0);
+			return ret;
 		}
 		
 		/**

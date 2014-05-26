@@ -239,9 +239,12 @@ package potato.designer.plugin.guestManager
 			
 			if(!timer)
 			{
-				timer = new Timer(1000, 0);
+				timer = new Timer(NetConst.HOST_MULTICAST_INTERVAL, 0);
 				timer.addEventListener(TimerEvent.TIMER, timerHandler);
 			}
+			
+			var bytes:ByteArray = new ByteArray();
+			bytes.writeUTFBytes(NetConst.S2C_HELLO);
 			
 			timer.reset();
 			timer.start();
@@ -252,10 +255,7 @@ package potato.designer.plugin.guestManager
 			{
 				for each (var i:DatagramSocket in udpSockets) 
 				{
-					var byteArray:ByteArray = new ByteArray();
-					byteArray.writeUTF(NetConst.S2C_HELLO);
-					byteArray.writeUTF(i.localAddress);
-					i.send(byteArray);
+					i.send(bytes);
 				}
 			}
 		}
