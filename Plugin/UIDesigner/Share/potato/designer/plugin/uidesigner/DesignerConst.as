@@ -12,7 +12,9 @@ package potato.designer.plugin.uidesigner
 		
 		/**请求指定的类描述*/		
 		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";
-		/**初始化UIDesigner*/		
+		/**初始化UIDesigner
+		 * <br>这是一个异步方法。
+		 */		
 		public static const S2C_INIT:String = "UID_S2C_INIT";
 		/**组件更新*/		
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";

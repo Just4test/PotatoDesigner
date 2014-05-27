@@ -24,7 +24,12 @@ package potato.designer.plugin.uidesigner.basic.constructor
 	 */
 	public class BasicConstructor implements IConstructor
 	{
+		
+		public static function init():void
 		{
+			
+			Factory.constructorList.push(instance);
+			
 			registerClassAlias("BasicClassProfile", BasicClassProfile);
 			
 			regType("int", getInt, true, "int");

@@ -7,6 +7,8 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
+	import potato.designer.plugin.uidesigner.basic.constructor.BasicConstructor;
+	import potato.designer.plugin.uidesigner.construct.Factory;
 	
 	public class UIDesignerGuest implements IPluginActivator
 	{	
@@ -24,6 +26,10 @@ package potato.designer.plugin.uidesigner
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_UPDATE, updateHandler);
 			
 			//初始化UI
+			
+			
+			//注册基础构建器
+			BasicConstructor.init();
 			
 			
 			info.started();

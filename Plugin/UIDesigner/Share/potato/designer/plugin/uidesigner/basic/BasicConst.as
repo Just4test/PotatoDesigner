@@ -9,5 +9,10 @@ package potato.designer.plugin.uidesigner.basic
 		/**构建器数据中组件描述文件的key*/
 		public static const CONSTRUCTOR_COMPONENT_PROFILE:String = "CONSTRUCTOR_COMPONENT_PROFILE";
 		
+		
+		
+		/**建议值文件所在位置*/
+		public static const SUGGEST_FILE_PATH:String = "suggest.json";
+		
 	}
 }

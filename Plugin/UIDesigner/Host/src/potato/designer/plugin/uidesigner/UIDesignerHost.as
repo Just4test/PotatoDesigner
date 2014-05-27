@@ -1,6 +1,7 @@
 package potato.designer.plugin.uidesigner
 {
 	
+	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
@@ -15,10 +16,12 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
+	import potato.designer.plugin.uidesigner.basic.designer.BasicDesigner;
 	import potato.designer.plugin.uidesigner.basic.designer.ClassTypeEditor;
 	import potato.designer.plugin.uidesigner.basic.designer.TypeTransform;
 	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.Suggest;
+	import potato.designer.utils.MultiLock;
 	
 	import spark.components.Window;
 	import spark.skins.spark.SparkChromeWindowedApplicationSkin;
@@ -35,15 +38,43 @@ package potato.designer.plugin.uidesigner
 	public class UIDesignerHost implements IPluginActivator
 	{
 		
-		/**请求指定的类描述*/		
-		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";
-		public static const SUGGEST_FILE_PATH:String = "suggest.json";
+		
+		/**
+		 * 事件：生成组件配置文件
+		 * <br>这是一个同步事件。由于每次添加/删除/修改组件（比如拖动组件位置）都会重新生成组件配置文件并重新构建组件树，因此生成组件配置文件的过程需要非常快。
+		 * <br>这个事件将附带一个Object，即目标配置文件。各个设计器需要监听这个事件，并为Object添加属性。添加的属性必须可以序列化。
+		 */
+		public static const EVENT_MAKE_COMPONENT_PROFILE:String = "UID_EVENT_MAKE_COMPONENT_PROFILE";
 		
 		
-		/**事件：生成组件配置文件
-		 * <br>这个事件将附带一个Object。各个编辑工具需要响应这个事件，并为Object添加属性。
-		 * <be>稍后Object将被传输至客户端以生成组件，或者被存储到文件。因此为其添加的属性必须可以序列化。*/
-		public static const EVENT_MAKE_COMPONENT_PROFILE:String = "EVENT_MAKE_COMPONENT_PROFILE";
+		/**
+		 *事件：导出发布版本
+		 * <br>生成一个为发布优化的组件配置文件版本。此版本可能为运行时优化了效率，或者针对特定环境进行导出。
+		 * 如果某个设计器不涉及为发布优化的功能，以 EVENT_MAKE_COMPONENT_PROFILE 方式响应此事件即可。
+		 * <br>这是一个异步事件。允许设计器异步执行（比如与Guest端通讯）甚至导出失败。
+		 * <br>data:[target:Object, multiLock:MultiLock]
+		 */
+		public static const EVENT_EXPORT_RELEASE_BUILD:String = "UID_EVENT_EXPORT_RELEASE_BUILD";
+		/**
+		 *导出发行版成功 
+		 */
+		public static const EVENT_EXPORT_OK:String = "UID_EVENT_EXPORT_OK";
+		/**
+		 * 导出发行版失败
+		 */
+		public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
+		
+		
+		protected static var _multiLock:MultiLock;
+		protected static var _targetProfile:Object;
+		
+		/**
+		 *检查设计器是否锁定。当导出发布版本未完成时，设计器锁定。此时不应对组件配置有任何修改。
+		 */
+		public static function get isLocking():Boolean
+		{
+			return !_multiLock;
+		}
 		
 		/**组件和大纲窗口*/
 		protected static var window0:Window;
@@ -98,15 +129,73 @@ package potato.designer.plugin.uidesigner
 			
 		}
 		
+		/**
+		 *导出发行版
+		 * <br>此方法派发 EVENT_EXPORT_RELEASE_BUILD 事件以调用设计器生成发行版组件。
+		 * 
+		 */
+		public static function exportReleaseBuild():void
+		{
+			_multiLock = new MultiLock;
+			EventCenter.dispatchEvent(new DesignerEvent(EVENT_EXPORT_OK, [_targetProfile, _multiLock]));
+			if(!_multiLock.isFree)
+			{
+				finishExport();
+			}
+			else
+			{
+				_multiLock.addEventListener(MultiLock.EVENT_DEAD, multiLockHandler);
+				_multiLock.addEventListener(MultiLock.EVENT_UNLOCKED, multiLockHandler);
+			}
+		}
+		
+		private static function multiLockHandler(event:Event):void
+		{
+			_multiLock.removeEventListener(MultiLock.EVENT_DEAD, multiLockHandler);
+			_multiLock.removeEventListener(MultiLock.EVENT_UNLOCKED, multiLockHandler);
+			
+			switch(event.type)
+			{
+				case MultiLock.EVENT_DEAD:
+				{
+					finishExport();
+					break;
+				}
+				case MultiLock.EVENT_UNLOCKED:
+				{
+					EventCenter.dispatchEvent(new Event(EVENT_EXPORT_FAILED));
+					break;
+				}
+					
+				default:
+				{
+					throw new Error("内部错误");
+					break;
+				}
+			}
+		}
+		
+		
+		public static function finishExport():void
+		{
+			_multiLock = null;
+			EventCenter.dispatchEvent(new Event(EVENT_EXPORT_OK));
+		}
+		
+		
+		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
-			Suggest.loadSuggestFile(info.getAbsolutePath(SUGGEST_FILE_PATH));
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
+			//初始化基础设计器
+			BasicDesigner.init(info);
+			
 			//注册视图并显示窗口
 			updateWindow();
+			
 			
 			info.started();
 			
