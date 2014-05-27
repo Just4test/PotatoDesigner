@@ -1,5 +1,6 @@
 package potato.designer.plugin.uidesigner.construct
 {
+	import potato.designer.plugin.uidesigner.basic.constructor.BasicConstructor;
 
 	/**
 	 *组件工厂

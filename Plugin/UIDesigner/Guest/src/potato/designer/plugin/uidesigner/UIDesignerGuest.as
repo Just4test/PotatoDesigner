@@ -1,6 +1,5 @@
 package potato.designer.plugin.uidesigner
 {
-	import flash.net.registerClassAlias;
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
 	
@@ -8,14 +7,9 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
-	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
 	
 	public class UIDesignerGuest implements IPluginActivator
 	{	
-		
-		{
-			registerClassAlias("BasicClassProfile", BasicClassTypeProfile);
-		}
 		
 		[Suggest(type="String", "int", "Number", value="Hello, World!", null, 0)]
 		public function start1(s:String, x:int, y:int):void

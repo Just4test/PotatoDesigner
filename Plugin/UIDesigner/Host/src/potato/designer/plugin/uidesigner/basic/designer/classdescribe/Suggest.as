@@ -1,11 +1,11 @@
-package potato.designer.plugin.uidesigner.basic.classdescribe
+package potato.designer.plugin.uidesigner.basic.designer.classdescribe
 {
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	
-	import potato.designer.plugin.uidesigner.basic.TypeProfile;
-	import potato.designer.plugin.uidesigner.basic.TypeTransform;
+	import potato.designer.plugin.uidesigner.basic.designer.TypeProfile;
+	import potato.designer.plugin.uidesigner.basic.designer.TypeTransform;
 
 	/**
 	 *建议值配置文件

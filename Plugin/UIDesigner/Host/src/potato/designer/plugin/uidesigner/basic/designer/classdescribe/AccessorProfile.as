@@ -1,6 +1,6 @@
-package potato.designer.plugin.uidesigner.basic.classdescribe
+package potato.designer.plugin.uidesigner.basic.designer.classdescribe
 {
-	import potato.designer.plugin.uidesigner.basic.TypeTransform;
+	import potato.designer.plugin.uidesigner.basic.designer.TypeTransform;
 
 	/**
 	 * 变量和存取器描述符

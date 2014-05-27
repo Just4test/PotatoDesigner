@@ -1,5 +1,6 @@
-package potato.designer.plugin.uidesigner.construct
+package potato.designer.plugin.uidesigner.basic.constructor
 {
+	import potato.designer.plugin.uidesigner.construct.IComponentProfile;
 
 	/**
 	 * 构建用组件描述文件

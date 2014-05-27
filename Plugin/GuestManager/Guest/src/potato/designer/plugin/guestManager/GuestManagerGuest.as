@@ -112,9 +112,6 @@ package potato.designer.plugin.guestManager
 			}
 			
 			Stage.getStage().addEventListener(Event.ENTER_FRAME, hostDiscoveryHandler);
-			
-			
-			
 		}
 		
 		protected static function hostDiscoveryHandler(event:Event):void
@@ -138,7 +135,7 @@ package potato.designer.plugin.guestManager
 			
 			for (var i:String in _hostTable) 
 			{
-				if(time - _hostTable[i] > NetConst.HOST_MULTICAST_INTERVAL * 2)
+				if(time - _hostTable[i] > NetConst.HOST_MULTICAST_INTERVAL * 3)
 				{
 					flag = true;
 					log("[GuestManager] 主机停止响应", i);

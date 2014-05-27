@@ -1,11 +1,11 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.plugin.uidesigner.basic.classdescribe{
+package potato.designer.plugin.uidesigner.basic.designer.classdescribe{
 	import flash.filesystem.File;
 	
 	import potato.designer.plugin.uidesigner.DesignerConst;
-	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
+	import potato.designer.plugin.uidesigner.basic.constructor.BasicClassProfile;
 
 /**
  *类配置文件
@@ -178,9 +178,9 @@ public class ClassProfile {
 		return _memberMap[name];
 	}
 	
-	public function getTypeProfile():BasicClassTypeProfile
+	public function getTypeProfile():BasicClassProfile
 	{
-		var ret:BasicClassTypeProfile = new BasicClassTypeProfile(_className);
+		var ret:BasicClassProfile = new BasicClassProfile(_className);
 		ret.constructorTypes = getTypes(_constructor);
 		
 		for each (var i:AccessorProfile in _accessors) 

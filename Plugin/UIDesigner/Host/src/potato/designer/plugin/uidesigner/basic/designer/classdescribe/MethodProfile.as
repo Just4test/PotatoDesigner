@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner.basic.classdescribe
+package potato.designer.plugin.uidesigner.basic.designer.classdescribe
 {
 	import potato.designer.plugin.uidesigner.DesignerConst;
 

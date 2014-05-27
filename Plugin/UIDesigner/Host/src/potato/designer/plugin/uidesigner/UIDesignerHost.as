@@ -15,11 +15,10 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
-	import potato.designer.plugin.uidesigner.basic.ClassTypeEditor;
-	import potato.designer.plugin.uidesigner.basic.TypeTransform;
-	import potato.designer.plugin.uidesigner.basic.classdescribe.ClassProfile;
-	import potato.designer.plugin.uidesigner.basic.classdescribe.Suggest;
-	import potato.designer.plugin.uidesigner.construct.BasicClassTypeProfile;
+	import potato.designer.plugin.uidesigner.basic.designer.ClassTypeEditor;
+	import potato.designer.plugin.uidesigner.basic.designer.TypeTransform;
+	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.ClassProfile;
+	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.Suggest;
 	
 	import spark.components.Window;
 	import spark.skins.spark.SparkChromeWindowedApplicationSkin;
@@ -35,13 +34,6 @@ package potato.designer.plugin.uidesigner
 	 */
 	public class UIDesignerHost implements IPluginActivator
 	{
-		{
-			registerClassAlias("BasicClassProfile", BasicClassTypeProfile);
-			
-			TypeTransform.regType("String", "String");
-			TypeTransform.regType("int", "int");
-			TypeTransform.regType("Number", "Number");
-		}
 		
 		/**请求指定的类描述*/		
 		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";

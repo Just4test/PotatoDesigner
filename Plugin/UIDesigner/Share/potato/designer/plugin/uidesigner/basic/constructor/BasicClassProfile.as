@@ -1,11 +1,11 @@
-package potato.designer.plugin.uidesigner.construct
+package potato.designer.plugin.uidesigner.basic.constructor
 {
 	/**
-	 *类描述文件 
+	 *基础类描述文件
 	 * @author Just4test
 	 * 
 	 */
-	public class BasicClassTypeProfile
+	public class BasicClassProfile
 	{
 		public static const TYPE_ACCESSOR:int = 1;
 		public static const TYPE_METHOD:int = 2;
@@ -17,7 +17,7 @@ package potato.designer.plugin.uidesigner.construct
 		protected var _memberTypeTable:Object = {};
 		protected var _memberParameterTable:Object = {};
 		
-		public function BasicClassTypeProfile(className:String)
+		public function BasicClassProfile(className:String)
 		{
 			_className = className;
 		}
