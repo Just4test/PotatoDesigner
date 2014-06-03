@@ -48,7 +48,7 @@ package potato.designer.plugin.uidesigner.construct
 		 *设置组件描述文件
 		 * <br>使用组件描述文件来让构建器获取构建组件的参数。
 		 */
-		public static function setComponentProfile(profile:IComponentProfile, name:String):void
+		public static function setComponentProfile(profile:ITargetProfile, name:String):void
 		{
 			componentTable[name] = profile;
 		}
@@ -56,7 +56,7 @@ package potato.designer.plugin.uidesigner.construct
 		 *获取组件描述文件
 		 * <br>使用组件描述文件来让构建器获取构建组件的参数。
 		 */
-		public static function getComponentProfile(name:String):IComponentProfile
+		public static function getComponentProfile(name:String):ITargetProfile
 		{
 			return componentTable[name];
 		}
@@ -74,7 +74,7 @@ package potato.designer.plugin.uidesigner.construct
 		 * @return 
 		 * 
 		 */
-		public static function compile(name:String):ComponentTree
+		public static function compile(name:String):TargetTree
 		{
 			return compileProfile(getComponentProfile(name));
 		}
@@ -85,9 +85,9 @@ package potato.designer.plugin.uidesigner.construct
 		 * @return 
 		 * 
 		 */		
-		public static function compileProfile(profile:IComponentProfile):ComponentTree
+		public static function compileProfile(profile:ITargetProfile):TargetTree
 		{
-			var tree:ComponentTree = new ComponentTree;
+			var tree:TargetTree = new TargetTree;
 			
 			//构建组件自身
 			for (var i:int = 0; i < constructorList.length; i++) 
@@ -99,7 +99,7 @@ package potato.designer.plugin.uidesigner.construct
 			//构建子组件
 			if(profile.children)
 			{
-				tree.children = new Vector.<ComponentTree>;
+				tree.children = new Vector.<TargetTree>;
 				for (i = 0; i < profile.children.length; i++) 
 				{
 					tree.children[i] = compileProfile(profile.children[i]);

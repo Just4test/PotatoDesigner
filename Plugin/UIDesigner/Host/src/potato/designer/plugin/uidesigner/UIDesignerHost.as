@@ -109,6 +109,27 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
+		
+		/**
+		 *注册 
+		 * @param name
+		 * @param data
+		 * 
+		 */
+		/**
+		 *注册组件类型 
+		 * @param name 组件名
+		 * @param isContainer 组件是否是容器。这决定了组件能否展开并插入子组件
+		 * @param icon 为组件指定图标
+		 * 
+		 */
+		public static function regComponentType(name:String, isContainer:Boolean, icon:Class = null):void
+		{
+			
+		}
+		
+		
+		
 		/**
 		 *刷新客户端组件树
 		 * <br>当属性更改或者向组件树添加了新组件后调用这个方法。

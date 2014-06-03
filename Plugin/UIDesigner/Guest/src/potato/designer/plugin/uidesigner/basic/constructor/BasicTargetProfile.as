@@ -1,6 +1,6 @@
 package potato.designer.plugin.uidesigner.basic.constructor
 {
-	import potato.designer.plugin.uidesigner.construct.IComponentProfile;
+	import potato.designer.plugin.uidesigner.construct.ITargetProfile;
 
 	/**
 	 * 构建用组件描述文件
@@ -8,16 +8,16 @@ package potato.designer.plugin.uidesigner.basic.constructor
 	 * <br>本类是动态类，因而可以自由的扩充您所需要的参数。
 	 * @author Just4test
 	 */
-	public dynamic class BasicComponentProfile implements IComponentProfile
+	public dynamic class BasicTargetProfile implements ITargetProfile
 	{
 		protected var _className:String;
 		
 		protected var _constructorParameters:Vector.<String>;
 		
 //		protected var _memberTable:Object = {};
-		protected var _members:Vector.<BasicComponentMemberProfile>;
+		protected var _members:Vector.<BasicTargetMemberProfile>;
 		
-		protected var _children:Vector.<BasicComponentProfile>;
+		protected var _children:Vector.<BasicTargetProfile>;
 		
 		public static const CLASS_NAME:String = "className";
 		public static const CONSTRUCTOR:String = "constructor";
@@ -32,11 +32,11 @@ package potato.designer.plugin.uidesigner.basic.constructor
 		 * @return 
 		 * 
 		 */
-		public static function MakeProfile(json:String):BasicComponentProfile
+		public static function MakeProfile(json:String):BasicTargetProfile
 		{
 			try
 			{
-				return BasicComponentProfile(JSON.parse(json));
+				return BasicTargetProfile(JSON.parse(json));
 			} 
 			catch(error:Error) 
 			{
@@ -46,23 +46,23 @@ package potato.designer.plugin.uidesigner.basic.constructor
 		}
 
 		
-		public function BasicComponentProfile(obj:Object)
+		public function BasicTargetProfile(obj:Object)
 		{
 			_className = obj[CLASS_NAME];
 			
 			var array:Array;
 			array = obj[MEMBERS];
-			_members = new Vector.<BasicComponentMemberProfile>;
+			_members = new Vector.<BasicTargetMemberProfile>;
 			for (i = 0; i < array.length; i++) 
 			{
-				_members.push(new BasicComponentMemberProfile(array[i][MEMBER_NAME],  array[i][MEMBER_VALUES]));
+				_members.push(new BasicTargetMemberProfile(array[i][MEMBER_NAME],  array[i][MEMBER_VALUES]));
 			}
 			
 			array = obj[CHILDREN];
-			_children = new Vector.<BasicComponentProfile>(array.length);
+			_children = new Vector.<BasicTargetProfile>(array.length);
 			for (var i:int = 0; i < array.length; i++) 
 			{
-				_children[i] = new BasicComponentProfile(array[i]);
+				_children[i] = new BasicTargetProfile(array[i]);
 			}
 			
 			
@@ -88,9 +88,9 @@ package potato.designer.plugin.uidesigner.basic.constructor
 			return _constructorParameters;
 		}
 		
-		public function get children():Vector.<IComponentProfile>
+		public function get children():Vector.<ITargetProfile>
 		{
-			return _children as Vector.<IComponentProfile>;
+			return _children as Vector.<ITargetProfile>;
 		}
 		
 		/**
@@ -109,7 +109,7 @@ package potato.designer.plugin.uidesigner.basic.constructor
 		 * @return 
 		 * 
 		 */
-		public function get members():Vector.<BasicComponentMemberProfile>
+		public function get members():Vector.<BasicTargetMemberProfile>
 		{
 			return _members.concat();
 		}

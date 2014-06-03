@@ -31,7 +31,7 @@ public class ComponentSubstitute extends UIComponent
 	/**子替身列表*/
     protected const _subSubstitutes:Vector.<ComponentSubstitute> = new <ComponentSubstitute>[];
 	/**父替身*/
-    protected var _parrentSubstitute:ComponentSubstitute;
+    protected var _parentSubstitute:ComponentSubstitute;
 	/**指示该替身是否处于选中状态*/
     protected var _selected:Boolean;
 	/**指示该替身是否处于展开状态*/
@@ -49,18 +49,19 @@ public class ComponentSubstitute extends UIComponent
 	
 	
 
-    public function get parrentSubstitute():ComponentSubstitute {
-        return _parrentSubstitute;
+    public function get parentSubstitute():ComponentSubstitute {
+        return _parentSubstitute;
     }
 
     public function get subSubstitutes():Vector.<ComponentSubstitute> {
         return _subSubstitutes;
     }
 
-    public function ComponentSubstitute(prototype:*, parrent:ComponentSubstitute = null)
+    public function ComponentSubstitute(prototype:*, parent:ComponentSubstitute = null)
     {
         _prototype = prototype;
-        _parrentSubstitute = parrent;
+        _parentSubstitute = parent;
+		parent && parent._subSubstitutes.push(this);
         refresh();
 		
 		/**单击选中组件*/
@@ -102,7 +103,7 @@ public class ComponentSubstitute extends UIComponent
      * <br>展开动作时，所有直接子组件被放入新的替身中呈现。与展开组件同层且叠放次序在展开的组件上方的替身被隐藏。
      * <br>双击展开状态的容器外围，该容器折叠。
      * <br>折叠状态下的组件替身呈现该组件的完整外观。
-     * <br>折叠动作时，所有直接子组件所对应的替身被销毁。与被折叠组件同层且叠放次序在被折叠的组件上方的替身重新显示。
+     * <br>折叠动作时，所有子组件所对应的替身被销毁。与被折叠组件同层且叠放次序在被折叠的组件上方的替身重新显示。
      * */
     public function get unfolded():Boolean {
         return _unfolded;
@@ -190,17 +191,37 @@ public class ComponentSubstitute extends UIComponent
     }
 
     /**
-     * 返回当前组件在组件树中的路径
-     * <br>形如"0.1.4"表示当前组件是根组件的第二个子组件的第五个子组件
+     * 返回当前组件的路径
+     * <br>形如"[0,1,4]"表示当前组件是根组件的第二个子组件的第五个子组件
      * */
-    public function getPath():String
+    public function get path():Vector.<uint>
     {
-        if(!_parrentSubstitute)
+        if(!_parentSubstitute)
         {
-            return "0";
+            return new Vector.<uint>;
         }
-        return _parrentSubstitute.getPath() + "." + _parrentSubstitute._subSubstitutes.indexOf(this);
+		var ret:Vector.<uint> = _parentSubstitute.path;
+		ret.push(_parentSubstitute._subSubstitutes.indexOf(this))
+        return ret;
     }
+	
+	/**
+	 *检查当前路径是否和目标路径相同，或者是目标路径的父路径。
+	 */
+	public function inPath(foldPath:Vector.<uint>):Boolean
+	{
+		var myPath:Vector.<uint> = path
+		if(myPath.length > foldPath.length)
+			return false;
+		
+		for (var i:int = 0; i < myPath.length; i++) 
+		{
+			if(myPath[i] != foldPath[i])
+				return false;
+		}
+		
+		return true;
+	}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -211,7 +232,7 @@ public class ComponentSubstitute extends UIComponent
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_CLICK, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_CLICK, path);
 		}
 	}
 	
@@ -222,7 +243,7 @@ public class ComponentSubstitute extends UIComponent
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, path);
 		}
 	}
 	
@@ -247,7 +268,7 @@ public class ComponentSubstitute extends UIComponent
 			EventCenter.dispatchEvent(controlEvent);
 			if(!controlEvent.isDefaultPrevented())
 			{
-				GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_START, getPath());
+				GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_START, path);
 			}
 		}
 		
@@ -263,7 +284,7 @@ public class ComponentSubstitute extends UIComponent
 		EventCenter.dispatchEvent(controlEvent);
 		if(!controlEvent.isDefaultPrevented())
 		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_END, getPath());
+			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_END, path);
 		}
 	}
 	

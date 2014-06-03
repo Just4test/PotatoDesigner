@@ -1,11 +1,11 @@
 package potato.designer.plugin.uidesigner.basic.constructor
 {
-	public class BasicComponentMemberProfile
+	public class BasicTargetMemberProfile
 	{
 		protected var _name:String;
 		protected var _values:Vector.<String>;
 		
-		public function BasicComponentMemberProfile(name:String, values:Array)
+		public function BasicTargetMemberProfile(name:String, values:Array)
 		{
 			_name = name;
 			_values = Vector.<String>(values);

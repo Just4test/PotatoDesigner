@@ -9,9 +9,9 @@ package potato.designer.plugin.uidesigner.basic.constructor
 	import core.display.TextureData;
 	
 	import potato.designer.plugin.uidesigner.basic.BasicConst;
-	import potato.designer.plugin.uidesigner.construct.ComponentTree;
+	import potato.designer.plugin.uidesigner.construct.TargetTree;
 	import potato.designer.plugin.uidesigner.construct.Factory;
-	import potato.designer.plugin.uidesigner.construct.IComponentProfile;
+	import potato.designer.plugin.uidesigner.construct.ITargetProfile;
 	import potato.designer.plugin.uidesigner.construct.IConstructor;
 	
 	
@@ -166,10 +166,10 @@ package potato.designer.plugin.uidesigner.basic.constructor
 		
 		public static const instance:BasicConstructor = new BasicConstructor;
 		
-		public function construct(profile:IComponentProfile, tree:ComponentTree):Boolean
+		public function construct(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
 			//如果配置文件不是所需要的格式则跳过本构建器
-			var basicProfile:BasicComponentProfile = profile as BasicComponentProfile;
+			var basicProfile:BasicTargetProfile = profile as BasicTargetProfile;
 			if(!basicProfile)
 			{
 				return false;
@@ -181,7 +181,7 @@ package potato.designer.plugin.uidesigner.basic.constructor
 			}
 			
 			//如果没有传入组件，则创建组件
-			var component:* = tree.component;
+			var component:* = tree.target;
 			if(!component)
 			{
 				var array:Array = _classMemberTable[basicProfile.className][basicProfile.className](basicProfile.getConstructor());
@@ -224,12 +224,12 @@ package potato.designer.plugin.uidesigner.basic.constructor
 					default:
 						throw new Error("类的参数个数过多");
 				}
-				tree.component = component;
+				tree.target = component;
 			}
 			
 			//遍历
 			var memberTable:Object = _classMemberTable[basicProfile.className];
-			for each (var member:BasicComponentMemberProfile in basicProfile.member) 
+			for each (var member:BasicTargetMemberProfile in basicProfile.member) 
 			{
 				var name:String = member.name;
 				var F:Function = memberTable[name];
@@ -258,9 +258,9 @@ package potato.designer.plugin.uidesigner.basic.constructor
 			return false;
 		}
 		
-		public function addChildren(profile:IComponentProfile, tree:ComponentTree):Boolean
+		public function addChildren(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
-			var container:DisplayObjectContainer = tree.component as DisplayObjectContainer;
+			var container:DisplayObjectContainer = tree.target as DisplayObjectContainer;
 			for (var i:int = 0; i < tree.children.length; i++) 
 			{
 				var disObj:DisplayObject = tree.children[i] as DisplayObject;

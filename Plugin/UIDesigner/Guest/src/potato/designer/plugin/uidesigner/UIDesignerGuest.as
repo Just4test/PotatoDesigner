@@ -8,16 +8,11 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	import potato.designer.plugin.uidesigner.basic.constructor.BasicConstructor;
+	import potato.designer.plugin.uidesigner.construct.TargetTree;
 	import potato.designer.plugin.uidesigner.construct.Factory;
 	
 	public class UIDesignerGuest implements IPluginActivator
 	{	
-		
-		[Suggest(type="String", "int", "Number", value="Hello, World!", null, 0)]
-		public function start1(s:String, x:int, y:int):void
-		{
-			
-		}
 		public function start(info:PluginInfo):void
 		{
 			//注册消息
@@ -69,6 +64,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
+			var tree:TargetTree = Factory.compileProfile(msg.data);
 			
 		}
 	}

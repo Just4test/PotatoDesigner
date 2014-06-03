@@ -7,9 +7,9 @@ package potato.designer.plugin.uidesigner.construct
 	 * @author Administrator
 	 * 
 	 */
-	public interface IComponentProfile
+	public interface ITargetProfile
 	{
 		/**获取子对象的描述文件*/
-		function get children():Vector.<IComponentProfile>;
+		function get children():Vector.<ITargetProfile>;
 	}
 }

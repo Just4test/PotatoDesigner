@@ -66,7 +66,7 @@ package potato.designer.plugin.guestManager
 			startHostMultiCast();
 		}
 		
-		public static const loaclAvmPath:String = "C:/Users/Administrator/Documents/Flash Working Folder/avm/avm.exe";
+		public static const loaclAvmPath:String = "app:/designer/avm/avm.exe";
 		public static const loaclProjectPath:String = "C:/Users/Administrator/Documents/GitHub/PotatoDesigner/PotatoDesignerGuest";
 		public static const loaclProjectMainSwfPath:String = "bin-debug/Main.swf";
 		/**
