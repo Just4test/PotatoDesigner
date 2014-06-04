@@ -69,19 +69,7 @@ package potato.designer.plugin.uidesigner
 			}
 			
 			_children.splice(index, 0, child);
-			child._parent = this;
-			
-			//确定插入到什么位置。因为DesignerProfile的index和其target的index不一定相同。
-			var childTargetIndex:int;
-			if(index + 1 < _children.length)
-			{
-				childTargetIndex = getChildTargetIndex(_children[index + 1]);
-			}
-			else
-			{
-				childTargetIndex = targetProfile.children.length;
-			}
-			targetProfile.children.splice(childTargetIndex, 0, child);
+			targetProfile.children.splice(index, 0, child.targetProfile);
 		}
 		
 		
@@ -93,19 +81,13 @@ package potato.designer.plugin.uidesigner
 		
 		public function removeChildAt(index:uint):void
 		{
-			var child:DesignerProfile = _children[index];
-			
-			var childTargetIndex:int = targetProfile.children.indexOf(targetProfile);
-			
-			if(-1 == childTargetIndex)
+			if(_children[index].targetProfile != targetProfile.children[index])
 			{
-				throw new Error("子代的target不是当前target的子代");
+				throw new Error("target不匹配");
 			}
 			
 			_children.splice(index, 1);
-			child._parent = null;
-			
-			targetProfile.children.splice(childTargetIndex, 1);
+			targetProfile.children.splice(index, 1);
 		}
 		
 		public function getChildAt(index:uint):DesignerProfile
@@ -118,45 +100,25 @@ package potato.designer.plugin.uidesigner
 			return _children.indexOf(child);
 		}
 		
-		
-		
-		/**
-		 *返回目标子代的target在当前target的子代中的index。
-		 * @param child
-		 * @return -1，如果目标不是当前对象的子代
-		 * 
-		 */
-		public function getChildTargetIndex(child:DesignerProfile):int
-		{
-			if(-1 == _children.indexOf(child))
-			{
-				return -1;
-			}
-			
-			var index:int = targetProfile.children.indexOf(child.targetProfile);
-			
-			if(-1 == index)
-			{
-				throw new Error("子代的target不是当前target的子代");
-			}
-			
-			return index;
-		}
-		
 		/**
 		 *返回当前target于父target的子代中的index
 		 */
-		public function get targetIndex():int
+		public function get index():int
 		{
 			if(!_parent)
 				return -1;
 			
-			return getChildTargetIndex(this);
+			return _parent._children.indexOf(this);
 		}
 		
-		public function get targetPath():Vector.<uint>
+		public function get path():Vector.<uint>
 		{
-			return null;
+			if(!_parent)
+				return Vector.<uint>([0]);
+			
+			var ret:Vector.<uint> = _parent.path;
+			ret.push(index)
+			return ret;
 		}
 		
 		

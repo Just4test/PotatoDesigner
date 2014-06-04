@@ -64,6 +64,11 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
 		
+		public static function get exportResult():Object
+		{
+			return null;
+		}
+		
 		
 		protected static var _multiLock:MultiLock;
 		protected static var _targetProfile:Object;
