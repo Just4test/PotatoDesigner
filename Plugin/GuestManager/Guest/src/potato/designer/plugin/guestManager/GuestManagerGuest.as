@@ -122,20 +122,27 @@ package potato.designer.plugin.guestManager
 			
 			while(_udpSocket.receive(bytes) > 0)
 			{
-				if(NetConst.HOST_MULTICAST_PORT == _udpSocket.remotePort && NetConst.S2C_HELLO == bytes.readUTFBytes(bytes.length))
+				try
 				{
-					if(!_hostTable[_udpSocket.remoteAddress])
-						flag = true;
-					if(!_hostTable[_udpSocket.remoteAddress])
-						log("[GuestManager] 发现主机", _udpSocket.remoteAddress);
+					if(NetConst.HOST_MULTICAST_PORT == _udpSocket.remotePort && NetConst.S2C_HELLO == bytes.readUTFBytes(bytes.length))
+					{
+						if(!_hostTable[_udpSocket.remoteAddress])
+							flag = true;
+						if(!_hostTable[_udpSocket.remoteAddress])
+							log("[GuestManager] 发现主机", _udpSocket.remoteAddress);
+						
+						_hostTable[_udpSocket.remoteAddress] = time;
+					}
+				} 
+				catch(error:Error) 
+				{
 					
-					_hostTable[_udpSocket.remoteAddress] = time;
 				}
 			}
 			
 			for (var i:String in _hostTable) 
 			{
-				if(time - _hostTable[i] > NetConst.HOST_MULTICAST_INTERVAL * 3)
+				if(time - _hostTable[i] > NetConst.HOST_MULTICAST_INTERVAL + 1000)
 				{
 					flag = true;
 					log("[GuestManager] 主机停止响应", i);

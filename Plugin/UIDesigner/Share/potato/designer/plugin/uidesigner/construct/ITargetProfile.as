@@ -9,7 +9,9 @@ package potato.designer.plugin.uidesigner.construct
 	 */
 	public interface ITargetProfile
 	{
-		/**获取子对象的描述文件*/
+		/**获取子对象的描述文件。
+		 * <br>禁止返回null。如果对象没有子对象，请返回0长数组
+		 */
 		function get children():Vector.<ITargetProfile>;
 	}
 }

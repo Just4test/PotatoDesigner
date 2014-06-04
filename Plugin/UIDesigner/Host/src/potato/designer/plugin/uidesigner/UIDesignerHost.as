@@ -111,12 +111,6 @@ package potato.designer.plugin.uidesigner
 		
 		
 		/**
-		 *注册 
-		 * @param name
-		 * @param data
-		 * 
-		 */
-		/**
 		 *注册组件类型 
 		 * @param name 组件名
 		 * @param isContainer 组件是否是容器。这决定了组件能否展开并插入子组件
