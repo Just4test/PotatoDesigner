@@ -25,7 +25,7 @@ package potato.designer.plugin.uidesigner
 		
 		
 		/**
-		 *导出为运行时优化过的打包文件。
+		 * 导出为运行时优化过的打包文件。
 		 * <br>该文件应该包含所有ITargetProfile，以及任何需要的环境变量等。导出的目标对象会由IConstructor.setData处理。
 		 * <br>将导出结果写入UIDesignerHost.exportResult的属性。必须导出可以序列化的对象。
 		 * @param lock 一个众锁。如果导出工作不能同步完成，请锁定众锁。
@@ -34,6 +34,29 @@ package potato.designer.plugin.uidesigner
 		 * 
 		 */		
 		function export(lock:MultiLock):Boolean;
+		
+		/**
+		 * 初始化客户端
+		 * <br>当一个启动了UIDesignerGuest的客户端连接到主机时，使用此方法初始化它。初始化完毕后，客户端才能进行正常操作。
+		 */
+		function initGuest(guest:Guest, lock:MultiLock):Boolean;
+		
+		
+		/**
+		 * 刷新ITargetProfile树。
+		 */
+		function refresh():Boolean;
+		
+		
+		/**
+		 * 载入设计器信息以便继续之前的设计过程。
+		 */
+		function load():Boolean;
+		
+		/**
+		 * 保存设计器信息。
+		 */
+		function save():Boolean;
 			
 	}
 }
