@@ -216,6 +216,11 @@ public class ClassProfile {
 		}
 	}
 
+	public function get className():String
+	{
+		return _className;
+	}
+
 
 }
 }

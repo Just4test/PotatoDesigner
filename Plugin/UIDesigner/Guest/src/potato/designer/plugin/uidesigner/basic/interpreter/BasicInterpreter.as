@@ -8,11 +8,13 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	import core.display.Texture;
 	import core.display.TextureData;
 	
-	import potato.designer.plugin.uidesigner.basic.BasicConst;
-	import potato.designer.plugin.uidesigner.factory.TargetTree;
-	import potato.designer.plugin.uidesigner.factory.Factory;
+	import potato.designer.net.Message;
+	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	import potato.designer.plugin.uidesigner.ITargetProfile;
+	import potato.designer.plugin.uidesigner.basic.BasicConst;
+	import potato.designer.plugin.uidesigner.factory.Factory;
 	import potato.designer.plugin.uidesigner.factory.IInterpreter;
+	import potato.designer.plugin.uidesigner.factory.TargetTree;
 	
 	
 	
@@ -32,11 +34,21 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			
 			registerClassAlias("BasicClassProfile", BasicClassProfile);
 			
+			//注册类型
 			regType("int", getInt, true, "int");
 			regType("Number", getNumber, true, "Number");
 			regType("String", getString, true, "String");
 			regType("Texture", getTexture, false, "core.display::Texture");
 			regType("TextureData", getTextureData, false, "core.display::TextureData");
+			
+			
+			//注册消息
+			GuestManagerGuest.addEventListener(BasicConst.S2C_REQ_TYPE_TABLE,
+				function(msg:Message):void
+				{
+					msg.answer(BasicConst.S2C_REQ_TYPE_TABLE, type2ClassNameTable);
+				}
+			);
 		}
 		
 		
@@ -285,9 +297,9 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			try
 			{
 				//读取类描述文件
-				if(data.hasOwnProperty(BasicConst.CONSTRUCTOR_CLASS_TYPE_PROFILE))
+				if(data.hasOwnProperty(BasicConst.INTERPRETER_CLASS_TYPE_PROFILE))
 				{
-					var types:Vector.<BasicClassProfile> = Vector.<BasicClassProfile>(data[BasicConst.CONSTRUCTOR_CLASS_TYPE_PROFILE]);
+					var types:Vector.<BasicClassProfile> = Vector.<BasicClassProfile>(data[BasicConst.INTERPRETER_CLASS_TYPE_PROFILE]);
 					for each(var typeProfile:BasicClassProfile in types)
 					{
 						setClassProfile(typeProfile);
@@ -295,9 +307,9 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				}
 				
 				//读取并设置组件描述文件
-				if(data.hasOwnProperty(BasicConst.CONSTRUCTOR_COMPONENT_PROFILE))
+				if(data.hasOwnProperty(BasicConst.INTERPRETER_COMPONENT_PROFILE))
 				{
-					var componentTable:Object = data[BasicConst.CONSTRUCTOR_COMPONENT_PROFILE]
+					var componentTable:Object = data[BasicConst.INTERPRETER_COMPONENT_PROFILE]
 					for each(var name:String in componentTable)
 					{
 						Factory.setComponentProfile(componentTable[name], name);

@@ -8,11 +8,11 @@ package potato.designer.utils
 	public class SubLock
 	{
 		private var _parent:MultiLock;
-		private var _info:*;
+		private var _info:String;
 		
 		
 		/**请勿手动调用初始化方法*/
-		public function SubLock(parent:MultiLock, info:*)
+		public function SubLock(parent:MultiLock, info:String)
 		{
 			_parent = parent;
 			_info = info;
@@ -31,7 +31,7 @@ package potato.designer.utils
 		}
 		
 		/**锁的信息，以便其他代码可以理解是何种对象加了锁*/
-		public function get info():*
+		public function get info():String
 		{
 			return _info;
 		}

@@ -5,9 +5,12 @@ package potato.designer.plugin.uidesigner.basic
 		
 		
 		/**解释器数据中类描述文件的key*/
-		public static const CONSTRUCTOR_CLASS_TYPE_PROFILE:String = "CONSTRUCTOR_CLASS_TYPE_PROFILE";
+		public static const INTERPRETER_CLASS_TYPE_PROFILE:String = "INTERPRETER_CLASS_TYPE_PROFILE";
 		/**解释器数据中组件描述文件的key*/
-		public static const CONSTRUCTOR_COMPONENT_PROFILE:String = "CONSTRUCTOR_COMPONENT_PROFILE";
+		public static const INTERPRETER_COMPONENT_PROFILE:String = "INTERPRETER_COMPONENT_PROFILE";
+		
+		/**编译器向解释器请求已经注册的type表*/
+		public static const S2C_REQ_TYPE_TABLE:String = "S2C_REQ_TYPE_TABLE";
 		
 		
 		

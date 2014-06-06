@@ -47,7 +47,7 @@ package potato.designer.utils
 		 * @return 子锁
 		 * 
 		 */
-		public function getLock(info:* = null):SubLock
+		public function getLock(info:String = null):SubLock
 		{
 			var lock:SubLock = new SubLock(this, info);
 			if(!_isDead && !_locks.length)

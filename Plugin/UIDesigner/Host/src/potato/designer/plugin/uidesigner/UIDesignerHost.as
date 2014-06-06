@@ -127,6 +127,17 @@ package potato.designer.plugin.uidesigner
 			
 		}
 		
+		/**
+		 *移除组件类型 
+		 * @param name 组件名
+		 * @return 如果成功移除了组件，返回true。如果本不存在该名称的组件，返回false
+		 * 
+		 */
+		public static function removeComponentType(name:String):Boolean
+		{
+			return false;
+		}
+		
 		
 		
 		/**
