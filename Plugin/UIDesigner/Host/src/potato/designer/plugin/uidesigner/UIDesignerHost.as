@@ -28,7 +28,7 @@ package potato.designer.plugin.uidesigner
 	import spark.skins.spark.WindowedApplicationSkin;
 	
 	/**
-	 *管理设计器的Host端UI、提供两个Window。
+	 *管理编译器的Host端
 	 * <br>提供两个窗口作为Host端UI。这两个窗口均为纵向布局。习惯上，窗口0显示组件类型视图和大纲视图，窗口1显示属性视图。
 	 * <br>提供打包、传输组件描述文件的方式
 	 * <br>提供控制组件替身的方式
@@ -42,7 +42,7 @@ package potato.designer.plugin.uidesigner
 		/**
 		 * 事件：生成组件配置文件
 		 * <br>这是一个同步事件。由于每次添加/删除/修改组件（比如拖动组件位置）都会重新生成组件配置文件并重新构建组件树，因此生成组件配置文件的过程需要非常快。
-		 * <br>这个事件将附带一个Object，即目标配置文件。各个设计器需要监听这个事件，并为Object添加属性。添加的属性必须可以序列化。
+		 * <br>这个事件将附带一个Object，即目标配置文件。各个编译器需要监听这个事件，并为Object添加属性。添加的属性必须可以序列化。
 		 */
 		public static const EVENT_MAKE_COMPONENT_PROFILE:String = "UID_EVENT_MAKE_COMPONENT_PROFILE";
 		
@@ -50,8 +50,8 @@ package potato.designer.plugin.uidesigner
 		/**
 		 *事件：导出发布版本
 		 * <br>生成一个为发布优化的组件配置文件版本。此版本可能为运行时优化了效率，或者针对特定环境进行导出。
-		 * 如果某个设计器不涉及为发布优化的功能，以 EVENT_MAKE_COMPONENT_PROFILE 方式响应此事件即可。
-		 * <br>这是一个异步事件。允许设计器异步执行（比如与Guest端通讯）甚至导出失败。
+		 * 如果某个编译器不涉及为发布优化的功能，以 EVENT_MAKE_COMPONENT_PROFILE 方式响应此事件即可。
+		 * <br>这是一个异步事件。允许编译器异步执行（比如与Guest端通讯）甚至导出失败。
 		 * <br>data:[target:Object, multiLock:MultiLock]
 		 */
 		public static const EVENT_EXPORT_RELEASE_BUILD:String = "UID_EVENT_EXPORT_RELEASE_BUILD";
@@ -74,7 +74,7 @@ package potato.designer.plugin.uidesigner
 		protected static var _targetProfile:Object;
 		
 		/**
-		 *检查设计器是否锁定。当导出发布版本未完成时，设计器锁定。此时不应对组件配置有任何修改。
+		 *检查编译器是否锁定。当导出发布版本未完成时，编译器锁定。此时不应对组件配置有任何修改。
 		 */
 		public static function get isLocking():Boolean
 		{
@@ -151,7 +151,7 @@ package potato.designer.plugin.uidesigner
 		
 		/**
 		 *导出发行版
-		 * <br>此方法派发 EVENT_EXPORT_RELEASE_BUILD 事件以调用设计器生成发行版组件。
+		 * <br>此方法派发 EVENT_EXPORT_RELEASE_BUILD 事件以调用编译器生成发行版组件。
 		 * 
 		 */
 		public static function exportReleaseBuild():void
@@ -210,7 +210,7 @@ package potato.designer.plugin.uidesigner
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
-			//初始化基础设计器
+			//初始化基础编译器
 			BasicDesigner.init(info);
 			
 			//注册视图并显示窗口

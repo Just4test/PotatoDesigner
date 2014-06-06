@@ -1,20 +1,20 @@
 package potato.designer.plugin.uidesigner
 {
-	import potato.designer.plugin.uidesigner.construct.ITargetProfile;
+	import potato.designer.plugin.uidesigner.ITargetProfile;
 
 	/**
-	 * 设计器配置文件
-	 * <br>UIDesignerHost通过设计器配置文件操作ITargetProfile树。
-	 * <br>允许在ITargetProfile树中插入不受设计器配置文件管理的ITargetProfile。比如，为某个显示对象插入自动生成的布局对象。
+	 * 编译器配置文件
+	 * <br>UIDesignerHost通过编译器配置文件操作ITargetProfile树。
+	 * <br>允许在ITargetProfile树中插入不受编译器配置文件管理的ITargetProfile。比如，为某个显示对象插入自动生成的布局对象。
 	 * <br>但该ITargetProfile应该是由其父ITargetProfile管理的，而不是由其兄弟ITargetProfile管理。
 	 * @author Administrator
 	 * 
 	 */
-	public class DesignerProfile
+	public class CompilerProfile
 	{
 		protected var _type:String;
-		protected var _parent:DesignerProfile;
-		protected const _children:Vector.<DesignerProfile> = new Vector.<DesignerProfile>;
+		protected var _parent:CompilerProfile;
+		protected const _children:Vector.<CompilerProfile> = new Vector.<CompilerProfile>;
 		
 		/**
 		 *目标名。这会显示在大纲视图中。
@@ -26,7 +26,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		public var targetProfile:ITargetProfile;
 		
-		public function DesignerProfile(type:String)
+		public function CompilerProfile(type:String)
 		{
 			_type = type;
 		}
@@ -41,22 +41,22 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		
-		public function get parent():DesignerProfile
+		public function get parent():CompilerProfile
 		{
 			return _parent;
 		}
 		
-		public function get children():Vector.<DesignerProfile>
+		public function get children():Vector.<CompilerProfile>
 		{
 			return _children.concat();
 		}
 		
-		public function addChild(child:DesignerProfile):void
+		public function addChild(child:CompilerProfile):void
 		{
 			addChildAt(child, children.length)
 		}
 		
-		public function addChildAt(child:DesignerProfile, index:uint):void
+		public function addChildAt(child:CompilerProfile, index:uint):void
 		{
 			if(index > _children.length)
 			{
@@ -73,7 +73,7 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		
-		public function removeChild(child:DesignerProfile):void
+		public function removeChild(child:CompilerProfile):void
 		{
 			removeChildAt(_children.indexOf(child));
 		}
@@ -90,12 +90,12 @@ package potato.designer.plugin.uidesigner
 			targetProfile.children.splice(index, 1);
 		}
 		
-		public function getChildAt(index:uint):DesignerProfile
+		public function getChildAt(index:uint):CompilerProfile
 		{
 			return _children[index];
 		}
 		
-		public function getChildIndex(child:DesignerProfile):int
+		public function getChildIndex(child:CompilerProfile):int
 		{
 			return _children.indexOf(child);
 		}
@@ -119,6 +119,25 @@ package potato.designer.plugin.uidesigner
 			var ret:Vector.<uint> = _parent.path;
 			ret.push(index)
 			return ret;
+		}
+		
+		/**
+		 * 应用TargetProfile树
+		 */
+		public function applyTargetProfile(value:ITargetProfile):void
+		{
+			if(_children.length > value.children.length)
+			{
+				throw new Error();
+			}
+			
+			
+			targetProfile = value;
+			
+			for (var i:int = 0; i < _children.length; i++) 
+			{
+				_children[i].applyTargetProfile(value.children[i]);
+			}
 		}
 		
 		

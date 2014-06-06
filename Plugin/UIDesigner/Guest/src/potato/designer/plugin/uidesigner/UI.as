@@ -9,7 +9,7 @@ package potato.designer.plugin.uidesigner
 	import core.display.Stage;
 	import core.display.SuperTexture;
 	
-	import potato.designer.plugin.uidesigner.construct.TargetTree;
+	import potato.designer.plugin.uidesigner.factory.TargetTree;
 	
 	public class UI
 	{

@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner.basic.constructor
+package potato.designer.plugin.uidesigner.basic.interpreter
 {
 	public class BasicTargetMemberProfile
 	{

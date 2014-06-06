@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner.basic.constructor
+package potato.designer.plugin.uidesigner.basic.interpreter
 {
 	/**
 	 *基础类描述文件

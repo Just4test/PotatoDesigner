@@ -5,7 +5,7 @@ package potato.designer.plugin.uidesigner.basic.designer.classdescribe{
 	import flash.filesystem.File;
 	
 	import potato.designer.plugin.uidesigner.DesignerConst;
-	import potato.designer.plugin.uidesigner.basic.constructor.BasicClassProfile;
+	import potato.designer.plugin.uidesigner.basic.interpreter.BasicClassProfile;
 
 /**
  *类配置文件

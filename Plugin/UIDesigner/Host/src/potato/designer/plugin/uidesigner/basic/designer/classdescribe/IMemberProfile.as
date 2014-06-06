@@ -7,7 +7,7 @@ package potato.designer.plugin.uidesigner.basic.designer.classdescribe
 	{
         function initByXML(xml:XML):void;
 		
-		/**指定该属性在设计器中是否可见*/
+		/**指定该属性在编译器中是否可见*/
 		function get enable():Boolean;
 		function set enable(value:Boolean):void;
 		

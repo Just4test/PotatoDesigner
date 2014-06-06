@@ -1,6 +1,7 @@
-package potato.designer.plugin.uidesigner.construct
+package potato.designer.plugin.uidesigner.factory
 {
-	import potato.designer.plugin.uidesigner.basic.constructor.BasicConstructor;
+	import potato.designer.plugin.uidesigner.basic.interpreter.BasicInterpreter;
+	import potato.designer.plugin.uidesigner.ITargetProfile;
 
 	/**
 	 *组件工厂
@@ -19,19 +20,19 @@ package potato.designer.plugin.uidesigner.construct
 		protected static var componentTable:Object = {};
 		
 		/**
-		 *构建器链
-		 * <br>构建过程会从构建器链的0号构建器开始依次调用。
-		 * <br>每一个构建器可以选择跳过其后的所有构建器。
+		 *编译器链
+		 * <br>构建过程会从编译器链的0号编译器开始依次调用。
+		 * <br>每一个编译器可以选择跳过其后的所有编译器。
 		 */
-		public static const constructorList:Vector.<IConstructor> = new Vector.<IConstructor>;
+		public static const constructorList:Vector.<IInterpreter> = new Vector.<IInterpreter>;
 		
 		{
-			constructorList.push(BasicConstructor.instance);
+			constructorList.push(BasicInterpreter.instance);
 		}
 		/**
 		 *设置数据 
-		 * <br>不同的构建器需要不同格式的数据。数据被组织为一个Object对象，内部包含了各种对象：构建配置文件或其他。
-		 * <br>构建器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
+		 * <br>不同的编译器需要不同格式的数据。数据被组织为一个Object对象，内部包含了各种对象：构建配置文件或其他。
+		 * <br>编译器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
 		 * <br>约定：如果传入null，则清理所有已设置数据。
 		 * @param data
 		 */ 
@@ -46,7 +47,7 @@ package potato.designer.plugin.uidesigner.construct
 		
 		/**
 		 *设置组件描述文件
-		 * <br>使用组件描述文件来让构建器获取构建组件的参数。
+		 * <br>使用组件描述文件来让编译器获取构建组件的参数。
 		 */
 		public static function setComponentProfile(profile:ITargetProfile, name:String):void
 		{
@@ -54,7 +55,7 @@ package potato.designer.plugin.uidesigner.construct
 		}
 		/**
 		 *获取组件描述文件
-		 * <br>使用组件描述文件来让构建器获取构建组件的参数。
+		 * <br>使用组件描述文件来让编译器获取构建组件的参数。
 		 */
 		public static function getComponentProfile(name:String):ITargetProfile
 		{

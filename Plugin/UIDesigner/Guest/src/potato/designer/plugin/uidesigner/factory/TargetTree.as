@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner.construct
+package potato.designer.plugin.uidesigner.factory
 {
 	public class TargetTree
 	{

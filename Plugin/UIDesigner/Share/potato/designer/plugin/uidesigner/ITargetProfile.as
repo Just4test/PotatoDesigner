@@ -1,9 +1,9 @@
-package potato.designer.plugin.uidesigner.construct
+package potato.designer.plugin.uidesigner
 {
 	/**
 	 *组件描述文件接口
 	 * <br>组建描述文件接口是必要的，因为它定义了访问子代描述文件的方法。
-	 * <br>组建描述文件和构建器配套使用。如果您重新定义了本接口的一个实现，请确保您提供了能够理解它的构建器。
+	 * <br>组建描述文件和编译器配套使用。如果您重新定义了本接口的一个实现，请确保您提供了能够理解它的编译器。
 	 * @author Administrator
 	 * 
 	 */

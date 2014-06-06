@@ -1,6 +1,6 @@
-package potato.designer.plugin.uidesigner.basic.constructor
+package potato.designer.plugin.uidesigner.basic.interpreter
 {
-	import potato.designer.plugin.uidesigner.construct.ITargetProfile;
+	import potato.designer.plugin.uidesigner.ITargetProfile;
 
 	/**
 	 * 构建用组件描述文件
