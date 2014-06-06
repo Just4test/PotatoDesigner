@@ -17,8 +17,8 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	
 	
 	/**
-	 *基础编译器
-	 * <br>此编译器可以为变量和可写的存取器赋值，以及对象的调用成员方法。只要这些变量/存取器的值，或者成员方法的参数可以由字符串转换得到。
+	 *基础解释器
+	 * <br>此解释器可以为变量和可写的存取器赋值，以及对象的调用成员方法。只要这些变量/存取器的值，或者成员方法的参数可以由字符串转换得到。
 	 * @author Just4test
 	 * 
 	 */
@@ -49,7 +49,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		/**
 		 * 注册类型
 		 * <br>类型是一种翻译机制：它将字符串翻译为目标值。
-		 * <br>可以为类型指定一个目标类，这意味着声明了翻译结果是该目标类的实例。编译器并不检查翻译结果是否真的是目标类。
+		 * <br>可以为类型指定一个目标类，这意味着声明了翻译结果是该目标类的实例。解释器并不检查翻译结果是否真的是目标类。
 		 * <br>一个目标类可以对应多个类型。在Host端指定属性/参数类型时，设计器将提示用户与需要的类对应的所有类型。
 		 * 然而，允许指定与目标类不匹配的类型。比如，需要Number类时，可以手动输入int类型。设计器不会检查类型是否匹配。
 		 * @param typeName 类型名
@@ -89,8 +89,8 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		
 		/**
 		 *设置类描述文件
-		 * <br>使用类描述文件来让编译器确定如何配合组件描述文件来构建组件。
-		 * <br>部分编译器可能不需要类描述文件。
+		 * <br>使用类描述文件来让解释器确定如何配合组件描述文件来构建组件。
+		 * <br>部分解释器可能不需要类描述文件。
 		 */
 		public static function setClassProfile(profile:BasicClassProfile):void
 		{
@@ -107,7 +107,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				{
 					var typeProfile:BasicTypeProfile = getTypeProfile(j);
 					if(!typeProfile)
-						throw new Error("[基础编译器] 指定的type未注册：" + j);
+						throw new Error("[基础解释器] 指定的type未注册：" + j);
 				}
 				
 				
@@ -117,7 +117,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 					{
 						if(paras.length > translaters.length)
 						{
-							throw new Error("[基础编译器] 给予的参数比需要的参数多：" + profile.className + "::" + i);
+							throw new Error("[基础解释器] 给予的参数比需要的参数多：" + profile.className + "::" + i);
 						}
 					}
 					
@@ -136,7 +136,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 							} 
 							catch(error:Error) 
 							{
-								throw new Error("[基础编译器] 将\"" + paras[i] + "\"转换为[" + i + "]类型时发生错误" + error);
+								throw new Error("[基础解释器] 将\"" + paras[i] + "\"转换为[" + i + "]类型时发生错误" + error);
 							}
 						}
 						else
@@ -154,8 +154,8 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		
 		/**
 		 *获取类描述文件
-		 * <br>使用类描述文件来让编译器确定如何配合组件描述文件来构建组件。
-		 * <br>部分编译器可能不需要类描述文件。
+		 * <br>使用类描述文件来让解释器确定如何配合组件描述文件来构建组件。
+		 * <br>部分解释器可能不需要类描述文件。
 		 */
 		public static function getClassProfile(className:String):BasicClassProfile
 		{
@@ -168,7 +168,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		
 		public function construct(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
-			//如果配置文件不是所需要的格式则跳过本编译器
+			//如果配置文件不是所需要的格式则跳过本解释器
 			var basicProfile:BasicTargetProfile = profile as BasicTargetProfile;
 			if(!basicProfile)
 			{

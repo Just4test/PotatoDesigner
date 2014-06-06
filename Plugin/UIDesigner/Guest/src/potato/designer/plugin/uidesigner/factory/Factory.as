@@ -20,9 +20,9 @@ package potato.designer.plugin.uidesigner.factory
 		protected static var componentTable:Object = {};
 		
 		/**
-		 *编译器链
-		 * <br>构建过程会从编译器链的0号编译器开始依次调用。
-		 * <br>每一个编译器可以选择跳过其后的所有编译器。
+		 *解释器链
+		 * <br>构建过程会从解释器链的0号解释器开始依次调用。
+		 * <br>每一个解释器可以选择跳过其后的所有解释器。
 		 */
 		public static const constructorList:Vector.<IInterpreter> = new Vector.<IInterpreter>;
 		
@@ -31,8 +31,8 @@ package potato.designer.plugin.uidesigner.factory
 		}
 		/**
 		 *设置数据 
-		 * <br>不同的编译器需要不同格式的数据。数据被组织为一个Object对象，内部包含了各种对象：构建配置文件或其他。
-		 * <br>编译器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
+		 * <br>不同的解释器需要不同格式的数据。数据被组织为一个Object对象，内部包含了各种对象：构建配置文件或其他。
+		 * <br>解释器尝试从数据中提取自己能够理解的对象并将其保存下来，以便稍后使用。
 		 * <br>约定：如果传入null，则清理所有已设置数据。
 		 * @param data
 		 */ 
@@ -47,7 +47,7 @@ package potato.designer.plugin.uidesigner.factory
 		
 		/**
 		 *设置组件描述文件
-		 * <br>使用组件描述文件来让编译器获取构建组件的参数。
+		 * <br>使用组件描述文件来让解释器获取构建组件的参数。
 		 */
 		public static function setComponentProfile(profile:ITargetProfile, name:String):void
 		{
@@ -55,7 +55,7 @@ package potato.designer.plugin.uidesigner.factory
 		}
 		/**
 		 *获取组件描述文件
-		 * <br>使用组件描述文件来让编译器获取构建组件的参数。
+		 * <br>使用组件描述文件来让解释器获取构建组件的参数。
 		 */
 		public static function getComponentProfile(name:String):ITargetProfile
 		{

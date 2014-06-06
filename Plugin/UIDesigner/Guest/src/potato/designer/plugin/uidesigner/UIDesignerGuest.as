@@ -23,7 +23,7 @@ package potato.designer.plugin.uidesigner
 			//初始化UI
 			
 			
-			//注册基础编译器
+			//注册基础解释器
 			BasicInterpreter.init();
 			
 			
