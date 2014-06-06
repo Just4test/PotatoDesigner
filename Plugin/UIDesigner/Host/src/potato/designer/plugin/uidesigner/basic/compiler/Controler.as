@@ -1,6 +1,6 @@
-package potato.designer.plugin.uidesigner.basic.designer
+package potato.designer.plugin.uidesigner.basic.compiler
 {
-	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.ClassProfile;
+	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 
 	public class Controler
 	{

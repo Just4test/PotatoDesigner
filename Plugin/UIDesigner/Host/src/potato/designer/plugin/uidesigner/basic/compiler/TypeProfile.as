@@ -1,4 +1,4 @@
-package potato.designer.plugin.uidesigner.basic.designer
+package potato.designer.plugin.uidesigner.basic.compiler
 {
 	public class TypeProfile
 	{

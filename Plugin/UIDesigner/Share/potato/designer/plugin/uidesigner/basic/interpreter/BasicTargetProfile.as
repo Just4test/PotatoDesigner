@@ -46,7 +46,13 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		}
 
 		
-		public function BasicTargetProfile(obj:Object)
+		public function BasicTargetProfile(obj:Object = null)
+		{
+			if(obj)
+				applyJsonObj(obj);
+		}
+		
+		public function applyJsonObj(obj:Object):void
 		{
 			_className = obj[CLASS_NAME];
 			

@@ -15,9 +15,9 @@
 			import potato.designer.net.Message;
 			import potato.designer.plugin.guestManager.Guest;
 			import potato.designer.plugin.guestManager.GuestManagerHost;
-			import potato.designer.plugin.uidesigner.basic.designer.classdescribe.ClassProfile;
-			import potato.designer.plugin.uidesigner.basic.designer.classdescribe.IMemberProfile;
-			import potato.designer.plugin.uidesigner.basic.designer.classdescribe.Suggest;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 			
 			import spark.events.TextOperationEvent;
 			
@@ -154,7 +154,7 @@
 		<s:Label id="info_label" width="100%" text="这里显示一些信息" textAlign="right"/>
 		<s:VGroup id="edit_group" width="100%" height="100%">
 			<s:List id="member_list" width="100%" height="100%"
-					itemRenderer="potato.designer.plugin.uidesigner.basic.designer.MemberTypeEditor"></s:List>
+					itemRenderer="potato.designer.plugin.uidesigner.basic.compiler.MemberTypeEditor"></s:List>
 			<s:HGroup width="100%">
 				<s:Button id="showAll_btn" label="显示全部成员"/>
 				<s:Group width="100%">

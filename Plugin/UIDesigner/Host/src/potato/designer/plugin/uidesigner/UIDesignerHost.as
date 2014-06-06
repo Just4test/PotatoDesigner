@@ -16,11 +16,11 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
-	import potato.designer.plugin.uidesigner.basic.designer.BasicDesigner;
-	import potato.designer.plugin.uidesigner.basic.designer.ClassTypeEditor;
-	import potato.designer.plugin.uidesigner.basic.designer.TypeTransform;
-	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.ClassProfile;
-	import potato.designer.plugin.uidesigner.basic.designer.classdescribe.Suggest;
+	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
+	import potato.designer.plugin.uidesigner.basic.compiler.ClassTypeEditor;
+	import potato.designer.plugin.uidesigner.basic.compiler.TypeTransform;
+	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
+	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 	import potato.designer.utils.MultiLock;
 	
 	import spark.components.Window;
@@ -211,7 +211,7 @@ package potato.designer.plugin.uidesigner
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
 			//初始化基础编译器
-			BasicDesigner.init(info);
+			BasicCompiler.init(info);
 			
 			//注册视图并显示窗口
 			updateWindow();

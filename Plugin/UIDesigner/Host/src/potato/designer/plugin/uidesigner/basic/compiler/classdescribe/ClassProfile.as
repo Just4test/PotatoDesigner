@@ -1,7 +1,7 @@
 /**
  * Created by just4test on 13-12-16.
  */
-package potato.designer.plugin.uidesigner.basic.designer.classdescribe{
+package potato.designer.plugin.uidesigner.basic.compiler.classdescribe{
 	import flash.filesystem.File;
 	
 	import potato.designer.plugin.uidesigner.DesignerConst;
