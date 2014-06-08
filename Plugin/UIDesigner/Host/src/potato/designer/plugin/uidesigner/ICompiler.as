@@ -22,7 +22,16 @@ package potato.designer.plugin.uidesigner
 		 * @return 返回true则跳过后面的编译器。通常返回false。
 		 * 
 		 */
-		function addTarget(targetType:String, profile:CompilerProfile):Boolean;
+		function addTarget(profile:CompilerProfile):Boolean;
+		
+		
+		/**
+		 * 更新targetProfile
+		 * <br>调用时，所有子代DesignerProfile已经完成refresh。
+		 * @param profile
+		 * @return 返回true则跳过后面的编译器。通常返回false。
+		 */
+		function update(profile:CompilerProfile):Boolean;
 		
 		
 		/**
@@ -45,15 +54,6 @@ package potato.designer.plugin.uidesigner
 		 * 
 		 */
 		function initGuest(guest:Guest, lock:MultiLock):Boolean;
-		
-		
-		/**
-		 * 更新DesignerProfile的targetProfile属性
-		 * <br>调用时，所有子代DesignerProfile已经完成refresh。
-		 * @param profile
-		 * @return 返回true则跳过后面的编译器。通常返回false。
-		 */
-		function refresh(profile:CompilerProfile):Boolean;
 		
 		
 //		/**

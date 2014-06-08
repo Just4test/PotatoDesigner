@@ -16,7 +16,9 @@ package potato.designer.plugin.uidesigner
 		 * <br>这是一个异步方法。
 		 */		
 		public static const S2C_INIT:String = "UID_S2C_INIT";
-		/**组件更新*/		
+		/**组件更新
+		 * msg = rootTargetProfile
+		 */		
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";
 		
 		

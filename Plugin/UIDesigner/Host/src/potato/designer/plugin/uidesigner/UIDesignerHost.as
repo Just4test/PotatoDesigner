@@ -18,7 +18,6 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
 	import potato.designer.plugin.uidesigner.basic.compiler.ClassTypeEditor;
-	import potato.designer.plugin.uidesigner.basic.compiler.TypeTransform;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 	import potato.designer.utils.MultiLock;
@@ -64,14 +63,24 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
 		
+		
+		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
+		
+		
 		public static function get exportResult():Object
 		{
 			return null;
 		}
 		
 		
+		protected static var _rootCompilerProfile:CompilerProfile;
+		
+		
 		protected static var _multiLock:MultiLock;
 		protected static var _targetProfile:Object;
+		
+		
+		protected static var _targetTypeTable:Object;
 		
 		/**
 		 *检查编译器是否锁定。当导出发布版本未完成时，编译器锁定。此时不应对组件配置有任何修改。
@@ -122,9 +131,9 @@ package potato.designer.plugin.uidesigner
 		 * @param icon 为组件指定图标
 		 * 
 		 */
-		public static function regComponentType(name:String, isContainer:Boolean, icon:Class = null):void
+		public static function regTargetType(name:String, isContainer:Boolean, icon:* = null):void
 		{
-			
+			_targetTypeTable[name] = new TargetType(name, isContainer, icon);
 		}
 		
 		/**
@@ -133,8 +142,13 @@ package potato.designer.plugin.uidesigner
 		 * @return 如果成功移除了组件，返回true。如果本不存在该名称的组件，返回false
 		 * 
 		 */
-		public static function removeComponentType(name:String):Boolean
+		public static function removeTargetType(name:String):Boolean
 		{
+			if(_targetTypeTable[name])
+			{
+				delete _targetTypeTable[name];
+				return true;
+			}
 			return false;
 		}
 		
@@ -146,16 +160,30 @@ package potato.designer.plugin.uidesigner
 		 * <br>这个方法将先派发EVENT_MAKE_COMPONENT_PROFILE事件，以创建组件配置文件；
 		 * <br>然后将组件配置文件传输至客户端，指示其刷新设计舞台。
 		 */
-		public static function update():void
+		public static function updateGuest():void
 		{
-			//TODO
-			var profile:Object = {};
-			EventCenter.dispatchEvent(new DesignerEvent(EVENT_MAKE_COMPONENT_PROFILE, profile));
-			
+			if(_rootCompilerProfile)
+				update(_rootCompilerProfile);
 			
 			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin("UIDesigner"))
 			{
-				i.send(DesignerConst.S2C_UPDATE, profile);
+				i.send(DesignerConst.S2C_UPDATE, _rootCompilerProfile && _rootCompilerProfile.targetProfile);
+			}
+		}
+		
+		
+		public static function update(profile:CompilerProfile):void
+		{
+			for (var i:int = 0; i < profile.children.length; i++) 
+			{
+				update(profile.children[i]);
+			}
+			
+			
+			for (var j:int = 0; j < compilerList.length; j++) 
+			{
+				if(compilerList[j].update(profile))
+					break;
 			}
 			
 		}
@@ -237,9 +265,22 @@ package potato.designer.plugin.uidesigner
 			var newWindow:ClassTypeEditor = new ClassTypeEditor;
 			newWindow.open(true);
 			
-			update();
 		}
 		
 		
+	}
+}
+
+class TargetType
+{
+	public var name:String;
+	public var isContainer:Boolean;
+	public var icon:*;
+	
+	function TargetType(name:String, isContainer:Boolean, icon:* = null)
+	{
+		this.name = name;
+		this.isContainer = isContainer;
+		this.icon = icon;
 	}
 }

@@ -24,10 +24,10 @@ package potato.designer.plugin.uidesigner.factory
 		 * <br>构建过程会从解释器链的0号解释器开始依次调用。
 		 * <br>每一个解释器可以选择跳过其后的所有解释器。
 		 */
-		public static const constructorList:Vector.<IInterpreter> = new Vector.<IInterpreter>;
+		public static const interpreterList:Vector.<IInterpreter> = new Vector.<IInterpreter>;
 		
 		{
-			constructorList.push(BasicInterpreter.instance);
+			interpreterList.push(BasicInterpreter.instance);
 		}
 		/**
 		 *设置数据 
@@ -38,9 +38,9 @@ package potato.designer.plugin.uidesigner.factory
 		 */ 
 		public static function setData(data:Object):void
 		{
-			for (var i:int = 0; i < constructorList.length; i++) 
+			for (var i:int = 0; i < interpreterList.length; i++) 
 			{
-				if(constructorList[i].setData(data))
+				if(interpreterList[i].setData(data))
 					break;
 			}
 		}
@@ -91,9 +91,9 @@ package potato.designer.plugin.uidesigner.factory
 			var tree:TargetTree = new TargetTree;
 			
 			//构建组件自身
-			for (var i:int = 0; i < constructorList.length; i++) 
+			for (var i:int = 0; i < interpreterList.length; i++) 
 			{
-				if(constructorList[i].construct(profile, tree))
+				if(interpreterList[i].construct(profile, tree))
 					break;
 			}
 			
@@ -108,9 +108,9 @@ package potato.designer.plugin.uidesigner.factory
 			}
 			
 			//安装子组件
-			for (i = 0; i < constructorList.length; i++) 
+			for (i = 0; i < interpreterList.length; i++) 
 			{
-				if(constructorList[i].addChildren(profile, tree))
+				if(interpreterList[i].addChildren(profile, tree))
 					break;
 			}
 			

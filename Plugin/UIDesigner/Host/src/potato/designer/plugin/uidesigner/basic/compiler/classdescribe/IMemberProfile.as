@@ -22,5 +22,10 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		 * 
 		 */
 		function get availability():Boolean;
+		
+		/**
+		 *是否具有默认值
+		 */
+		function get hasDefaultValue():Boolean;
     }
 }

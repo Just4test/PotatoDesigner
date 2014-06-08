@@ -25,13 +25,14 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	 * 
 	 */
 	public class BasicInterpreter implements IInterpreter
-	{
-		
+	{	
 		public static function init():void
 		{
 			
-			Factory.constructorList.push(instance);
+			Factory.interpreterList.push(instance);
 			
+			registerClassAlias("BasicTargetProfile", BasicTargetProfile);
+			registerClassAlias("BasicTargetMemberProfile", BasicTargetMemberProfile);
 			registerClassAlias("BasicClassProfile", BasicClassProfile);
 			
 			//注册类型
@@ -68,7 +69,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 * @param translater 翻译器。这是一个方法，它接受一个String作为参数，并返回目标类型
 		 * @param isSerializable 指示翻译器的返回是否可以序列化。如果该参数为true，则发布版中将仅包含翻译过的结果，而不是初始的String。这样做可以加速发行版本的构建速度。
 		 * @param className 指示该类型所对应的目标类。
-		 * 
 		 */
 		public static function regType(typeName:String, translater:Function, isSerializable:Boolean = false, className:String = null):void
 		{

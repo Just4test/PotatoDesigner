@@ -26,9 +26,12 @@ package potato.designer.plugin.uidesigner
 			//注册基础解释器
 			BasicInterpreter.init();
 			
+			UI.init();
 			
 			info.started();
 		}
+		
+		protected var _rootTargetProfile:ITargetProfile;
 		
 		
 		/////////////////////////////////////////////////////////////////

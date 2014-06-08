@@ -11,7 +11,6 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 	{
 		protected var _xml:XML;
 		protected var _name:String;
-		protected var _availability:*;
 		protected var _enable:Boolean;
 		/**可用的参数个数。此值只有在方法可用时才有效*/
 		protected var _availableLength:int;
@@ -31,14 +30,14 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 //		}
 		
 		
-		/**参数的个数*/
+		/**参数的总个数*/
 		public function get numParameter():uint
 		{
 			return _paras.length;
 		}
 		
 		
-		/**必须的参数个数，*/
+		/**必须的参数个数*/
 		public function get numParameterMin():uint
 		{
 			return _numParameterMin;
@@ -66,7 +65,6 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 			}
 			
 			//检查并填充参数。
-			_availability = true;
 			_paras = new Vector.<ParameterProfile>;
 			_availableLength = 0;
 			_numParameterMin = 0;
@@ -99,23 +97,16 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 			return 0;
 		}
 		
-		protected function refreshAvailability():void
-		{
-			_availability = true;
-			for(var i:int = 0; i < _numParameterMin; i++)
-			{
-				if(!_paras[i])
-				{
-					_availability = false;
-					return;
-				}
-			}
-		}
-		
 		public function get availability():Boolean
 		{
-			refreshAvailability();
-			return _availability;
+			for(var i:int = 0; i < _numParameterMin; i++)
+			{
+				if(null == _paras[i].type)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		/**
@@ -139,6 +130,42 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 //			var trmpArr:Array = getShortClassName(_xml.@returnType.toString()).split("::");
 			
 			return _name + "(" + (tempStr || "") + "):" + DesignerConst.getShortClassName(_xml.@returnType);
+		}
+		
+		
+		
+		public function get hasDefaultValue():Boolean
+		{
+			for(var i:int = 0; i < _numParameterMin; i++)
+			{
+				if(!_paras[i].hasDefaultValue)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		public function get defaultValue():Vector.<String>
+		{
+			var ret:Vector.<String> = new Vector.<String>;
+			for(var i:int = 0; i < _paras.length; i++)
+			{
+				if(!_paras[i].hasDefaultValue)
+				{
+					return ret;
+				}
+				ret.push(_paras[i].defaultValue);
+			}
+			return ret;
+		}
+		
+		public function set defaultValue(value:Vector.<String>):void
+		{
+			for(var i:int = 0; i < value.length; i++)
+			{
+				_paras[i].defaultValue = value[i];
+			}
 		}
 	}
 }

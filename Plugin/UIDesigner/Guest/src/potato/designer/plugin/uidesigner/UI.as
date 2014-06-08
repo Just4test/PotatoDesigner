@@ -8,6 +8,8 @@ package potato.designer.plugin.uidesigner
 	import core.display.RenderTexture;
 	import core.display.Stage;
 	import core.display.SuperTexture;
+	import core.display.Texture;
+	import core.display.TextureData;
 	
 	import potato.designer.plugin.uidesigner.factory.TargetTree;
 	
@@ -38,12 +40,16 @@ package potato.designer.plugin.uidesigner
 			_stageContainer.addChild(designerStage);
 			
 			setStageSize(480, 320);
+//			_stageBackground.texture = new Texture(TextureData.createRGB(480,320, true, 0xffff0000));
 			Stage.getStage().addChild(_stageContainer);
+			
+			trace("！！！", Stage.getStage().stageWidth, _stageContainer.width, _stageBackground.width,
+				_stageBackground.scaleX, _stageBackground.texture && _stageBackground.texture.width);
+			
 			_stageContainer.x = (Stage.getStage().stageWidth - _stageContainer.width) / 2;
 			_stageContainer.y = (Stage.getStage().stageHeight - _stageContainer.height) / 2;
 			
 		}
-		
 		
 		/**
 		 *设置设计舞台的尺寸 

@@ -31,7 +31,7 @@
 			{
 				var access:AccessorProfile = data as AccessorProfile;
 				var method:MethodProfile = data as MethodProfile;
-				if(TypeTransform.getTypeByName(type_input.text))
+				if(BasicCompiler.getClassNameByType(type_input.text))
 				{
 					type_input.setStyle("contentBackgroundColor", 0xffffff);
 					if(access)
@@ -64,8 +64,13 @@
 				redraw();
 			}
 			
+			
+			protected static const TYPE_ALL:String = "all";
+			protected static const TYPE_BEGIN:String = "begin";
+			protected static const TYPE_END:String = "end";
+			
 			/**重绘*/
-			protected function redraw():void
+			protected function redraw(type:String = null):void
 			{
 				var access:AccessorProfile = data as AccessorProfile;
 				var method:MethodProfile;
@@ -124,6 +129,12 @@
 				else
 				{
 					addElement(type_input);
+					switch(type)
+					{
+						case TYPE_ALL:
+							type_input.selectAll();
+							break;
+					}
 					addElement(after_label);
 				}
 				
@@ -144,7 +155,7 @@
 						editPoint = 0;
 					}
 				}
-				redraw();
+				redraw(TYPE_ALL);
 			}
 			
 			/**导航至上一个参数*/
@@ -162,7 +173,7 @@
 						editPoint = MethodProfile(data).numParameter -1;
 					}
 				}
-				redraw();
+				redraw(TYPE_ALL);
 			}
 			
 			protected function inputOverHandler():void
@@ -177,7 +188,7 @@
 				if(data is AccessorProfile || (data as MethodProfile).numParameter)
 				{
 					editPoint = 0;
-					redraw();
+					redraw(TYPE_ALL);
 					type_input.setFocus();
 				}
 				
@@ -186,11 +197,11 @@
 			protected function input_keyDownHandler(event:KeyboardEvent):void
 			{
 				
-				if(Keyboard.LEFT == event.keyCode || (Keyboard.TAB == event.keyCode && event.shiftKey))
+				if(Keyboard.COMMA == event.keyCode || (Keyboard.TAB == event.keyCode && event.shiftKey))
 				{
 					previous();
 				}
-				else if(Keyboard.RIGHT == event.keyCode || (Keyboard.TAB == event.keyCode && !event.shiftKey))
+				else if(Keyboard.TAB == event.keyCode && !event.shiftKey)
 				{
 					next();
 				}

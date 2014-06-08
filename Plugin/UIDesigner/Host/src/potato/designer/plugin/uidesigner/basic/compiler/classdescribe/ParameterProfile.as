@@ -1,7 +1,5 @@
 package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 {
-	import potato.designer.plugin.uidesigner.basic.compiler.TypeTransform;
-
 	/**
 	 * 参数描述
 	 * @author Just4test
@@ -36,11 +34,6 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 			_type = value;
 		}
 		
-//		public function get type():String
-//		{
-//			return Const.getShortClassName(_xml.@type);
-//		}
-		
 		public function get className():String
 		{
 			return _xml.@type;
@@ -50,6 +43,30 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		{
 			return _xml.@optional;
 		}
+		
+		protected var _defaultValue:*;
+		
+		public function get hasDefaultValue():Boolean
+		{
+			return undefined === _defaultValue;
+		}
+		
+		public function get defaultValue():String
+		{
+			return _defaultValue;
+		}
+		
+		public function set defaultValue(value:String):void
+		{
+			_defaultValue = value;
+		}
+		
+		
+		public function deleteDefaultValue():void
+		{
+			_defaultValue = undefined;
+		}
+		
 
 	}
 }

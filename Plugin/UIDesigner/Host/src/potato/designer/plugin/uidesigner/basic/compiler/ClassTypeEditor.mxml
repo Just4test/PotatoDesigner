@@ -7,14 +7,14 @@
 		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
-			import potato.designer.plugin.uidesigner.DesignerConst;
-			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
 			import potato.designer.net.Message;
 			import potato.designer.plugin.guestManager.Guest;
 			import potato.designer.plugin.guestManager.GuestManagerHost;
+			import potato.designer.plugin.uidesigner.DesignerConst;
+			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
@@ -137,7 +137,7 @@
 					return;
 				}
 				
-				Controler.regClass(_classProfile);
+				BasicCompiler.regClass(DesignerConst.getShortClassName(_classProfile.className), _classProfile);
 				
 				close();
 				

@@ -1,7 +1,5 @@
 package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 {
-	import potato.designer.plugin.uidesigner.basic.compiler.TypeTransform;
-
 	/**
 	 * 变量和存取器描述符
 	 * @author Just4test
@@ -28,6 +26,8 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		protected var _enable:Boolean;
 		protected var _className:String;
 		protected var _type:String;
+		
+		protected var _defaultValue:*;
 		
 		public function AccessorProfile(xml:XML)
 		{
@@ -96,6 +96,27 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		{
 			_availability = null;
 			_type = value;
+		}
+		
+		public function get hasDefaultValue():Boolean
+		{
+			return undefined === _defaultValue;
+		}
+		
+		public function get defaultValue():String
+		{
+			return _defaultValue;
+		}
+
+		public function set defaultValue(value:String):void
+		{
+			_defaultValue = value;
+		}
+
+		
+		public function deleteDefaultValue():void
+		{
+			_defaultValue = undefined;
 		}
 
 
