@@ -40,11 +40,7 @@ package potato.designer.plugin.uidesigner
 			_stageContainer.addChild(designerStage);
 			
 			setStageSize(480, 320);
-//			_stageBackground.texture = new Texture(TextureData.createRGB(480,320, true, 0xffff0000));
 			Stage.getStage().addChild(_stageContainer);
-			
-			trace("！！！", Stage.getStage().stageWidth, _stageContainer.width, _stageBackground.width,
-				_stageBackground.scaleX, _stageBackground.texture && _stageBackground.texture.width);
 			
 			_stageContainer.x = (Stage.getStage().stageWidth - _stageContainer.width) / 2;
 			_stageContainer.y = (Stage.getStage().stageHeight - _stageContainer.height) / 2;
@@ -74,6 +70,7 @@ package potato.designer.plugin.uidesigner
 			parentTexture.draw(quad, new Matrix(1, 0, 0, 1, BLOCK_SIZE, 0));
 			
 			var texture:SuperTexture = new SuperTexture(parentTexture);
+			texture.setSize(width, height);
 			_stageBackground.texture = texture;
 			
 			var vertex:Vector.<Number> = new Vector.<Number>;

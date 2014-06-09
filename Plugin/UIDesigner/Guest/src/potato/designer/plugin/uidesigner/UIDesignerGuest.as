@@ -67,7 +67,11 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
-			var tree:TargetTree = Factory.compileProfile(msg.data);
+			_rootTargetProfile = msg.data;
+			if(_rootTargetProfile)
+			{
+				var tree:TargetTree = Factory.compileProfile(msg.data);
+			}
 			
 		}
 	}

@@ -23,6 +23,8 @@
 			{
 				// TODO Auto-generated method stub
 				
+				DataCenter.styleParent = this;
+				
 				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
 				var newWindow:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
 				newWindow.open(true);

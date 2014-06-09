@@ -3,6 +3,8 @@ package potato.designer.framework
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
 	
+	import mx.core.UIComponent;
+	
 	import potato.designer.utils.MultiLock;
 	
 	
@@ -367,6 +369,10 @@ package potato.designer.framework
 			}
 			_regTable[name] = new RegPropInfo(filter, needSave, eventType);
 		}
+		
+		
+		
+		public static var styleParent:UIComponent;
 	}
 }
 

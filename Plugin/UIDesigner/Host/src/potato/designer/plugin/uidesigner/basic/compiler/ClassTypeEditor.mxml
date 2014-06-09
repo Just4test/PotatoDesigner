@@ -2,12 +2,13 @@
 <s:Window xmlns:fx="http://ns.adobe.com/mxml/2009"
 		  xmlns:s="library://ns.adobe.com/flex/spark"
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
-		  width="640" height="400" backgroundColor="0xffffff"
-		  fontFamily="微软雅黑" fontSize="16" initialize="initializeHandler(event)"
+		  width="640" height="400"
+		  initialize="initializeHandler(event)"
+		  fontFamily="微软雅黑" fontSize="16" backgroundColor="0xffffff"
 		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
-			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
 			import mx.events.FlexEvent;
 			
 			import potato.designer.net.Message;
@@ -22,7 +23,7 @@
 			import spark.events.TextOperationEvent;
 			
 			protected var timer:Timer;
-			protected var members:ArrayCollection;
+			protected var members:ArrayList;
 			
 			protected var _classProfile:ClassProfile;
 			
@@ -62,7 +63,7 @@
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
-				members = new ArrayCollection;
+				members = new ArrayList;
 				member_list.dataProvider = members;
 			}
 			

@@ -7,6 +7,7 @@ package potato.designer.plugin.uidesigner
 	import flash.filesystem.FileStream;
 	import flash.net.registerClassAlias;
 	
+	import mx.collections.ArrayList;
 	import mx.core.UIComponent;
 	
 	import potato.designer.framework.DesignerEvent;
@@ -20,9 +21,13 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.uidesigner.basic.compiler.ClassTypeEditor;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
+	import potato.designer.plugin.uidesigner.ui.ComponentView;
+	import potato.designer.plugin.uidesigner.ui.OutlineView;
+	import potato.designer.plugin.uidesigner.ui.ViewWindow;
 	import potato.designer.utils.MultiLock;
 	
 	import spark.components.Window;
+	import spark.layouts.VerticalLayout;
 	import spark.skins.spark.SparkChromeWindowedApplicationSkin;
 	import spark.skins.spark.WindowedApplicationSkin;
 	
@@ -63,14 +68,9 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
 		
+		//////////////////////////////////////////////////////////////////////////////
 		
 		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
-		
-		
-		public static function get exportResult():Object
-		{
-			return null;
-		}
 		
 		
 		protected static var _rootCompilerProfile:CompilerProfile;
@@ -82,6 +82,35 @@ package potato.designer.plugin.uidesigner
 		
 		protected static var _targetTypeTable:Object;
 		
+		
+		/////////////////////////////UI/////////////////////////////////////////////////
+		
+		/**窗口0的视图列表。默认是组件类型视图和大纲视图*/
+		public static const window0Views:Vector.<UIComponent> = new Vector.<UIComponent>;
+		/**窗口1的视图列表。默认是属性视图*/
+		public static const window1Views:Vector.<UIComponent> = new Vector.<UIComponent>;
+		
+		/**组件和大纲窗口*/
+		protected static var _window0:ViewWindow;
+		/**属性窗口*/
+		protected static var _window1:ViewWindow;
+		
+		/**组件视图*/
+		protected static var _targetTypeView:ComponentView;
+		protected static var _targetTypeViewDataProvider:ArrayList;
+		
+		/**大纲视图*/
+		protected static var _outlineView:OutlineView;
+		protected static var _outlineTree:XML;
+		
+		
+		////////////////////////////////////////////////////////////////////////////
+		
+		public static function get exportResult():Object
+		{
+			return null;
+		}
+		
 		/**
 		 *检查编译器是否锁定。当导出发布版本未完成时，编译器锁定。此时不应对组件配置有任何修改。
 		 */
@@ -90,37 +119,67 @@ package potato.designer.plugin.uidesigner
 			return !_multiLock;
 		}
 		
-		/**组件和大纲窗口*/
-		protected static var window0:Window;
-		/**属性窗口*/
-		protected static var window1:Window;
-		
-		/**窗口0的视图列表。默认是组件类型视图和大纲视图*/
-		public static const window0Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		/**窗口1的视图列表。默认是属性视图*/
-		public static const window1Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		
 		/***更改了视图列表后调用此方法，以便应用更改。*/
 		public static function updateWindow():void
 		{
-			//TODO
-			if(window0)
+			if(window0Views.length)
 			{
-				window0.removeAllElements();
+				if(!_window0)
+				{
+					_window0 = new ViewWindow;
+					_window0.open();
+				}
+				
+				_window0.removeAllElements();
 				for each(var i:UIComponent in window0Views)
 				{
-					window0.addElement(i);
+					_window0.addElement(i);
+				}
+			}
+			else
+			{
+				if(_window0)
+				{
+					_window0.removeAllElements();
+					_window0.close();
+					_window0 = null;
 				}
 			}
 			
-			if(window1)
+			if(window1Views.length)
 			{
-				window1.removeAllElements();
+				if(!_window1)
+				{
+					_window1 = new ViewWindow;
+					_window1.open();
+				}
+				
+				_window1.removeAllElements();
 				for each(i in window1Views)
 				{
-					window1.addElement(i);
+					_window1.addElement(i);
 				}
 			}
+			else
+			{
+				if(_window1)
+				{
+					_window1.removeAllElements();
+					_window1.close();
+					_window1 = null;
+				}
+			}
+			
+			
+			if(_window1)
+			{
+				_window1.removeAllElements();
+				for each(i in window1Views)
+				{
+					_window1.addElement(i);
+				}
+			}
+			spark.components.FormHeading
 		}
 		
 		
@@ -134,6 +193,7 @@ package potato.designer.plugin.uidesigner
 		public static function regTargetType(name:String, isContainer:Boolean, icon:* = null):void
 		{
 			_targetTypeTable[name] = new TargetType(name, isContainer, icon);
+			_targetTypeViewDataProvider.addItem(_targetTypeTable[name]);
 		}
 		
 		/**
@@ -146,6 +206,7 @@ package potato.designer.plugin.uidesigner
 		{
 			if(_targetTypeTable[name])
 			{
+				_targetTypeViewDataProvider.removeItem(_targetTypeTable[name]);
 				delete _targetTypeTable[name];
 				return true;
 			}
@@ -246,6 +307,8 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
+			_targetTypeTable = {};
+			_targetTypeViewDataProvider = new ArrayList;
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
@@ -253,6 +316,20 @@ package potato.designer.plugin.uidesigner
 			BasicCompiler.init(info);
 			
 			//注册视图并显示窗口
+			_targetTypeView = new ComponentView;
+			_targetTypeView.list.dataProvider = _targetTypeViewDataProvider;
+			window0Views.push(_targetTypeView);
+			
+			_outlineView = new OutlineView;
+			_outlineTree = 
+				<root>
+					<target label="走你"/>
+				</root>
+				
+			_outlineView.tree.dataProvider = _outlineTree
+			window0Views.push(_outlineView);
+			
+			
 			updateWindow();
 			
 			
