@@ -77,19 +77,19 @@ package potato.designer.plugin.guestManager
 		
 		public function start(info:PluginInfo):void
 		{
-			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_START, pluginActiveHandler);
+			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_ACCTIVATED, pluginActiveHandler);
 			
 			info.started();
 			
-			tryConnect("localhost", "local");
+//			tryConnect("localhost", "local");
 			startHostDiscovery();
 		}
 		
 		protected static function pluginActiveHandler(event:DesignerEvent):void
 		{
-			if(_connection.connected)
+			if(_connection && _connection.connected)
 			{
-				send(NetConst.C2S_PLUGIN_ACCTIVATED, event.data);
+				send(NetConst.C2S_PLUGIN_ACCTIVATED, event.data.id);
 			}
 		}
 		

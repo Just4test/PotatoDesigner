@@ -26,16 +26,17 @@ package potato.designer.framework
 	 */
 	public class PluginManager
 	{
-		/**当有一个新的插件被安装后派发此事件*/
+		/**当有一个新的插件被安装后派发此事件。data:PluginInfo*/
 		public static const EVENT_PLUGIN_INSTALLED:String = "EVENT_PLUGIN_INSTALLED";
-		/**当有一个新的插件被激活后派发此事件*/
-		public static const EVENT_PLUGIN_START:String = "EVENT_PLUGIN_START";
+		/**当有一个新的插件被激活后派发此事件。data:PluginInfo*/
+		public static const EVENT_PLUGIN_ACCTIVATED:String = "EVENT_PLUGIN_ACCTIVATED";
 		/**指定清单文件的文件名*/
 		public static const MANIFEST_FILE_NAME:String = "Manifest.json";
 		
 		public static const PLUGIN_FOLDER:String = "plugins";
 		
 		private static const _pluginList:Vector.<PluginInfo> = new Vector.<PluginInfo>;
+		private static const _waitingStartList:Vector.<PluginInfo> = new Vector.<PluginInfo>;
 		private static const _pluginMap:Object = new Object;
 		
 		
@@ -249,7 +250,7 @@ package potato.designer.framework
 		 * @param id 插件id
 		 * @return 插件是否已经成功启动。
 		 * <br>返回true说明插件早已启动或者在刚刚的操作中成功启动。
-		 * <br>返回false说明插件尚未启动完成或者因为未满足依赖而延迟启动。
+		 * <br>返回false说明插件尚未启动完成或者因为未满足依赖而延迟启动。如果尚未满足依赖，则当其依赖已经满足后会自动启动。
 		 * 
 		 */
 		public static function startPlugin(id:String):Boolean
@@ -275,12 +276,48 @@ package potato.designer.framework
 						{
 							return true;
 						}
-						return false;
 					}
+					else
+					{
+						_waitingStartList.push(plugin);
+					}
+					return false;
 				default:
 					throw new Error("[Plugin] 插件[" + id + "]的状态是非法值\"" + plugin.state + "\"");
 			}
 		}
+		
+		internal static function pluginStarted(plugin:PluginInfo):void
+		{
+			if(PluginInfo.STATE_INITING == plugin._state)
+			{
+				plugin._state = PluginInfo.STATE_RUNNING;
+				
+				var index:int = _waitingStartList.indexOf(plugin);
+				if(-1 != index)
+				{
+					_waitingStartList.splice(index, 1);
+				}
+				
+				log("[Plugin] 插件[" + plugin.id + "]启动完成");
+				
+				EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_ACCTIVATED, plugin));
+				
+				for each(var i:PluginInfo in _waitingStartList)
+				{
+					if(i.isDependenciesMeet)
+					{
+						i.start();
+					}
+				}
+			}
+			else
+			{
+				throw new Error("[Plugin] 插件[" + plugin.id + "]于" + plugin._state + "状态下尝试报告其启动完成");
+			}
+		}
+		
+		
 		
 		
 		/**获得插件列表*/

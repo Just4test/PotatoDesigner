@@ -1,0 +1,8 @@
+{
+	"id":"Window",
+	"version":1,
+	"depend":[],
+	"startLevel":10,
+	"hostFile":"PluginWindow.swc",
+	"hostClass":"potato.designer.plugin.window.WindowManager"	
+}

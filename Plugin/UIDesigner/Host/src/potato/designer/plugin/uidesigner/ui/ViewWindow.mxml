@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="360" height="600"
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="360" height="100%"
 		  fontFamily="微软雅黑" fontSize="16" backgroundColor="0xffffff"
-		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
+		  skinClass="spark.skins.spark.WindowedApplicationSkin"
+		  ><!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
 	<fx:Script>
 		
 		<![CDATA[
+			
+			protected override function measure():void
+			{
+				super.measure();
+			}
+			
+			protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				log("更新窗口尺寸", unscaledWidth, unscaledHeight, getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
+				
+				height = getExplicitOrMeasuredHeight() + 32;
+				
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				
+				
+			}
 		]]>
 	</fx:Script>
 	<fx:Declarations>

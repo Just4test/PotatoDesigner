@@ -61,7 +61,7 @@ package potato.designer.plugin.guestManager
 			log("[GuestManager] 开始监听连接");
 			
 			info.started();
-			startLocalGuest(960,640);
+//			startLocalGuest(960,640);
 			
 			startHostMultiCast();
 		}
@@ -235,6 +235,8 @@ package potato.designer.plugin.guestManager
 					}
 				}
 			}
+			if(udpSockets.length)
+				log("开始本机地址广播");
 			
 			if(!timer)
 			{
@@ -261,6 +263,7 @@ package potato.designer.plugin.guestManager
 		
 		public static function stopHostMultiCast():void
 		{
+			log("停止本机地址广播");
 			timer.stop();
 		}
 		

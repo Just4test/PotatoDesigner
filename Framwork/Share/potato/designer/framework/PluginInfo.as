@@ -13,7 +13,7 @@ package potato.designer.framework
 
 	public class PluginInfo
 	{
-		protected var _state:String;
+		internal var _state:String;
 		
 		protected var _id:String;
 		protected var _version:int;
@@ -103,15 +103,7 @@ package potato.designer.framework
 		 */
 		public function started():void
 		{
-			if(STATE_INITING == _state)
-			{
-				_state = STATE_RUNNING;
-				log("[Plugin] 插件[" + _id + "]启动完成");
-			}
-			else
-			{
-				throw new Error("[Plugin] 插件[" + _id + "]于" + _state + "状态下尝试报告其启动完成");
-			}
+			PluginManager.pluginStarted(this);
 		}
 		
 		

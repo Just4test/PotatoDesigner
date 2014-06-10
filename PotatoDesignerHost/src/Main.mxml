@@ -16,16 +16,15 @@
 			import potato.designer.framework.EventCenter;
 			import potato.designer.framework.PluginInfo;
 			import potato.designer.framework.PluginManager;
+			import potato.designer.plugin.window.ViewWindow;
+			import potato.designer.plugin.window.WindowManager;
 			
 			import spark.components.Window;
 			
 			protected function application1_applicationCompleteHandler(event:FlexEvent):void
-			{
-				// TODO Auto-generated method stub
-				
-				DataCenter.styleParent = this;
-				
+			{	
 				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
+				EventCenter.addEventListener(WindowManager.OPEN_WINDOW, openWindowHandler);
 				var newWindow:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
 				newWindow.open(true);
 			}
@@ -34,6 +33,13 @@
 			{
 				EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, pluginInstalledHandler);
 				PluginManager.scan();
+			}
+			
+			protected function openWindowHandler(e:DesignerEvent):void
+			{
+				var window:ViewWindow = new ViewWindow;
+				window.windowData = e.data;
+				window.open();
 			}
 			
 			protected function pluginInstalledHandler(e:DesignerEvent):void
