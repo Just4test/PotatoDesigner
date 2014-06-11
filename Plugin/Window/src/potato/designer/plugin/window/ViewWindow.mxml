@@ -66,9 +66,14 @@
 			
 			protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
-				log("更新窗口尺寸", unscaledWidth, unscaledHeight, getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
+				log("窗口尺寸！！！！！", getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
+				if(_windowData.autoSize)
+				{
+					width = measuredWidth;
+					height = measuredHeight;
+				}
 				
-				super.updateDisplayList(unscaledWidth, unscaledHeight);
+				super.updateDisplayList(getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
 			}
 			
 			

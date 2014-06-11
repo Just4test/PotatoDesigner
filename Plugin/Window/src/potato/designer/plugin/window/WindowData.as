@@ -2,7 +2,7 @@ package potato.designer.plugin.window
 {
 	import mx.core.UIComponent;
 	
-	import spark.layouts.BasicLayout;
+	import spark.layouts.supportClasses.LayoutBase;
 
 	[Bindable]
 	public class WindowData
@@ -15,7 +15,7 @@ package potato.designer.plugin.window
 		/**
 		 *窗口布局 
 		 */
-		public var layout:BasicLayout;
+		public var layout:LayoutBase;
 		
 		/**
 		 *窗口组件列表 

@@ -18,12 +18,12 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
-	import potato.designer.plugin.uidesigner.basic.compiler.ClassTypeEditor;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 	import potato.designer.plugin.uidesigner.ui.ComponentView;
 	import potato.designer.plugin.uidesigner.ui.OutlineView;
-	import potato.designer.plugin.uidesigner.ui.ViewWindow;
+	import potato.designer.plugin.window.ViewWindow;
+	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
 	
 	import spark.components.Window;
@@ -128,22 +128,16 @@ package potato.designer.plugin.uidesigner
 			{
 				if(!_window0)
 				{
-					_window0 = new ViewWindow;
-					_window0.open();
+					_window0 = WindowManager.openWindow("", window0Views, new VerticalLayout);
 				}
 				
-				_window0.removeAllElements();
-				for each(var i:UIComponent in window0Views)
-				{
-					_window0.addElement(i);
-				}
+				_window0.refresh();
 			}
 			else
 			{
 				if(_window0)
 				{
-					_window0.removeAllElements();
-					_window0.close();
+					_window0.refresh();
 					_window0 = null;
 				}
 			}
@@ -152,36 +146,19 @@ package potato.designer.plugin.uidesigner
 			{
 				if(!_window1)
 				{
-					_window1 = new ViewWindow;
-					_window1.open();
+					_window1 = WindowManager.openWindow("", window1Views, new VerticalLayout);
 				}
 				
-				_window1.removeAllElements();
-				for each(i in window1Views)
-				{
-					_window1.addElement(i);
-				}
+				_window1.refresh();
 			}
 			else
 			{
 				if(_window1)
 				{
-					_window1.removeAllElements();
-					_window1.close();
+					_window1.refresh();
 					_window1 = null;
 				}
 			}
-			
-			
-			if(_window1)
-			{
-				_window1.removeAllElements();
-				for each(i in window1Views)
-				{
-					_window1.addElement(i);
-				}
-			}
-			spark.components.FormHeading
 		}
 		
 		

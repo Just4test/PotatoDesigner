@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009"
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		  xmlns:s="library://ns.adobe.com/flex/spark"
 		  xmlns:mx="library://ns.adobe.com/flex/mx"
 		  width="640" height="400"
-		  initialize="initializeHandler(event)"
-		  fontFamily="微软雅黑" fontSize="16" backgroundColor="0xffffff"
-		  skinClass="spark.skins.spark.WindowedApplicationSkin"><!---本UI从代码创建，需要对skinClass手动赋值 -->
+		  initialize="initializeHandler(event)">
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	<!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayList;
@@ -20,6 +22,7 @@
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 			
+			import spark.components.Window;
 			import spark.events.TextOperationEvent;
 			
 			protected var timer:Timer;
@@ -31,8 +34,8 @@
 			
 			protected function showInfo(info:String):void
 			{
-				root_group.addElement(info_label);
-				edit_group.parent && root_group.removeElement(edit_group);
+				addElement(info_label);
+				edit_group.parent && removeElement(edit_group);
 				height = 80;
 				
 				info_label.text = info;
@@ -44,22 +47,22 @@
 			
 			protected function showEdit():void
 			{
-				root_group.addElement(edit_group);
-				info_label.parent && root_group.removeElement(info_label);
+				addElement(edit_group);
+				info_label.parent && removeElement(info_label);
 				height = 480;
 			}
 			
 			protected function showInfoAndEdit(info:String):void
 			{
-				root_group.addElement(info_label);
-				root_group.addElement(edit_group);
+				addElement(info_label);
+				addElement(edit_group);
 				height = 480;
 				
 				info_label.text = info;
 			}
 			
 			
-			
+			internal var window:Window;
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
@@ -132,15 +135,18 @@
 			
 			protected function ok_btn_clickHandler(event:MouseEvent):void
 			{
-				if(_classProfile.constructor && !_classProfile.constructor.availability)
+				if(_classProfile)
 				{
-					showInfoAndEdit("必须具有有效的构造方法");
-					return;
+					if(_classProfile.constructor && !_classProfile.constructor.availability)
+					{
+						showInfoAndEdit("必须具有有效的构造方法");
+						return;
+					}
+					
+					BasicCompiler.regClass(DesignerConst.getShortClassName(_classProfile.className), _classProfile);
 				}
-				
-				BasicCompiler.regClass(DesignerConst.getShortClassName(_classProfile.className), _classProfile);
-				
-				close();
+
+				window.close();
 				
 			}
 			
@@ -149,7 +155,6 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:VGroup id="root_group" width="100%" height="100%">
 		<s:TextInput id="className_input" width="100%" change="className_input_changeHandler(event)"
 					 prompt="输入类的完全限定名"/>
 		<s:Label id="info_label" width="100%" text="这里显示一些信息" textAlign="right"/>
@@ -163,6 +168,4 @@
 				<s:Button id="ok_btn" label="好" click="ok_btn_clickHandler(event)"/>
 			</s:HGroup>
 		</s:VGroup>
-		
-	</s:VGroup>
-</s:Window>
+</s:Group>

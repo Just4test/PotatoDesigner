@@ -2,6 +2,8 @@ package potato.designer.plugin.uidesigner.basic.compiler
 {
 	import flash.net.registerClassAlias;
 	
+	import mx.core.UIComponent;
+	
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
@@ -14,8 +16,11 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.plugin.uidesigner.basic.interpreter.BasicClassProfile;
 	import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetMemberProfile;
 	import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
+	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
 	import potato.designer.utils.SubLock;
+	
+	import spark.layouts.BasicLayout;
 
 	public class BasicCompiler implements ICompiler
 	{
@@ -49,8 +54,8 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		
 		protected static function addClassType():void
 		{
-			var newWindow:ClassTypeEditor = new ClassTypeEditor;
-			newWindow.open(true);
+			var editor:ClassTypeEditor = new ClassTypeEditor;
+			editor.window = WindowManager.openWindow("类组件编辑器", Vector.<UIComponent>([editor]));
 			
 		}
 		

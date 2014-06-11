@@ -7,6 +7,7 @@ package potato.designer.plugin.window
 	import potato.designer.framework.PluginInfo;
 	
 	import spark.layouts.BasicLayout;
+	import spark.layouts.supportClasses.LayoutBase;
 	
 	/**
 	 *窗口管理器
@@ -23,18 +24,17 @@ package potato.designer.plugin.window
 		{
 			DataCenter.instance.regProperty(OPEN_WINDOW, ViewWindow, false, OPEN_WINDOW);
 			info.started();
-			
-			openWindow("走你", null, null);
 		}
 		
-		public function openWindow(title:String, layout:BasicLayout, components:Vector.<UIComponent>,
-								   width:int = 100, height:int = 100):ViewWindow
+		public static function openWindow(title:String, components:Vector.<UIComponent>, layout:LayoutBase = null,
+								   autoSize:Boolean = true, width:int = 100, height:int = 100):ViewWindow
 		{
 			var data:WindowData = new WindowData;
 			
 			data.title = title;
-			data.layout = layout;
+			data.layout = layout || new BasicLayout;
 			data.components = components;
+			data.autoSize = autoSize;
 			data.width = width;
 			data.height = height;
 			
