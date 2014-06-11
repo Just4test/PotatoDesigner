@@ -37,12 +37,6 @@
 				layout = _windowData.layout;
 				components = _windowData.components;
 				
-				if(_windowData.autoSize)
-				{
-					_windowData.width = measuredWidth;
-					_windowData.height = measuredHeight;
-				}
-				
 				width = _windowData.width;
 				height = _windowData.height + 32;//状态栏高度
 			}
@@ -66,7 +60,6 @@
 			
 			protected override function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 			{
-				log("窗口尺寸！！！！！", getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
 				if(_windowData.autoSize)
 				{
 					width = measuredWidth;

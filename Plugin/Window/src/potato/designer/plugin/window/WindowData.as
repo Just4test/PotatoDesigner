@@ -23,17 +23,17 @@ package potato.designer.plugin.window
 		public var components:Vector.<UIComponent>;
 		
 		/**
-		 *窗口宽度 
+		 *窗口初始宽度 
 		 */
 		public var width:int;
 		
 		/**
-		 *窗口高度 
+		 *窗口初始高度 
 		 */
 		public var height:int;
 		
 		/**
-		 *指定是否自动设置窗口尺寸。 
+		 *指定是否自动设置窗口尺寸。 如果此值为true，则忽略初始宽高，并且用户不可以手动更改窗口尺寸。
 		 */
 		public var autoSize:Boolean;
 		
