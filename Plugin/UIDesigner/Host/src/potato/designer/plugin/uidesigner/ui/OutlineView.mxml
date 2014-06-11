@@ -10,5 +10,5 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Label text="大纲视图"/>
-	<mx:Tree id="tree" width="100%" height="100%" itemRenderer="OutlineTreeItem" showRoot="false"></mx:Tree>
+	<mx:Tree id="tree" width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.ui.OutlineTreeItem" showRoot="false"></mx:Tree>
 </s:Group>

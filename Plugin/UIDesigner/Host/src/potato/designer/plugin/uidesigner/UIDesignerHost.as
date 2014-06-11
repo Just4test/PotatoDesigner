@@ -77,10 +77,10 @@ package potato.designer.plugin.uidesigner
 		
 		
 		protected static var _multiLock:MultiLock;
-		protected static var _targetProfile:Object;
+		protected static var _componentProfile:Object;
 		
 		
-		protected static var _targetTypeTable:Object;
+		protected static var _componentTypeTable:Object;
 		
 		
 		/////////////////////////////UI/////////////////////////////////////////////////
@@ -96,8 +96,8 @@ package potato.designer.plugin.uidesigner
 		protected static var _window1:ViewWindow;
 		
 		/**组件视图*/
-		protected static var _targetTypeView:ComponentView;
-		protected static var _targetTypeViewDataProvider:ArrayList;
+		protected static var _componentTypeView:ComponentView;
+		protected static var _componentTypeViewDataProvider:ArrayList;
 		
 		/**大纲视图*/
 		protected static var _outlineView:OutlineView;
@@ -190,10 +190,10 @@ package potato.designer.plugin.uidesigner
 		 * @param icon 为组件指定图标
 		 * 
 		 */
-		public static function regTargetType(name:String, isContainer:Boolean, icon:* = null):void
+		public static function regComponentType(name:String, isContainer:Boolean, icon:* = null):void
 		{
-			_targetTypeTable[name] = new TargetType(name, isContainer, icon);
-			_targetTypeViewDataProvider.addItem(_targetTypeTable[name]);
+			_componentTypeTable[name] = new ComponentType(name, isContainer, icon);
+			_componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
 		}
 		
 		/**
@@ -202,16 +202,18 @@ package potato.designer.plugin.uidesigner
 		 * @return 如果成功移除了组件，返回true。如果本不存在该名称的组件，返回false
 		 * 
 		 */
-		public static function removeTargetType(name:String):Boolean
+		public static function removeComponentType(name:String):Boolean
 		{
-			if(_targetTypeTable[name])
+			if(_componentTypeTable[name])
 			{
-				_targetTypeViewDataProvider.removeItem(_targetTypeTable[name]);
-				delete _targetTypeTable[name];
+				_componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
+				delete _componentTypeTable[name];
 				return true;
 			}
 			return false;
 		}
+		
+		
 		
 		
 		
@@ -257,7 +259,7 @@ package potato.designer.plugin.uidesigner
 		public static function exportReleaseBuild():void
 		{
 			_multiLock = new MultiLock;
-			EventCenter.dispatchEvent(new DesignerEvent(EVENT_EXPORT_OK, [_targetProfile, _multiLock]));
+			EventCenter.dispatchEvent(new DesignerEvent(EVENT_EXPORT_OK, [_componentProfile, _multiLock]));
 			if(!_multiLock.isFree)
 			{
 				finishExport();
@@ -307,8 +309,8 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
-			_targetTypeTable = {};
-			_targetTypeViewDataProvider = new ArrayList;
+			_componentTypeTable = {};
+			_componentTypeViewDataProvider = new ArrayList;
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			
@@ -316,9 +318,9 @@ package potato.designer.plugin.uidesigner
 			BasicCompiler.init(info);
 			
 			//注册视图并显示窗口
-			_targetTypeView = new ComponentView;
-			_targetTypeView.list.dataProvider = _targetTypeViewDataProvider;
-			window0Views.push(_targetTypeView);
+			_componentTypeView = new ComponentView;
+			_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
+			window0Views.push(_componentTypeView);
 			
 			_outlineView = new OutlineView;
 			_outlineTree = 
@@ -348,13 +350,13 @@ package potato.designer.plugin.uidesigner
 	}
 }
 
-class TargetType
+class ComponentType
 {
 	public var name:String;
 	public var isContainer:Boolean;
 	public var icon:*;
 	
-	function TargetType(name:String, isContainer:Boolean, icon:* = null)
+	function ComponentType(name:String, isContainer:Boolean, icon:* = null)
 	{
 		this.name = name;
 		this.isContainer = isContainer;

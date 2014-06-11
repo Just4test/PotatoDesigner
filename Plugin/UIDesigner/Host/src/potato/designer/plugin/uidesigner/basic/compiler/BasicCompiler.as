@@ -115,13 +115,13 @@ package potato.designer.plugin.uidesigner.basic.compiler
 				if(classProfile.className == _classProfileNickTable[i].className)
 				{
 					delete _classProfileNickTable[i];
-					UIDesignerHost.removeTargetType(i);
+					UIDesignerHost.removeComponentType(i);
 				}
 			}
 			
 			_classProfileNickTable[nickName] = classProfile;
 			_classProfileNameTable[classProfile.className] = classProfile;
-			UIDesignerHost.regTargetType(nickName, classProfile.isDisplayObjContainer);
+			UIDesignerHost.regComponentType(nickName, classProfile.isDisplayObjContainer);
 		}
 		
 		/**

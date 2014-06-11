@@ -221,6 +221,7 @@ pip-log.txt
 *.actionScriptProperties
 *.flexProperties
 *.flexLibProperties
+*-app.xml
 *.project
 *.settings/*
 *.metadata/*
