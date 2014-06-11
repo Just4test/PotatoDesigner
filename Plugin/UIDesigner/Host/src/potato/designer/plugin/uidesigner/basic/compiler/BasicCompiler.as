@@ -42,6 +42,16 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			Suggest.loadSuggestFile(info.getAbsolutePath(BasicConst.SUGGEST_FILE_PATH));
 			
 			UIDesignerHost.compilerList.push(instance);
+			UIDesignerHost.regComponentTypeCreater("添加类", addClassType);
+		}
+		
+		
+		
+		protected static function addClassType():void
+		{
+			var newWindow:ClassTypeEditor = new ClassTypeEditor;
+			newWindow.open(true);
+			
 		}
 		
 		public function addTarget(profile:CompilerProfile):Boolean

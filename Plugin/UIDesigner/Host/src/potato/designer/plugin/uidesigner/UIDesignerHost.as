@@ -80,7 +80,9 @@ package potato.designer.plugin.uidesigner
 		protected static var _componentProfile:Object;
 		
 		
-		protected static var _componentTypeTable:Object;
+		protected static const _componentTypeTable:Object = {};
+		
+		protected static var _componentTypeCreaterDataProvider:ArrayList;
 		
 		
 		/////////////////////////////UI/////////////////////////////////////////////////
@@ -213,8 +215,24 @@ package potato.designer.plugin.uidesigner
 			return false;
 		}
 		
+		public static function regComponentTypeCreater(label:String, func:Function):void
+		{
+			_componentTypeCreaterDataProvider.addItem({label:label, func:func, toString:function():String{return label}});
+		}
 		
+		public static function removeComponentTypeCreater(label:String):void
+		{
+			for(var i:int = 0; i < _componentTypeCreaterDataProvider.length; i++)
+			{
+				var obj:Object = _componentTypeCreaterDataProvider.getItemAt(i);
+				if(obj.label == label)
+				{
+					delete _componentTypeCreaterDataProvider.removeItem(obj)
+				}
+			}
+		}
 		
+//		protected static function 
 		
 		
 		/**
@@ -309,17 +327,16 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
-			_componentTypeTable = {};
-			_componentTypeViewDataProvider = new ArrayList;
-			
-			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
-			
-			//初始化基础编译器
-			BasicCompiler.init(info);
 			
 			//注册视图并显示窗口
 			_componentTypeView = new ComponentView;
+			
+			_componentTypeViewDataProvider = new ArrayList;
 			_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
+			
+			_componentTypeCreaterDataProvider = new ArrayList;
+			_componentTypeView.add_drop.dataProvider = _componentTypeCreaterDataProvider;
+			
 			window0Views.push(_componentTypeView);
 			
 			_outlineView = new OutlineView;
@@ -331,18 +348,15 @@ package potato.designer.plugin.uidesigner
 			_outlineView.tree.dataProvider = _outlineTree
 			window0Views.push(_outlineView);
 			
-			
 			updateWindow();
 			
 			
-			info.started();
 			
-		}
-		
-		private function guestConnectedHandler(event:DesignerEvent):void
-		{
-			var newWindow:ClassTypeEditor = new ClassTypeEditor;
-			newWindow.open(true);
+			//初始化基础编译器
+			BasicCompiler.init(info);
+			
+			
+			info.started();
 			
 		}
 		

@@ -68,8 +68,6 @@
 			{
 				log("更新窗口尺寸", unscaledWidth, unscaledHeight, getExplicitOrMeasuredWidth(), getExplicitOrMeasuredHeight());
 				
-				height = getExplicitOrMeasuredHeight() + 32;
-				
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 			}
 			

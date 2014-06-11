@@ -24,9 +24,12 @@
 			protected function application1_applicationCompleteHandler(event:FlexEvent):void
 			{	
 				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
+				
+				var selectWorkSpaceDialog:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
+				selectWorkSpaceDialog.open(true);
+				
+				//与核心插件Window配合。引入Window项目时必须使用"合并到代码"
 				EventCenter.addEventListener(WindowManager.OPEN_WINDOW, openWindowHandler);
-				var newWindow:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
-				newWindow.open(true);
 			}
 			
 			protected function loadedHandler(e:Event):void
@@ -37,8 +40,7 @@
 			
 			protected function openWindowHandler(e:DesignerEvent):void
 			{
-				var window:ViewWindow = new ViewWindow;
-				window.windowData = e.data;
+				var window:Window = e.data;
 				window.open();
 			}
 			

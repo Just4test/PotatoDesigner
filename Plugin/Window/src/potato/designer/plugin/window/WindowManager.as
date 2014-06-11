@@ -21,26 +21,29 @@ package potato.designer.plugin.window
 		
 		public function start(info:PluginInfo):void
 		{
-			DataCenter.instance.regProperty(OPEN_WINDOW, WindowData, false, OPEN_WINDOW);
+			DataCenter.instance.regProperty(OPEN_WINDOW, ViewWindow, false, OPEN_WINDOW);
 			info.started();
 			
 			openWindow("走你", null, null);
 		}
 		
 		public function openWindow(title:String, layout:BasicLayout, components:Vector.<UIComponent>,
-								   width:int = 100, height:int = 100):WindowData
+								   width:int = 100, height:int = 100):ViewWindow
 		{
-			var ret:WindowData = new WindowData;
+			var data:WindowData = new WindowData;
 			
-			ret.title = title;
-			ret.layout = layout;
-			ret.components = components;
-			ret.width = width;
-			ret.height = height;
+			data.title = title;
+			data.layout = layout;
+			data.components = components;
+			data.width = width;
+			data.height = height;
 			
-			DataCenter.instance[OPEN_WINDOW] = ret;
+			var window:ViewWindow = new ViewWindow;
+			window.windowData = data;
 			
-			return ret;
+			DataCenter.instance[OPEN_WINDOW] = window;
+			
+			return window;
 		}
 	}
 }
