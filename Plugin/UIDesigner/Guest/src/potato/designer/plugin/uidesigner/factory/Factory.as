@@ -88,6 +88,8 @@ package potato.designer.plugin.uidesigner.factory
 		 */		
 		public static function compileProfile(profile:ITargetProfile):TargetTree
 		{
+			if(!profile)
+				return null;
 			var tree:TargetTree = new TargetTree;
 			
 			//构建组件自身

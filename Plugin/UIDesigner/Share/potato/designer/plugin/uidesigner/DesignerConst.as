@@ -17,7 +17,7 @@ package potato.designer.plugin.uidesigner
 		 */		
 		public static const S2C_INIT:String = "UID_S2C_INIT";
 		/**组件更新
-		 * msg = rootTargetProfile
+		 * msg = [rootTargetProfile, foldPath, focusIndex]
 		 */		
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";
 		

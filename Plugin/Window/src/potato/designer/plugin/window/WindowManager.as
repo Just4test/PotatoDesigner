@@ -29,6 +29,7 @@ package potato.designer.plugin.window
 		public static function openWindow(title:String, components:Vector.<UIComponent>, layout:LayoutBase = null,
 								   autoSize:Boolean = true, width:int = 100, height:int = 100):ViewWindow
 		{
+			log("[Window] 打开窗口:", title);
 			var data:WindowData = new WindowData;
 			
 			data.title = title;

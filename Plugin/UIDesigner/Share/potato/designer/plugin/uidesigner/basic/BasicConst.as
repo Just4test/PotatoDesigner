@@ -12,6 +12,13 @@ package potato.designer.plugin.uidesigner.basic
 		/**编译器向解释器请求已经注册的type表*/
 		public static const S2C_REQ_TYPE_TABLE:String = "S2C_REQ_TYPE_TABLE";
 		
+		/**向解释器推送类描述文件映射表*/
+		public static const S2C_PUSH_CLASS_TABLE:String = "S2C_PUSH_CLASS_TABLE";
+		/**
+		 *向解释器注册类描述文件
+		 */
+		public static const S2C_REG_CLASS:String = "S2C_REG_CLASS";
+		
 		
 		
 		/**建议值文件所在位置*/

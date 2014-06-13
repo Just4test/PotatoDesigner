@@ -7,6 +7,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
+	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.CompilerProfile;
 	import potato.designer.plugin.uidesigner.ICompiler;
 	import potato.designer.plugin.uidesigner.UIDesignerHost;
@@ -56,6 +57,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		protected static function addClassType():void
 		{
 			var editor:ClassTypeEditor = new ClassTypeEditor;
+			
 			editor.window = WindowManager.openWindow("类组件编辑器", Vector.<UIComponent>([editor]));
 			
 		}
@@ -138,6 +140,12 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			_classProfileNickTable[nickName] = classProfile;
 			_classProfileNameTable[classProfile.className] = classProfile;
 			UIDesignerHost.regComponentType(nickName, classProfile.isDisplayObjContainer);
+			
+			//向客户端传输组件配置文件
+			for each(var g:Guest in GuestManagerHost.getGuestsWithPlugin("UIDesigner"))
+			{
+				g.send(BasicConst.S2C_REG_CLASS, [nickName, classProfile.getTypeProfile()]);
+			}
 		}
 		
 		/**

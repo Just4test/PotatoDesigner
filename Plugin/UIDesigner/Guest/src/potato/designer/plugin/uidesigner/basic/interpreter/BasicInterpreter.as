@@ -44,12 +44,35 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			
 			
 			//注册消息
-			GuestManagerGuest.addEventListener(BasicConst.S2C_REQ_TYPE_TABLE,
-				function(msg:Message):void
-				{
-					msg.answer(BasicConst.S2C_REQ_TYPE_TABLE, type2ClassNameTable);
-				}
-			);
+			GuestManagerGuest.addEventListener(BasicConst.S2C_REQ_TYPE_TABLE, reqTypeTableHandler);
+			GuestManagerGuest.addEventListener(BasicConst.S2C_PUSH_CLASS_TABLE, pushClassTableHandler);
+			GuestManagerGuest.addEventListener(BasicConst.S2C_REG_CLASS, regClassHandler);
+		}
+		
+		protected static function reqTypeTableHandler(msg:Message):void
+		{
+			var ret:Object = {};
+			for(var i:String in _typeTable)
+			{
+				ret[i] = BasicTypeProfile(_typeTable[i]).typeName;
+			}
+			msg.answer(BasicConst.S2C_REQ_TYPE_TABLE, ret);
+		}
+		
+		protected static function pushClassTableHandler(msg:Message):void
+		{
+			_classTable = {};
+			_classMemberTable = {};
+			for each(var i:BasicClassProfile in msg.data)
+			{
+				setClassProfile(i);
+			}
+		}
+		
+		protected static function regClassHandler(msg:Message):void
+		{
+			log(msg.data);
+			setClassProfile(msg.data);
 		}
 		
 		
@@ -76,26 +99,11 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		}
 		
 		/**
-		 *获取已经注册的类型配置文件。
+		 *获取已经注册的类型配置文件。其他编译器可能使用此方法。
 		 */
 		public static function getTypeProfile(typeName:String):BasicTypeProfile
 		{
 			return _typeTable[typeName];
-		}
-		
-		/**
-		 *获取类型与className对应表。Host端使用该对应表提示与需要的类所对应的类型。
-		 * @return 一个Object。以类型作为key，目标类名作为value。
-		 * 
-		 */
-		public static function get type2ClassNameTable():Object
-		{
-			var ret:Object = {};
-			for(var i:String in _typeTable)
-			{
-				ret[i] = BasicTypeProfile(_typeTable[i]).typeName;
-			}
-			return ret;
 		}
 		
 		
@@ -104,7 +112,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 * <br>使用类描述文件来让解释器确定如何配合组件描述文件来构建组件。
 		 * <br>部分解释器可能不需要类描述文件。
 		 */
-		public static function setClassProfile(profile:BasicClassProfile):void
+		protected static function setClassProfile(profile:BasicClassProfile):void
 		{
 			_classTable[profile.className] = profile;
 			var memberTable:Object = {};
@@ -117,7 +125,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				
 				for each(var j:String in types)
 				{
-					var typeProfile:BasicTypeProfile = getTypeProfile(j);
+					var typeProfile:BasicTypeProfile = _typeTable[j];
 					if(!typeProfile)
 						throw new Error("[基础解释器] 指定的type未注册：" + j);
 				}
@@ -165,7 +173,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		}
 		
 		/**
-		 *获取类描述文件
+		 *获取类描述文件。其他编译器可能使用此方法。
 		 * <br>使用类描述文件来让解释器确定如何配合组件描述文件来构建组件。
 		 * <br>部分解释器可能不需要类描述文件。
 		 */
@@ -186,7 +194,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			{
 				return false;
 			}
-			var classProfile:BasicClassProfile = getClassProfile(basicProfile.className);
+			var classProfile:BasicClassProfile = _classTable[basicProfile.className];
 			if(!classProfile)
 			{
 				throw new Error("组件配置文件中使用的类[" + basicProfile.className + "]找不到对应的类配置文件");

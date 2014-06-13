@@ -197,7 +197,7 @@ package potato.designer.plugin.uidesigner
 			
 			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin("UIDesigner"))
 			{
-				i.send(DesignerConst.S2C_UPDATE, _rootCompilerProfile && _rootCompilerProfile.targetProfile);
+				i.send(DesignerConst.S2C_UPDATE, [_rootCompilerProfile && _rootCompilerProfile.targetProfile, _foldPath, _focusIndex]);
 			}
 		}
 		

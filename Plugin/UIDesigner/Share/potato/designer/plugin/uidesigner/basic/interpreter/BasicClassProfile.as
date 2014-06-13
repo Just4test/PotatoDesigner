@@ -72,7 +72,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		}
 		
 		/**
-		 * 返回memberTypeTable的副本
+		 * 返回成员类型表的副本
 		 * @return 
 		 * 
 		 */
@@ -82,7 +82,8 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			a.prototype = _memberTypeTable;
 			return new a();
 		}
-
+		
+		/**构造方法类型*/
 		public function get constructorTypes():Vector.<String>
 		{
 			return _constructorTypes;
