@@ -40,15 +40,26 @@ package potato.designer.plugin.uidesigner
 	{
 		
 		
+		/**组件视图数据提供程序*/
+		protected static var _componentTypeViewDataProvider:ArrayList;
+		
+		/**大纲视图数据提供程序*/
+		protected static var _outlineTree:XML;
+		
+		/**添加组件菜单数据提供程序*/
+		protected static var _componentTypeCreaterDataProvider:ArrayList;
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
+			_componentTypeViewDataProvider = new ArrayList;
+			_outlineTree = <root/>;
+			_componentTypeCreaterDataProvider = new ArrayList;
 			
 			clearStage();
 			
 			//初始化UI
-			ViewController.init();
+			ViewController.init(_componentTypeViewDataProvider, _outlineTree, _componentTypeCreaterDataProvider);
 			
 			//初始化基础编译器
 			BasicCompiler.init(info);
@@ -121,7 +132,7 @@ package potato.designer.plugin.uidesigner
 		public static function regComponentType(name:String, isContainer:Boolean, icon:* = null):void
 		{
 			_componentTypeTable[name] = new ComponentType(name, isContainer, icon);
-			ViewController._componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
+			_componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
 		}
 		
 		/**
@@ -134,11 +145,40 @@ package potato.designer.plugin.uidesigner
 		{
 			if(_componentTypeTable[name])
 			{
-				ViewController._componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
+				_componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
 				delete _componentTypeTable[name];
 				return true;
 			}
 			return false;
+		}
+		
+		/**
+		 *注册组件类型创建器菜单项
+		 * <br>在设计器UI中，组件视图的左上角有一个添加组件下拉菜单。使用此方法注册新的菜单项
+		 * @param label 菜单项的标签
+		 * @param func 点击菜单项后调用的方法
+		 * 
+		 */
+		public static function regComponentTypeCreater(label:String, func:Function):void
+		{
+			_componentTypeCreaterDataProvider.addItem({label:label, func:func, toString:function():String{return label}});
+		}
+		
+		/**
+		 * 移除组件类型创建器菜单项
+		 * @param label 菜单项的标签
+		 * 
+		 */
+		public static function removeComponentTypeCreater(label:String):void
+		{
+			for(var i:int = 0; i < _componentTypeCreaterDataProvider.length; i++)
+			{
+				var obj:Object = _componentTypeCreaterDataProvider.getItemAt(i);
+				if(obj.label == label)
+				{
+					delete _componentTypeCreaterDataProvider.removeItem(obj)
+				}
+			}
 		}
 		
 //		protected static function 

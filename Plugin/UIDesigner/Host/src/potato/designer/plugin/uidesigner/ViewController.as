@@ -31,14 +31,8 @@ package potato.designer.plugin.uidesigner
 		
 		/**组件视图*/
 		protected static var _componentTypeView:ComponentView;
-		internal static var _componentTypeViewDataProvider:ArrayList;
-		
 		/**大纲视图*/
 		protected static var _outlineView:OutlineView;
-		protected static var _outlineTree:XML;
-		
-		/**添加组件类型菜单*/
-		internal static var _componentTypeCreaterDataProvider:ArrayList;
 		
 		/***更改了视图列表后调用此方法，以便应用更改。*/
 		public static function updateWindow():void
@@ -80,60 +74,27 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
-		internal static function init():void
+		internal static function init(componentTypeViewDataProvider:ArrayList, outlineTree:XML, componentTypeCreaterDataProvider:ArrayList):void
 		{
 			
 			//注册视图并显示窗口
 			_componentTypeView = new ComponentView;
 			
-			_componentTypeViewDataProvider = new ArrayList;
-			_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
+			_componentTypeView.list.dataProvider = componentTypeViewDataProvider;
 			
-			_componentTypeCreaterDataProvider = new ArrayList;
-			_componentTypeView.add_drop.dataProvider = _componentTypeCreaterDataProvider;
+			_componentTypeView.add_drop.dataProvider = componentTypeCreaterDataProvider;
 			
 			window0Views.push(_componentTypeView);
 			
 			_outlineView = new OutlineView;
-			_outlineTree = 
-				<root>
-					<target label="走你"/>
-				</root>
 			
-			_outlineView.tree.dataProvider = _outlineTree
+			_outlineView.tree.dataProvider = outlineTree
 			window0Views.push(_outlineView);
 			
 			updateWindow();
 		}
 		
 		
-		/**
-		 *注册组件类型创建器菜单项
-		 * <br>在设计器UI中，组件视图的左上角有一个添加组件下拉菜单。使用此方法注册新的菜单项
-		 * @param label 菜单项的标签
-		 * @param func 点击菜单项后调用的方法
-		 * 
-		 */
-		public static function regComponentTypeCreater(label:String, func:Function):void
-		{
-			_componentTypeCreaterDataProvider.addItem({label:label, func:func, toString:function():String{return label}});
-		}
 		
-		/**
-		 * 移除组件类型创建器菜单项
-		 * @param label 菜单项的标签
-		 * 
-		 */
-		public static function removeComponentTypeCreater(label:String):void
-		{
-			for(var i:int = 0; i < _componentTypeCreaterDataProvider.length; i++)
-			{
-				var obj:Object = _componentTypeCreaterDataProvider.getItemAt(i);
-				if(obj.label == label)
-				{
-					delete _componentTypeCreaterDataProvider.removeItem(obj)
-				}
-			}
-		}
 	}
 }

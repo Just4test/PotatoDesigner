@@ -48,7 +48,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			Suggest.loadSuggestFile(info.getAbsolutePath(BasicConst.SUGGEST_FILE_PATH));
 			
 			UIDesignerHost.compilerList.push(instance);
-			ViewController.regComponentTypeCreater("添加类", addClassType);
+			UIDesignerHost.regComponentTypeCreater("添加类", addClassType);
 		}
 		
 		
