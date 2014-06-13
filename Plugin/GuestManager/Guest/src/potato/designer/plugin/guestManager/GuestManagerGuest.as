@@ -81,7 +81,7 @@ package potato.designer.plugin.guestManager
 			
 			info.started();
 			
-//			tryConnect("localhost", "local");
+			tryConnect("localhost", "local");
 			startHostDiscovery();
 		}
 		

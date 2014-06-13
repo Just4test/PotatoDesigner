@@ -227,6 +227,7 @@ package potato.designer.plugin.guestManager
 							if("IPv4" != address.ipVersion)
 								continue;
 							
+							log("发现本机地址:", address.address);
 							var socket:DatagramSocket = new DatagramSocket();
 							socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
 							socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);

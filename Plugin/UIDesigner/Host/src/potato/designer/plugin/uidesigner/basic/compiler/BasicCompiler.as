@@ -10,6 +10,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.plugin.uidesigner.CompilerProfile;
 	import potato.designer.plugin.uidesigner.ICompiler;
 	import potato.designer.plugin.uidesigner.UIDesignerHost;
+	import potato.designer.plugin.uidesigner.ViewController;
 	import potato.designer.plugin.uidesigner.basic.BasicConst;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
@@ -47,7 +48,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			Suggest.loadSuggestFile(info.getAbsolutePath(BasicConst.SUGGEST_FILE_PATH));
 			
 			UIDesignerHost.compilerList.push(instance);
-			UIDesignerHost.regComponentTypeCreater("添加类", addClassType);
+			ViewController.regComponentTypeCreater("添加类", addClassType);
 		}
 		
 		
@@ -125,7 +126,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		 */
 		public static function regClass(nickName:String, classProfile:ClassProfile):void
 		{
-			for each (var i:String in _classProfileNickTable) 
+			for(var i:String in _classProfileNickTable) 
 			{
 				if(classProfile.className == _classProfileNickTable[i].className)
 				{

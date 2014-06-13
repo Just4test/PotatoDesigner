@@ -131,6 +131,11 @@ package potato.designer.framework
 				throw new Error("[Plugin] 尝试启动未满足依赖的插件[" + _id + "]");
 			}
 			
+			if(_state != STATE_STOP)
+			{
+				throw new Error("[Plugin] 尝试启动处于[" + _state + "]状态的插件[" + _id + "]");
+			}
+			
 			log("[Plugin] 插件[" + _id + "]正在启动");
 			var activator:IPluginActivator;
 //			try

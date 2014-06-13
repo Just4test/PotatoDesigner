@@ -67,6 +67,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
+			log("!!!!!!!!!!!updateHandler!!!!!!!!!!!!!")
 			_rootTargetProfile = msg.data;
 			if(_rootTargetProfile)
 			{

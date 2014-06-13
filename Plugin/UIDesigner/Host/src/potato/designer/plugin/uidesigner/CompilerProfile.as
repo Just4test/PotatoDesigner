@@ -46,6 +46,9 @@ package potato.designer.plugin.uidesigner
 			return _parent;
 		}
 		
+		/**
+		 * 无法直接在children数组上添加子代。使用addChild添加。
+		 */
 		public function get children():Vector.<CompilerProfile>
 		{
 			return _children.concat();

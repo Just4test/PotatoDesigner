@@ -13,6 +13,10 @@ package potato.designer.plugin.bootloader
 	
 	public class BootLoader implements IPluginActivator
 	{
+		public static const LOG:String = "BOOTLOADER_LOG";
+		
+		protected static var connected:Boolean;
+		
 		protected var _info:PluginInfo
 		public function start(info:PluginInfo):void
 		{
@@ -34,10 +38,10 @@ package potato.designer.plugin.bootloader
 		
 		protected function connectedHandler(event:DesignerEvent):void
 		{
-			log("尝试启动Main.swf");
+			log("[BootLoader] 尝试启动Main.swf");
 			if(run("Main.swf", _info.getAbsolutePath("library.swf")))
 			{
-				log("成功加载Main.swf");
+				log("[BootLoader] 成功加载Main.swf");
 				_info.started();
 			}
 		}
@@ -50,8 +54,7 @@ package potato.designer.plugin.bootloader
 			var overrideDomain:Domain = new Domain();
 			
 			overrideDomain.load(overridePath);
-			overrideDomain.getClass("potato.logger.Logger").just4Log = bootloaderLog;
-			log("这是个啥",overrideDomain.getClass("potato.logger.Logger").just4Log);
+			overrideDomain.getClass("__J4T_BootLoader").log = bootloaderLog;
 			
 			var mainDomain:Domain = new Domain(overrideDomain);
 			mainDomain.load(mainPath);
@@ -65,7 +68,14 @@ package potato.designer.plugin.bootloader
 		
 		protected function bootloaderLog(msg:String):void
 		{
-			log("[BootLoader] " + msg);
+			if(connected)
+			{
+				GuestManagerGuest.send(LOG, msg);
+			}
+			else
+			{
+				log("[BL Log] " + msg);
+			}
 		}
 	}
 }

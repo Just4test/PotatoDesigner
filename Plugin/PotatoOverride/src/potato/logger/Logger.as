@@ -59,8 +59,6 @@ package potato.logger
 			this.logWriter = logWriter;
 		}
 		
-		public static var just4Log:Function;
-		
 		/**
 		 * 获得日志器
 		 * @param obj 调用该日志的对象
@@ -110,7 +108,7 @@ package potato.logger
 		 */
 		public function debug(...rest):void
 		{
-			just4Log && just4Log(formatMsg(rest));
+			__J4T_BootLoader.log && __J4T_BootLoader.log(formatMsg(rest));
 
 			if (this.level == OFF)
 			{
@@ -130,7 +128,7 @@ package potato.logger
 		 */
 		public function info(...rest):void
 		{
-			just4Log && just4Log(formatMsg(rest));
+			__J4T_BootLoader.log && __J4T_BootLoader.log(formatMsg(rest));
 			
 			if (this.level == OFF)
 			{
@@ -150,7 +148,7 @@ package potato.logger
 		 */
 		public function warn(...rest):void
 		{
-			just4Log && just4Log(formatMsg(rest));
+			__J4T_BootLoader.log && __J4T_BootLoader.log(formatMsg(rest));
 			
 			if (this.level == OFF)
 			{
@@ -170,7 +168,7 @@ package potato.logger
 		 */
 		public function error(...rest):void
 		{
-			just4Log && just4Log(formatMsg(rest));
+			__J4T_BootLoader.log && __J4T_BootLoader.log(formatMsg(rest));
 			
 			if (this.level == OFF)
 			{
@@ -190,7 +188,7 @@ package potato.logger
 		 */
 		public function fatal(...rest):void
 		{
-			just4Log && just4Log(formatMsg(rest));
+			__J4T_BootLoader.log && __J4T_BootLoader.log(formatMsg(rest));
 			
 			if (this.level == OFF)
 			{

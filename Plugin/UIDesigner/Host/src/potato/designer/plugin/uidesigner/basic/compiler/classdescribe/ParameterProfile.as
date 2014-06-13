@@ -48,7 +48,7 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		
 		public function get hasDefaultValue():Boolean
 		{
-			return undefined === _defaultValue;
+			return undefined !== _defaultValue;
 		}
 		
 		public function get defaultValue():String

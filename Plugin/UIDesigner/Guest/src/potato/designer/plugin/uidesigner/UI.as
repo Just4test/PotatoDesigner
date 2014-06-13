@@ -119,10 +119,10 @@ package potato.designer.plugin.uidesigner
 		 *设置展开路径以及焦点
 		 * <br>展开路径和焦点的概念类似文件路径：可以打开任意文件夹，并选中其中的一个文件，或者不选中任何文件。
 		 * @param foldPath 展开路径。
-		 * @param focus 焦点索引。如果指定为-1则说明没有选中任何对象。
+		 * @param focusIndex 焦点索引。如果指定为-1则说明没有选中任何对象。
 		 * 
 		 */
-		public static function setFoldFocus(foldPath:Vector.<uint>, focus:int):void
+		public static function setFoldFocus(foldPath:Vector.<uint>, focusIndex:int):void
 		{
 			
 		}

@@ -293,21 +293,18 @@ package potato.designer.framework
 			{
 				plugin._state = PluginInfo.STATE_RUNNING;
 				
-				var index:int = _waitingStartList.indexOf(plugin);
-				if(-1 != index)
-				{
-					_waitingStartList.splice(index, 1);
-				}
-				
 				log("[Plugin] 插件[" + plugin.id + "]启动完成");
 				
 				EventCenter.dispatchEvent(new DesignerEvent(EVENT_PLUGIN_ACCTIVATED, plugin));
 				
-				for each(var i:PluginInfo in _waitingStartList)
+				for (var i:int = 0; i < _waitingStartList.length; i++) 
 				{
-					if(i.isDependenciesMeet)
+					var toStart:PluginInfo = _waitingStartList[i];
+					if(toStart.isDependenciesMeet)
 					{
-						i.start();
+						_waitingStartList.splice(i,1);
+						i--;
+						toStart.start();
 					}
 				}
 			}

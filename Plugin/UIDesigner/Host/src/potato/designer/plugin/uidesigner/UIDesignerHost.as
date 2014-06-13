@@ -20,16 +20,13 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
-	import potato.designer.plugin.uidesigner.ui.ComponentView;
-	import potato.designer.plugin.uidesigner.ui.OutlineView;
+	import potato.designer.plugin.uidesigner.view.ComponentView;
+	import potato.designer.plugin.uidesigner.view.OutlineView;
 	import potato.designer.plugin.window.ViewWindow;
 	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
 	
-	import spark.components.Window;
 	import spark.layouts.VerticalLayout;
-	import spark.skins.spark.SparkChromeWindowedApplicationSkin;
-	import spark.skins.spark.WindowedApplicationSkin;
 	
 	/**
 	 *管理编译器的Host端
@@ -43,70 +40,60 @@ package potato.designer.plugin.uidesigner
 	{
 		
 		
-		/**
-		 * 事件：生成组件配置文件
-		 * <br>这是一个同步事件。由于每次添加/删除/修改组件（比如拖动组件位置）都会重新生成组件配置文件并重新构建组件树，因此生成组件配置文件的过程需要非常快。
-		 * <br>这个事件将附带一个Object，即目标配置文件。各个编译器需要监听这个事件，并为Object添加属性。添加的属性必须可以序列化。
-		 */
-		public static const EVENT_MAKE_COMPONENT_PROFILE:String = "UID_EVENT_MAKE_COMPONENT_PROFILE";
 		
+		/**插件注册方法*/
+		public function start(info:PluginInfo):void
+		{
+			
+			clearStage();
+			
+			//初始化UI
+			ViewController.init();
+			
+			//初始化基础编译器
+			BasicCompiler.init(info);
+			
+			info.started();
+			
+		}
 		
-		/**
-		 *事件：导出发布版本
-		 * <br>生成一个为发布优化的组件配置文件版本。此版本可能为运行时优化了效率，或者针对特定环境进行导出。
-		 * 如果某个编译器不涉及为发布优化的功能，以 EVENT_MAKE_COMPONENT_PROFILE 方式响应此事件即可。
-		 * <br>这是一个异步事件。允许编译器异步执行（比如与Guest端通讯）甚至导出失败。
-		 * <br>data:[target:Object, multiLock:MultiLock]
-		 */
-		public static const EVENT_EXPORT_RELEASE_BUILD:String = "UID_EVENT_EXPORT_RELEASE_BUILD";
-		/**
-		 *导出发行版成功 
-		 */
-		public static const EVENT_EXPORT_OK:String = "UID_EVENT_EXPORT_OK";
-		/**
-		 * 导出发行版失败
-		 */
-		public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
+	
 		
 		//////////////////////////////////////////////////////////////////////////////
 		
+		/**编译器队列*/
 		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
 		
 		
+		/**编译器配置文件树的根*/
 		protected static var _rootCompilerProfile:CompilerProfile;
 		
+		/**展开路径*/
+		protected static var _foldPath:Vector.<uint>;
+		/**焦点索引*/
+		protected static var _focusIndex:int;
 		
-		protected static var _multiLock:MultiLock;
-		protected static var _componentProfile:Object;
 		
+//		protected static var _multiLock:MultiLock;
+//		protected static var _componentProfile:Object;
 		
+		/**组件类型映射表*/
 		protected static const _componentTypeTable:Object = {};
 		
-		protected static var _componentTypeCreaterDataProvider:ArrayList;
-		
-		
-		/////////////////////////////UI/////////////////////////////////////////////////
-		
-		/**窗口0的视图列表。默认是组件类型视图和大纲视图*/
-		public static const window0Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		/**窗口1的视图列表。默认是属性视图*/
-		public static const window1Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		
-		/**组件和大纲窗口*/
-		protected static var _window0:ViewWindow;
-		/**属性窗口*/
-		protected static var _window1:ViewWindow;
-		
-		/**组件视图*/
-		protected static var _componentTypeView:ComponentView;
-		protected static var _componentTypeViewDataProvider:ArrayList;
-		
-		/**大纲视图*/
-		protected static var _outlineView:OutlineView;
-		protected static var _outlineTree:XML;
 		
 		
 		////////////////////////////////////////////////////////////////////////////
+		
+		/**
+		 *清理所有已经存在的组件，并初始化 
+		 * 
+		 */
+		public static function clearStage():void
+		{
+			_rootCompilerProfile = null;
+			_foldPath = new Vector.<uint>;
+			_focusIndex = -1;
+		}
 		
 		public static function get exportResult():Object
 		{
@@ -116,50 +103,12 @@ package potato.designer.plugin.uidesigner
 		/**
 		 *检查编译器是否锁定。当导出发布版本未完成时，编译器锁定。此时不应对组件配置有任何修改。
 		 */
-		public static function get isLocking():Boolean
-		{
-			return !_multiLock;
-		}
+//		public static function get isLocking():Boolean
+//		{
+//			return !_multiLock;
+//		}
 		
-		/***更改了视图列表后调用此方法，以便应用更改。*/
-		public static function updateWindow():void
-		{
-			if(window0Views.length)
-			{
-				if(!_window0)
-				{
-					_window0 = WindowManager.openWindow("", window0Views, new VerticalLayout);
-				}
-				
-				_window0.refresh();
-			}
-			else
-			{
-				if(_window0)
-				{
-					_window0.refresh();
-					_window0 = null;
-				}
-			}
-			
-			if(window1Views.length)
-			{
-				if(!_window1)
-				{
-					_window1 = WindowManager.openWindow("", window1Views, new VerticalLayout);
-				}
-				
-				_window1.refresh();
-			}
-			else
-			{
-				if(_window1)
-				{
-					_window1.refresh();
-					_window1 = null;
-				}
-			}
-		}
+		
 		
 		
 		/**
@@ -172,7 +121,7 @@ package potato.designer.plugin.uidesigner
 		public static function regComponentType(name:String, isContainer:Boolean, icon:* = null):void
 		{
 			_componentTypeTable[name] = new ComponentType(name, isContainer, icon);
-			_componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
+			ViewController._componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
 		}
 		
 		/**
@@ -185,28 +134,11 @@ package potato.designer.plugin.uidesigner
 		{
 			if(_componentTypeTable[name])
 			{
-				_componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
+				ViewController._componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
 				delete _componentTypeTable[name];
 				return true;
 			}
 			return false;
-		}
-		
-		public static function regComponentTypeCreater(label:String, func:Function):void
-		{
-			_componentTypeCreaterDataProvider.addItem({label:label, func:func, toString:function():String{return label}});
-		}
-		
-		public static function removeComponentTypeCreater(label:String):void
-		{
-			for(var i:int = 0; i < _componentTypeCreaterDataProvider.length; i++)
-			{
-				var obj:Object = _componentTypeCreaterDataProvider.getItemAt(i);
-				if(obj.label == label)
-				{
-					delete _componentTypeCreaterDataProvider.removeItem(obj)
-				}
-			}
 		}
 		
 //		protected static function 
@@ -251,10 +183,11 @@ package potato.designer.plugin.uidesigner
 		 * <br>此方法派发 EVENT_EXPORT_RELEASE_BUILD 事件以调用编译器生成发行版组件。
 		 * 
 		 */
+		/*
 		public static function exportReleaseBuild():void
 		{
 			_multiLock = new MultiLock;
-			EventCenter.dispatchEvent(new DesignerEvent(EVENT_EXPORT_OK, [_componentProfile, _multiLock]));
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.EVENT_EXPORT_OK, [_componentProfile, _multiLock]));
 			if(!_multiLock.isFree)
 			{
 				finishExport();
@@ -266,7 +199,7 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
-		private static function multiLockHandler(event:Event):void
+		protected static function multiLockHandler(event:Event):void
 		{
 			_multiLock.removeEventListener(MultiLock.EVENT_DEAD, multiLockHandler);
 			_multiLock.removeEventListener(MultiLock.EVENT_UNLOCKED, multiLockHandler);
@@ -280,7 +213,7 @@ package potato.designer.plugin.uidesigner
 				}
 				case MultiLock.EVENT_UNLOCKED:
 				{
-					EventCenter.dispatchEvent(new Event(EVENT_EXPORT_FAILED));
+					EventCenter.dispatchEvent(new Event(DesignerConst.EVENT_EXPORT_FAILED));
 					break;
 				}
 					
@@ -293,59 +226,95 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		
-		public static function finishExport():void
+		protected static function finishExport():void
 		{
 			_multiLock = null;
-			EventCenter.dispatchEvent(new Event(EVENT_EXPORT_OK));
+			EventCenter.dispatchEvent(new Event(DesignerConst.EVENT_EXPORT_OK));
+		}
+		*/
+		
+		/**
+		 *在当前路径下添加组件 
+		 * @param type
+		 * 
+		 */
+		public static function addComponent(type:String):void
+		{
+			var cp:CompilerProfile = new CompilerProfile(type);
+			
+			for (var i:int = 0; i < compilerList.length; i++) 
+			{
+				if(compilerList[i].addTarget(cp))
+					break;
+			}
+			
+			var folder:CompilerProfile = getCompilerProfileAtPath(_rootCompilerProfile, _foldPath);
+			
+			if(folder)
+			{
+				folder.addChildAt(cp, _focusIndex);
+			}
+			else
+			{
+				_rootCompilerProfile = cp;
+			}
+			
+			updateGuest();
+			
+			
 		}
 		
-		
-		
-		/**插件注册方法*/
-		public function start(info:PluginInfo):void
+		/**
+		 *获取编译器配置文件树中指定的目标
+		 * @param cp 编译器配置文件树
+		 * @param foldPath 展开路径。
+		 * @param focusIndex 焦点索引。如果指定为-1则说明没有选中任何对象。 
+		 * @return 
+		 * 
+		 */
+		protected static function getCompilerProfileAtPath(cp:CompilerProfile, foldPath:Vector.<uint>, focusIndex:int = -1):CompilerProfile
 		{
-			
-			//注册视图并显示窗口
-			_componentTypeView = new ComponentView;
-			
-			_componentTypeViewDataProvider = new ArrayList;
-			_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
-			
-			_componentTypeCreaterDataProvider = new ArrayList;
-			_componentTypeView.add_drop.dataProvider = _componentTypeCreaterDataProvider;
-			
-			window0Views.push(_componentTypeView);
-			
-			_outlineView = new OutlineView;
-			_outlineTree = 
-				<root>
-					<target label="走你"/>
-				</root>
+			while(foldPath.length)
+			{
+				var index:int = foldPath.shift();
+				if(cp.children.length <= index)
+					return null;
+				cp = cp.children[index];
 				
-			_outlineView.tree.dataProvider = _outlineTree
-			window0Views.push(_outlineView);
+			}
 			
-			updateWindow();
+			if(-1 != focusIndex)
+			{
+				if(cp.children.length <= focusIndex)
+					return null;
+				cp = cp.children[focusIndex];
+			}
 			
-			
-			
-			//初始化基础编译器
-			BasicCompiler.init(info);
-			
-			
-			info.started();
-			
+			return cp;
 		}
 		
 		
 	}
 }
 
+
+import potato.designer.plugin.uidesigner.UIDesignerHost;
+
+/**
+ *组件类型 
+ * @author Just4test
+ * 
+ */
 class ComponentType
 {
 	public var name:String;
 	public var isContainer:Boolean;
 	public var icon:*;
+	
+	public function add():void
+	{
+		UIDesignerHost.addComponent(name);
+	}
 	
 	function ComponentType(name:String, isContainer:Boolean, icon:* = null)
 	{
