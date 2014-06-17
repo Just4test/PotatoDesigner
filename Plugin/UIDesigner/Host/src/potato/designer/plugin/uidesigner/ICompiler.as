@@ -33,17 +33,29 @@ package potato.designer.plugin.uidesigner
 		 */
 		function update(profile:CompilerProfile):Boolean;
 		
+		/**
+		 *创建导出目标
+		 * <br>导出目标是导出工作时的环境变量集合，以一个Object的形式存储。允许设置多个导出目标，如为不同分辨率/语种优化的结果。
+		 * <br>根据约定，目标的EXPORT_TARGET_FILE_NAME属性是导出的文件名。
+		 * @param targets 目标数组。targets[0]是系统自动添加的，表示标准导出目标。编译器应该向此数组中添加自己需要的优化目标。
+		 * @return 返回true则跳过后面的编译器。通常返回false。
+		 * 
+		 * @see potato.designer.plugin.uidesigner.DesignerConst#EXPORT_TARGET_FILE_NAME
+		 */
+		function makeExportTarget(targets:Vector.<ExportProfile>):Boolean;
+		
 		
 		/**
 		 * 导出为运行时优化过的打包文件。
 		 * <br>该文件应该包含所有ITargetProfile，以及任何需要的环境变量等。导出的目标对象会由IConstructor.setData处理。
 		 * <br>将导出结果写入UIDesignerHost.exportResult的属性。必须导出可以序列化的对象。
-		 * @param lock 一个众锁。如果导出工作不能同步完成，请锁定众锁。
+		 * @param target 导出配置文件
+		 * @param lock 一个众锁。如果导出工作不能同步完成，请锁定众锁。请注意，编译器链将同步执行，锁定众锁并不会延迟后面的编译器执行。
 		 * @return 返回true则跳过后面的编译器。通常返回false。
 		 * <br>我实在不知道跳过后面的编译器有什么用。实际上我很想把这个接口设计为事件，但我真的希望显式要求编译器响应它。
 		 * 
 		 */		
-		function export(lock:MultiLock):Boolean;
+		function export(target:ExportProfile, lock:MultiLock):Boolean;
 		
 		/**
 		 * 初始化客户端

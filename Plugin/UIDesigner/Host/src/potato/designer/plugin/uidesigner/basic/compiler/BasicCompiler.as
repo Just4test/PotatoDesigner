@@ -9,6 +9,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.CompilerProfile;
+	import potato.designer.plugin.uidesigner.ExportProfile;
 	import potato.designer.plugin.uidesigner.ICompiler;
 	import potato.designer.plugin.uidesigner.UIDesignerHost;
 	import potato.designer.plugin.uidesigner.ViewController;
@@ -94,7 +95,15 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			return false;
 		}
 		
-		public function export(lock:MultiLock):Boolean
+		public function makeExportTarget(targets:Vector.<ExportProfile>):Boolean
+		{
+			// TODO 未实现
+			return false;
+		}
+		
+		
+		
+		public function export(target:ExportProfile, lock:MultiLock):Boolean
 		{
 			// TODO 未实现
 			return false;

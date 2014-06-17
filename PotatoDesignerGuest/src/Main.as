@@ -32,8 +32,7 @@ package
 //			addChild(connectHelper);
 			DataCenter.loadWorkSpace("designer");
 			
-			textHost = new TextInput("", 300, 30, UIGlobal.defaultFont, 32, 0xffffffff);
-			textHost.text = "123123123123";
+			textHost = new TextInput("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, UIGlobal.defaultFont, 32, 0xffffffff);
 			Stage.getStage().addChild(textHost);
 			
 			EventCenter.addEventListener(EventCenter.EVENT_LOG, log2textHost);
