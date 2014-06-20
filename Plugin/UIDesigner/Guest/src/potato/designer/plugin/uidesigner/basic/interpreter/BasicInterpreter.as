@@ -37,6 +37,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			
 			//注册类型
 			regType("int", getInt, true, "int");
+			regType("uint", getUint, true, "int");
 			regType("Number", getNumber, true, "Number");
 			regType("String", getString, true, "String");
 			regType("Texture", getTexture, false, "core.display::Texture");
@@ -54,7 +55,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			var ret:Object = {};
 			for(var i:String in _typeTable)
 			{
-				ret[i] = BasicTypeProfile(_typeTable[i]).typeName;
+				ret[i] = BasicTypeProfile(_typeTable[i]).className;
 			}
 			msg.answer(BasicConst.S2C_REQ_TYPE_TABLE, ret);
 		}
@@ -337,6 +338,11 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		protected static function getInt(value:String):int
 		{
 			return int(value);
+		}
+		
+		protected static function getUint(value:String):uint
+		{
+			return uint(value);
 		}
 		
 		protected static function getNumber(value:String):Number

@@ -9,7 +9,7 @@ package potato.designer.plugin.uidesigner.basic
 		/**解释器数据中组件描述文件的key*/
 		public static const INTERPRETER_COMPONENT_PROFILE:String = "INTERPRETER_COMPONENT_PROFILE";
 		
-		/**编译器向解释器请求已经注册的type表*/
+		/**编译器向解释器请求已经注册的type表。table[typeName] = className*/
 		public static const S2C_REQ_TYPE_TABLE:String = "S2C_REQ_TYPE_TABLE";
 		
 		/**向解释器推送类描述文件映射表*/

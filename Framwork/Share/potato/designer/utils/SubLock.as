@@ -9,6 +9,7 @@ package potato.designer.utils
 	{
 		private var _parent:MultiLock;
 		private var _info:String;
+		private var _isDead:Boolean;
 		
 		
 		/**请勿手动调用初始化方法*/
@@ -27,6 +28,7 @@ package potato.designer.utils
 		/**杀死子锁*/
 		public function kill():void
 		{
+			_isDead = true;
 			_parent.kill(this);
 		}
 		
@@ -34,6 +36,11 @@ package potato.designer.utils
 		public function get info():String
 		{
 			return _info;
+		}
+		
+		public function toString():String
+		{
+			return _info + _isDead ? "(Dead)" : "(Locked)";
 		}
 
 	}

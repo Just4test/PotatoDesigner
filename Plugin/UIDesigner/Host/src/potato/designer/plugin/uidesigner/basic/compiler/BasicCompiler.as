@@ -176,7 +176,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		/**
 		 *根据类型获取类全名 
 		 */
-		public static function getClassNameByType(type:String):ClassProfile
+		public static function getClassNameByParamType(type:String):String
 		{
 			return _paramTypeTable[type];
 		}
@@ -187,7 +187,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		 * @return 
 		 * 
 		 */
-		public static function getTypesByClassName(name:String):Vector.<String>
+		public static function getParamTypesByClassName(name:String):Vector.<String>
 		{
 			var ret:Vector.<String> = new Vector.<String>;
 			for(var i:String in _paramTypeTable)

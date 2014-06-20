@@ -39,6 +39,8 @@ package potato.designer.plugin.guestManager
 		public static const EVENT_GUEST_DISCONNECTED:String = "EVENT_GUEST_DISCONNECTED";
 		/**客户端激活*/
 		public static const EVENT_GUEST_ACTIVATED:String = "EVENT_GUEST_ACTIVATED";
+		/**客户端激活了插件。data:[guest, plugin]*/
+		public static const EVENT_GUEST_PLUGIN_ACTIVATED:String = "EVENT_GUEST_PLUGIN_ACTIVATED";
 		
 		private static var serverSocket:ServerSocket;
 		
@@ -384,6 +386,7 @@ package potato.designer.plugin.guestManager
 		private static function pluginAcctivatedHandler(msg:Message):void
 		{
 			Guest(msg.target)._activedPlugins.push(msg.data);
+			EventCenter.dispatchEvent( new DesignerEvent(EVENT_GUEST_PLUGIN_ACTIVATED, [msg.target, msg.data]));
 		}
 	}
 }

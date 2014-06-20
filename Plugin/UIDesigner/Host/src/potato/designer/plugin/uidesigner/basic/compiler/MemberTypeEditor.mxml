@@ -4,64 +4,77 @@
 				xmlns:mx="library://ns.adobe.com/flex/mx" 
 				autoDrawBackground="true" fontSize="16"
 				dataChange="dataChangeHandler(event)"
-				click="clickHandler(event)">
+				click="clickHandler(event)"
+				creationComplete="creationCompleteHandler(event)">
 	<s:layout>
 		<s:HorizontalLayout verticalAlign="middle"/>
 	</s:layout>
 	<fx:Script>
 		<![CDATA[
+			import mx.collections.ArrayList;
 			import mx.events.FlexEvent;
+			import mx.utils.StringUtil;
 			
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ITypeValue;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.MethodProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
 			
 			import spark.events.TextOperationEvent;
 			
-			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
-			protected var editPoint:int = -1;
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				type_combo.openButton.width = 0;
+				type_combo.openButton.visible = false;
+				type_combo.textInput.addEventListener(TextOperationEvent.CHANGE, input_changeHandler);
+				type_combo.textInput.addEventListener(KeyboardEvent.KEY_DOWN, input_keyDownHandler);
+				type_combo.textInput.addEventListener(FocusEvent.FOCUS_OUT, inputOverHandler);
+				type_combo.dataProvider = new ArrayList;
+			}
 			
 			protected function input_changeHandler(event:TextOperationEvent):void
 			{
-				testType();
+				testOrApply(true);
 			}
 			
-			protected function testType():void
+			protected function input_keyDownHandler(event:KeyboardEvent):void
 			{
-				var access:AccessorProfile = data as AccessorProfile;
-				var method:MethodProfile = data as MethodProfile;
-				if(BasicCompiler.getClassNameByType(type_input.text))
+				if(Keyboard.LEFT == event.keyCode)
 				{
-					type_input.setStyle("contentBackgroundColor", 0xffffff);
-					if(access)
+					if(0 == type_combo.textInput.selectionAnchorPosition && 0 == type_combo.textInput.selectionActivePosition)
 					{
-						access.type = type_input.text;
-					}
-					else
-					{
-						method.parameters[editPoint].type = type_input.text;
+						testOrApply(false);
+						previous();
 					}
 				}
-				else
+				else if(Keyboard.RIGHT == event.keyCode)
 				{
-					type_input.setStyle("contentBackgroundColor", 0xB62222);
-					if(access)
+					var lastIndex:int = type_combo.textInput.text.length;
+					if(lastIndex == type_combo.textInput.selectionAnchorPosition && lastIndex == type_combo.textInput.selectionActivePosition)
 					{
-						access.type = null;
-					}
-					else
-					{
-						method.parameters[editPoint].type = null;
+						testOrApply(false);
+						next();
 					}
 				}
 			}
+			
+			protected function inputOverHandler(e:Event):void
+			{
+				testOrApply(false);
+				editPoint = -1;
+				redraw();
+			}
+			
+			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
+			protected var editPoint:int = -1;
 			
 			protected function dataChangeHandler(event:FlexEvent):void
 			{
 				editPoint = -1;
 				inUse_check.selected = IMemberProfile(data).enable;
 				redraw();
+				
 			}
 			
 			
@@ -84,7 +97,7 @@
 					else
 					{
 						before_label.text = access.name + ":";
-						type_input.text = access.type || "?";
+						setTypeCombo(access);
 					}
 					after_label.text = "";
 				}
@@ -99,7 +112,7 @@
 						{
 							before_label.text = text;
 							text = "";
-							type_input.text = paras[i].type || "?";
+							setTypeCombo(paras[i]);
 						}
 						else
 						{
@@ -123,22 +136,105 @@
 				
 				if(-1 == editPoint)
 				{
-					type_input.parent && removeElement(type_input);
+					type_combo.parent && removeElement(type_combo);
 					after_label.parent && removeElement(after_label);
 				}
 				else
 				{
-					addElement(type_input);
+					addElement(type_combo);
 					switch(type)
 					{
 						case TYPE_ALL:
-							type_input.selectAll();
+							type_combo.textInput.selectAll();
 							break;
 					}
 					addElement(after_label);
 				}
 				
+				function setTypeCombo(typeValue:ITypeValue):void
+				{
+					var inputText:String = typeValue.type || "?";
+					type_combo.textInput.setStyle("contentBackgroundColor", typeValue.type ? 0xFFFFFF : 0xB62222);
+					type_combo.dataProvider.removeAll();
+					for each(var s:String in BasicCompiler.getParamTypesByClassName(typeValue.className))
+					{
+						type_combo.dataProvider.addItem(s);
+					}
+					if(typeValue.type && typeValue.hasDefaultValue)
+					{
+						inputText += " = " + typeValue.defaultValue;
+					}
+					type_combo.textInput.text = inputText;
+				}
+				
 			}
+			
+			/**应用输入的type和默认值*/
+			protected function testOrApply(isTest:Boolean):void
+			{	
+				var arr:Array = type_combo.textInput.text.split("=");
+				var type:String = arr.shift();
+				type = StringUtil.trim(type);
+				
+				if(!BasicCompiler.getClassNameByParamType(type))
+				{
+					if(isTest)
+					{
+						type_combo.textInput.setStyle("contentBackgroundColor", 0xB62222);
+					}
+					else
+					{
+						logf("指定的类型[{0}]不存在。", type);
+					}
+					return;
+				}
+				
+				if(isTest)
+				{
+					type_combo.textInput.setStyle("contentBackgroundColor", 0xFFFFFF);
+					return;
+				}
+
+				if(data is AccessorProfile)
+				{
+					var access:AccessorProfile = data as AccessorProfile;
+					access.type = type;
+				}
+				else
+				{
+					var method:MethodProfile = data as MethodProfile;
+					method.parameters[editPoint].type = type;
+				}
+				
+				if(arr.length)
+				{
+					var defaultValue:String = arr.join("=");
+					defaultValue = StringUtil.trim(defaultValue);
+					if(defaultValue.length >= 2 && defaultValue.charAt(0) == "'" && defaultValue.charAt(defaultValue.length - 1) == "'")
+					{
+						defaultValue = defaultValue.slice(1, length - 1);
+					}
+					else if(defaultValue.length >= 2 && defaultValue.charAt(0) == "\"" && defaultValue.charAt(defaultValue.length - 1) == "\"")
+					{
+						defaultValue = defaultValue.slice(1, length - 1);
+					}
+					
+					if(access)
+					{
+						access.defaultValue = defaultValue;
+					}
+					else
+					{
+						method.parameters[editPoint].defaultValue = defaultValue;
+					}
+				}
+				else
+				{
+					method.parameters[editPoint].deleteDefaultValue();
+				}
+				
+			}
+			
 			
 			/**导航至下一个参数*/
 			protected function next():void
@@ -176,12 +272,6 @@
 				redraw(TYPE_ALL);
 			}
 			
-			protected function inputOverHandler():void
-			{
-				editPoint = -1;
-				redraw();
-			}
-			
 			/**点击时显示编辑文本框*/
 			protected function clickHandler(event:MouseEvent):void
 			{
@@ -189,21 +279,7 @@
 				{
 					editPoint = 0;
 					redraw(TYPE_ALL);
-					type_input.setFocus();
-				}
-				
-			}
-			
-			protected function input_keyDownHandler(event:KeyboardEvent):void
-			{
-				
-				if(Keyboard.COMMA == event.keyCode || (Keyboard.TAB == event.keyCode && event.shiftKey))
-				{
-					previous();
-				}
-				else if(Keyboard.TAB == event.keyCode && !event.shiftKey)
-				{
-					next();
+					type_combo.textInput.setFocus();
 				}
 				
 			}
@@ -217,8 +293,9 @@
 	</fx:Script>
 	<s:CheckBox id="inUse_check" click="inUse_check_clickHandler(event)"/>
 	<s:Label id="before_label" text="function("/>
-	<s:TextInput id="type_input" text="type"
-				 change="input_changeHandler(event)" keyDown="input_keyDownHandler(event)" focusOut="inputOverHandler()"/>
+	<s:ComboBox id="type_combo">
+		
+	</s:ComboBox>
 	<s:Label id="after_label" text=" )"/>
 	
 </s:ItemRenderer>

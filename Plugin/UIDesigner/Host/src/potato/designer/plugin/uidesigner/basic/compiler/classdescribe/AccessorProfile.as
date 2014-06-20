@@ -5,7 +5,7 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 	 * @author Just4test
 	 * 
 	 */
-	public class AccessorProfile implements IMemberProfile
+	public class AccessorProfile implements IMemberProfile, ITypeValue
 	{
 		protected var _xml:XML;
 		protected var _name:String;

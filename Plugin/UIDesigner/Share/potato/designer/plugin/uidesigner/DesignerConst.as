@@ -55,6 +55,8 @@ package potato.designer.plugin.uidesigner
 			 * 导出发行版失败
 			 */
 			public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
+			
+			public static const PLUGIN_NAME:String = "UIDesigner";
 		}
 	}
 }

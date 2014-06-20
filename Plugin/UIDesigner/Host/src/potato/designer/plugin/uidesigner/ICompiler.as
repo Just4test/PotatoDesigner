@@ -36,7 +36,6 @@ package potato.designer.plugin.uidesigner
 		/**
 		 *创建导出目标
 		 * <br>导出目标是导出工作时的环境变量集合，以一个Object的形式存储。允许设置多个导出目标，如为不同分辨率/语种优化的结果。
-		 * <br>根据约定，目标的EXPORT_TARGET_FILE_NAME属性是导出的文件名。
 		 * @param targets 目标数组。targets[0]是系统自动添加的，表示标准导出目标。编译器应该向此数组中添加自己需要的优化目标。
 		 * @return 返回true则跳过后面的编译器。通常返回false。
 		 * 
@@ -62,7 +61,7 @@ package potato.designer.plugin.uidesigner
 		 * <br>当一个启动了UIDesignerGuest的客户端连接到主机时，使用此方法初始化它。初始化完毕后，客户端才能进行正常操作。
 		 * @param guest 客户端对象
 		 * @param lock 一个众锁。如果初始化工作不能同步完成，请锁定众锁。
-		 * @return 返回true则跳过后面的编译器。通常返回false。
+		 * @return 返回true则跳过后面的编译器。通常返回false。卧槽你初始化都要跳过人家到底是他妈想干啥！
 		 * 
 		 */
 		function initGuest(guest:Guest, lock:MultiLock):Boolean;

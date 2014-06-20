@@ -2,31 +2,17 @@ package potato.designer.plugin.uidesigner
 {
 	
 	import flash.events.Event;
-	import flash.filesystem.File;
-	import flash.filesystem.FileMode;
-	import flash.filesystem.FileStream;
-	import flash.net.registerClassAlias;
 	
 	import mx.collections.ArrayList;
-	import mx.core.UIComponent;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
-	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
-	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
-	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
-	import potato.designer.plugin.uidesigner.view.ComponentView;
-	import potato.designer.plugin.uidesigner.view.OutlineView;
-	import potato.designer.plugin.window.ViewWindow;
-	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
-	
-	import spark.layouts.VerticalLayout;
 	
 	/**
 	 *管理编译器的Host端
@@ -37,9 +23,7 @@ package potato.designer.plugin.uidesigner
 	 * 
 	 */
 	public class UIDesignerHost implements IPluginActivator
-	{
-		
-		
+	{		
 		/**组件视图数据提供程序*/
 		protected static var _componentTypeViewDataProvider:ArrayList;
 		
@@ -64,10 +48,66 @@ package potato.designer.plugin.uidesigner
 			//初始化基础编译器
 			BasicCompiler.init(info);
 			
+			//初始化客户端
+			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
+			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
+			for each(var guest:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			{
+				initGuest(guest);
+			}
+			
 			info.started();
 			
 		}
 		
+		protected function guestPluginActivatedHandler(event:DesignerEvent):void
+		{
+			if(DesignerConst.PLUGIN_NAME == event.data[1])
+			{
+				initGuest(event.data[0]);
+			}
+		}
+		
+		protected function guestConnectedHandler(event:DesignerEvent):void
+		{
+			if(Guest(event.data).isPluginActived(DesignerConst.PLUGIN_NAME))
+			{
+				initGuest(event.data);
+			}
+		}
+		
+		protected function initGuest(guest:Guest):void
+		{
+			var lock:MultiLock = new MultiLock;
+			lock.addEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
+			lock.addEventListener(MultiLock.EVENT_DEAD, lockHandler);
+			
+			for (var i:int = 0; i < compilerList.length; i++) 
+			{
+				if(compilerList[i].initGuest(guest, lock))
+					break;
+			}
+			
+			if(lock.isFree)
+			{
+				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+			}
+			
+			function lockHandler(event:Event):void
+			{
+				lock.removeEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
+				lock.removeEventListener(MultiLock.EVENT_DEAD, lockHandler);
+				
+				if(MultiLock.EVENT_UNLOCKED == event.type)
+				{
+					logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+				}
+				else
+				{
+					logf("[{0}] 客户端[{1}]初始化失败：{2}", DesignerConst.PLUGIN_NAME, guest.id, MultiLock(event.target).locks);
+				}
+			}
+		}
 	
 		
 		//////////////////////////////////////////////////////////////////////////////
@@ -195,7 +235,7 @@ package potato.designer.plugin.uidesigner
 			if(_rootCompilerProfile)
 				update(_rootCompilerProfile);
 			
-			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin("UIDesigner"))
+			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
 			{
 				i.send(DesignerConst.S2C_UPDATE, [_rootCompilerProfile && _rootCompilerProfile.targetProfile, _foldPath, _focusIndex]);
 			}

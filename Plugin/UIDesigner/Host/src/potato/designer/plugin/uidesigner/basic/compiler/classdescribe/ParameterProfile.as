@@ -5,7 +5,7 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 	 * @author Just4test
 	 * 
 	 */
-	public class ParameterProfile
+	public class ParameterProfile implements ITypeValue
 	{
 		protected var _xml:XML;
 		protected var _type:String;
