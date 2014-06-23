@@ -1,7 +1,7 @@
 {
 	"id":"UIDesigner",
 	"version":1,
-	"depend":[],
+	"depend":["Window"],
 	"startLevel":10,
 	"hostFile":"PluginUIDesignerHost.swc",
 	"hostClass":"potato.designer.plugin.uidesigner.UIDesignerHost",

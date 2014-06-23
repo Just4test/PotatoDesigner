@@ -1,11 +1,15 @@
 package potato.designer.plugin.uidesigner.basic.interpreter
 {
+	import flash.utils.IDataInput;
+	import flash.utils.IDataOutput;
+	import flash.utils.IExternalizable;
+
 	/**
 	 *基础类描述文件
 	 * @author Just4test
 	 * 
 	 */
-	public class BasicClassProfile
+	public class BasicClassProfile implements IExternalizable
 	{
 		public static const TYPE_ACCESSOR:int = 1;
 		public static const TYPE_METHOD:int = 2;
@@ -17,7 +21,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		protected var _memberTypeTable:Object = {};
 		protected var _memberParameterTable:Object = {};
 		
-		public function BasicClassProfile(className:String)
+		public function BasicClassProfile(className:String = null)//从二进制数据流恢复对象，必须具有0参构造方法
 		{
 			_className = className;
 		}
@@ -30,7 +34,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 */
 		public function setMethod(name:String, types:Vector.<String>):void
 		{
-			_memberTypeTable[name] = TYPE_ACCESSOR;
+			_memberTypeTable[name] = TYPE_METHOD;
 			_memberParameterTable[name] = types;
 		}
 		
@@ -42,18 +46,18 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 */
 		public function getMethodParameters(name:String):Vector.<String>
 		{
-			return _memberParameterTable[name];
+			return Vector.<String>(_memberParameterTable[name]);
 		}
 		
 		public function setAccessor(name:String, type:String):void
 		{
 			_memberTypeTable[name] = TYPE_ACCESSOR;
-			_memberParameterTable[name] = type;
+			_memberParameterTable[name] = Vector.<String>([type]);
 		}
 		
 		public function getAccessorType(name:String):String
 		{
-			return _memberParameterTable[name];
+			return _memberParameterTable[name][0];
 		}
 		
 		/**
@@ -93,6 +97,23 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		{
 			_constructorTypes = value;
 		}
-
+		
+		public function readExternal(input:IDataInput):void
+		{
+			_className = input.readUTF();
+			_constructorTypes = Vector.<String>(input.readObject());//因为从序列化中恢复时，所有Vector会变为Vector.<Object>
+			_memberTypeTable = input.readObject();
+			_memberParameterTable = input.readObject();
+			
+		}
+		
+		public function writeExternal(output:IDataOutput):void
+		{
+			output.writeUTF(_className);
+			output.writeObject(_constructorTypes);
+			output.writeObject(_memberTypeTable);
+			output.writeObject(_memberParameterTable);
+		}
+		
 	}
 }

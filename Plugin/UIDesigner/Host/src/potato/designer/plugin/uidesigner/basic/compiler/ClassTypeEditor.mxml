@@ -7,7 +7,6 @@
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
-	<!---本UI从代码创建，需要对skinClass手动赋值 -->
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayList;

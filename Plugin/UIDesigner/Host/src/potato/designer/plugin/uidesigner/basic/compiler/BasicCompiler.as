@@ -87,10 +87,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			}
 			
 			tp.className = cp.className;
-			if(cp.constructor.hasDefaultValue)
-			{
-				tp.constructorParam = Vector.<*>(cp.constructor.defaultValue);
-			}
+			tp.constructorParam = cp.constructor.hasDefaultValue ? Vector.<*>(cp.constructor.defaultValue) : new Vector.<*>();
 			
 			return false;
 		}
@@ -153,7 +150,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			//向客户端传输组件配置文件
 			for each(var g:Guest in GuestManagerHost.getGuestsWithPlugin("UIDesigner"))
 			{
-				g.send(BasicConst.S2C_REG_CLASS, [nickName, classProfile.getTypeProfile()]);
+				g.send(BasicConst.S2C_REG_CLASS, classProfile.getClientProfile());
 			}
 		}
 		

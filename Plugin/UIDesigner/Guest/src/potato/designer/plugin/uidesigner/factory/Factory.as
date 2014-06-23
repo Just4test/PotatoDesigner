@@ -99,21 +99,21 @@ package potato.designer.plugin.uidesigner.factory
 					break;
 			}
 			
-			//构建子组件
 			if(profile.children)
 			{
+				//构建子组件
 				tree.children = new Vector.<TargetTree>;
 				for (i = 0; i < profile.children.length; i++) 
 				{
 					tree.children[i] = compileProfile(profile.children[i]);
 				}
-			}
-			
-			//安装子组件
-			for (i = 0; i < interpreterList.length; i++) 
-			{
-				if(interpreterList[i].addChildren(profile, tree))
-					break;
+				
+				//安装子组件
+				for (i = 0; i < interpreterList.length; i++) 
+				{
+					if(interpreterList[i].addChildren(profile, tree))
+						break;
+				}
 			}
 			
 			

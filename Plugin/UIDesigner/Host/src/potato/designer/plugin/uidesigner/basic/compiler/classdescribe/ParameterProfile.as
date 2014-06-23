@@ -41,7 +41,7 @@ package potato.designer.plugin.uidesigner.basic.compiler.classdescribe
 		
 		public function get optional():Boolean
 		{
-			return _xml.@optional;
+			return "true" == _xml.@optional;
 		}
 		
 		protected var _defaultValue:*;

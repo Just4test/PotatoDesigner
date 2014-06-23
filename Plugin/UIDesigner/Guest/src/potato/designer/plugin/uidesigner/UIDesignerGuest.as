@@ -3,8 +3,11 @@ package potato.designer.plugin.uidesigner
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
 	
+	import core.display.DisplayObject;
 	import core.display.Stage;
 	
+	import potato.designer.framework.DesignerEvent;
+	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
@@ -30,7 +33,20 @@ package potato.designer.plugin.uidesigner
 			
 			UI.init();
 			
-			info.started();
+			info.started();	
+			
+			EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
+			GuestManagerGuest.startHostDiscovery();
+			
+		}
+		
+		protected function hostDiscoverdHandler(event:DesignerEvent):void
+		{
+			if(event.data.length)
+			{
+				GuestManagerGuest.tryConnect(event.data[0]);
+				GuestManagerGuest.stopHostDiscovery();
+			}
 		}
 		
 		/**根组件描述文件*/
@@ -88,11 +104,17 @@ package potato.designer.plugin.uidesigner
 			_foldPath = msg.data[1];
 			_focusIndex = msg.data[2];
 			
-			_rootTargetTree = Factory.compileProfile(msg.data);
+			_rootTargetTree = Factory.compileProfile(_rootTargetProfile);
+			log("根组件",_rootTargetTree.target);
+			if(_rootTargetTree.target is DisplayObject)
+			{
+				log(_rootTargetTree.target.width, _rootTargetTree.target.height);
+			}
 			
 			_rootSubstitute = makeSubstitute(_rootTargetTree, _foldPath, _focusIndex);
 			
 			Stage.getStage().addChild(_rootSubstitute);
+			Stage.getStage().addChild(_rootTargetTree.target);
 			
 		}
 		

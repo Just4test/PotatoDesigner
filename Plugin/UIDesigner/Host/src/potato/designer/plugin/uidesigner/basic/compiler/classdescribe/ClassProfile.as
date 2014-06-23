@@ -178,7 +178,7 @@ public class ClassProfile {
 		return _memberMap[name];
 	}
 	
-	public function getTypeProfile():BasicClassProfile
+	public function getClientProfile():BasicClassProfile
 	{
 		var ret:BasicClassProfile = new BasicClassProfile(_className);
 		ret.constructorTypes = getTypes(_constructor);

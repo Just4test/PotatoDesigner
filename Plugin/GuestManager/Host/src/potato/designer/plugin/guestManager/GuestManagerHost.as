@@ -183,14 +183,18 @@ package potato.designer.plugin.guestManager
 		 */
 		public static function activate(guest:Guest):Boolean
 		{
-			if(!guest.connected || -1 == _guestList.indexOf(guest))
+			if(guest && (!guest.connected || -1 == _guestList.indexOf(guest)))
 			{
 				return false;
 			}
 			
 			_activatedGuest = guest;
 			
-			log("[GuestManager] 客户端" + guest.id.toString(16) + "成为当前的激活客户端。");
+			if(guest)
+				log("[GuestManager] 客户端" + guest.id.toString(16) + "成为当前的激活客户端。");
+			else
+				log("[GuestManager] 当前没有激活客户端。");
+			
 			EventCenter.dispatchEvent(new DesignerEvent(EVENT_GUEST_ACTIVATED, guest));
 			return _activatedGuest == guest;//万一有个贱B侦听这个消息然后激活一个其他的guest
 		}
@@ -297,13 +301,18 @@ package potato.designer.plugin.guestManager
 		
 		private static function completeClose(guest:Guest, reason:String):void
 		{
-			if(_activatedGuest == guest)
+			if(guest == _activatedGuest)
 			{
+				var newAct:Guest;
 				for each(var i:Guest in _guestList)
 				{
-					if(activate(i))
+					if(i.connected)
+					{
+						newAct = i;
 						break;
+					}
 				}
+				activate(newAct);
 			}
 			
 			guest._activedPlugins.length = 0;

@@ -2,12 +2,15 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 {
 	import flash.net.registerClassAlias;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
 	
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	import core.display.Texture;
 	import core.display.TextureData;
 	
+	import potato.designer.framework.DesignerEvent;
+	import potato.designer.framework.EventCenter;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	import potato.designer.plugin.uidesigner.ITargetProfile;
@@ -25,7 +28,9 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	 * 
 	 */
 	public class BasicInterpreter implements IInterpreter
-	{	
+	{
+		protected static const CONSTRUCTOR_NAME:String = "__J4T_CONSTRUCTOR__";
+		
 		public static function init():void
 		{
 			
@@ -72,7 +77,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		
 		protected static function regClassHandler(msg:Message):void
 		{
-			log(msg.data);
 			setClassProfile(msg.data);
 		}
 		
@@ -115,62 +119,78 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 */
 		protected static function setClassProfile(profile:BasicClassProfile):void
 		{
+			log("[基础编译器] 注册了类配置文件", profile.className);
 			_classTable[profile.className] = profile;
 			var memberTable:Object = {};
 			_classMemberTable[profile.className] = memberTable;
-			
-			for each(var i:String in profile.memberTypeTable) 
+
+			//创建参数序列生成函数
+			for(var i:String in profile.memberTypeTable) 
 			{
 				var types:Vector.<String> = profile.getMethodParameters(i);
+				addFunction(i, profile.getMethodParameters(i));
+			}
+
+			addFunction(CONSTRUCTOR_NAME, profile.constructorTypes);
+			
+			function addFunction(name:String, types:Vector.<String>):void
+			{
 				var translaters:Vector.<Function> = new Vector.<Function>;
 				
-				for each(var j:String in types)
+				for(var i:int = 0; i < types.length; i++)
 				{
-					var typeProfile:BasicTypeProfile = _typeTable[j];
+					var type:String = types[i];
+					if(!type)
+						break;
+					var typeProfile:BasicTypeProfile = _typeTable[type];
 					if(!typeProfile)
-						throw new Error("[基础解释器] 指定的type未注册：" + j);
+						throw new Error("[基础解释器] 指定的type未注册：" + type);
+					translaters[i] = typeProfile.translater;
 				}
 				
-				
-				memberTable[i] = function(paras:Array):Array
-				{
-					CONFIG::DEBUG
+				memberTable[name] = 
+					function(paras:Vector.<Object>):Array
 					{
-						if(paras.length > translaters.length)
+						var ret:Array = [];
+						CONFIG::DEBUG
 						{
-							throw new Error("[基础解释器] 给予的参数比需要的参数多：" + profile.className + "::" + i);
-						}
-					}
-					
-					var ret:Array = [];
-					for(var j:int = 0; j < paras.length; j++)
-					{
-						var translater:Function = translaters[i];
-						
-						if(CONFIG::DEBUG)
-						{
-							var value:*;
-							try
+							if(paras.length > translaters.length)
 							{
-								value = translater ? translater(paras[i]): paras[i];
-								ret.push(value);
-							} 
-							catch(error:Error) 
-							{
-								throw new Error("[基础解释器] 将\"" + paras[i] + "\"转换为[" + i + "]类型时发生错误" + error);
+								throw new Error("[基础解释器] 给予的参数比需要的参数多：" + profile.className + "::" + name);
 							}
 						}
-						else
+						
+						for(var j:int = 0; j < paras.length; j++)
 						{
-							ret.push(translater ? translater(paras[i]): paras[i]);
+							var translater:Function = translaters[j];
+							
+							if(CONFIG::DEBUG)
+							{
+								var value:*;
+								try
+								{
+									value = translater ? translater(paras[j]): paras[j];
+									ret.push(value);
+								} 
+								catch(error:Error) 
+								{
+									throw new Error("[基础解释器] 将\"" + paras[j] + "\"转换为所需类型时发生错误" + error);
+								}
+							}
+							else
+							{
+								ret.push(translater ? translater(paras[j]): paras[j]);
+							}
+							
+							
 						}
-						
-						
+						return ret;
 					}
-					return ret;
-					
-				}
 			}
+			
+			
+			
+			
 		}
 		
 		/**
@@ -205,7 +225,9 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			var component:* = tree.target;
 			if(!component)
 			{
-				var array:Array = _classMemberTable[basicProfile.className][basicProfile.className](basicProfile.getConstructor());
+				
+				var memberTable:Object = _classMemberTable[basicProfile.className];
+				var array:Array = memberTable[CONSTRUCTOR_NAME](basicProfile.constructorParam);
 				var C:Class = getDefinitionByName(basicProfile.className) as Class;
 				switch(array.length)
 				{
@@ -249,7 +271,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			}
 			
 			//遍历
-			var memberTable:Object = _classMemberTable[basicProfile.className];
 			for each (var member:BasicTargetMemberProfile in basicProfile.member) 
 			{
 				var name:String = member.name;
@@ -282,9 +303,10 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		public function addChildren(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
 			var container:DisplayObjectContainer = tree.target as DisplayObjectContainer;
+			EventCenter.dispatchEvent(new DesignerEvent("show", [profile, tree]));
 			for (var i:int = 0; i < tree.children.length; i++) 
 			{
-				var disObj:DisplayObject = tree.children[i] as DisplayObject;
+				var disObj:DisplayObject = tree.children[i].target as DisplayObject;
 				if(disObj)
 				{
 					container.addChild(disObj);

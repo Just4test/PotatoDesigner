@@ -294,7 +294,7 @@ package potato.designer.net
 				} 
 				catch(error:Error) 
 				{
-					CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。");}
+					CONFIG::DEBUG{trace("[Connection] 协议错误，连接崩溃。这可能是因为您连接到了一个非Connection管理的Socket，或者Connection版本不兼容。", error);}
 					dispatchEvent(new Event(EVENT_CRASH));
 					close();
 				}
