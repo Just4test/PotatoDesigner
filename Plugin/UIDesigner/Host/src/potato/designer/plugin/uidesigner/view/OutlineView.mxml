@@ -2,13 +2,134 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/mx"
-		 width="200" height="400">
+		 width="200" height="400" initialize="initializeHandler(event)">
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			protected var _rootXml:XML
+			
+			public function clear():void
+			{
+				_rootXml = <root name="尚未添加根组件"></root>;
+				tree.dataProvider = _rootXml
+			}
+			
+			public function add(name:String, path:Vector.<uint>):void
+			{
+				//当仅仅具有根组件时，showRoot=false失效，且添加了子组件也不会立即重新启用。需要做一下改变以触发相关重绘
+				if(!_rootXml.children().length())
+				{
+					tree.showRoot = true;
+					tree.showRoot = false;
+				}
+				
+				var childIndex:uint = path.pop();
+				var parent:XML = getXmlByPath(path);
+				var children:XMLList = parent.children();
+				var newNode:XML = <node name={name}/>;
+				if(!children.length())
+				{
+					parent.appendChild(newNode);
+				}
+				else
+				{
+					if(0 == childIndex)
+					{
+						parent.insertChildBefore(children[0], newNode);
+					}
+					else
+					{
+						parent.insertChildAfter(children[childIndex - 1], newNode);
+					}
+				}
+			}
+			
+			public function rename(name:String, path:Vector.<uint>):void
+			{
+				var xml:XML = getXmlByPath(path);
+				xml.@name = name;
+			}
+			
+			public function remove(path:Vector.<uint>):void
+			{
+				delete getXmlByPath(path);
+			}
+			
+			public function moveTree(path:Vector.<uint>, newPath:Vector.<uint>):void
+			{
+				//新路径不能是原路径的子路径
+				if(newPath.length > path.length)
+				{
+					var flag:Boolean;
+					for (var i:int = 0; i < path.length; i++) 
+					{
+						if(path[i] != newPath[i])
+						{
+							flag = true;
+							break;
+						}
+					}
+					if(!flag)
+						throw new Error("移动组件树时，新路径被指定为原有路径的子路径。");
+					
+				}
+				
+				var node:XML = getXmlByPath(path);
+				var childIndex:uint = newPath.pop();
+				var newParent:XML = getXmlByPath(newPath);
+				var children:XMLList = newParent.children();
+				
+				delete getXmlByPath(path);
+				
+				if(!children.length())
+				{
+					newParent.appendChild(node);
+				}
+				else
+				{
+					if(0 == childIndex)
+					{
+						newParent.insertChildBefore(children[0], node);
+					}
+					else
+					{
+						newParent.insertChildAfter(children[childIndex - 1], node);
+					}
+				}
+			}
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				clear();
+			}
+			
+			protected function getXmlByPath(path:Vector.<uint>):XML
+			{
+				var xml:XML = _rootXml;
+				for each(var index:uint in path)
+				{
+					xml = xml.children()[index];
+				}
+				return xml;
+			}
+			
+			protected function pathToIndex(path:Vector.<uint>):int
+			{
+				return 0;
+			}
+			
+		]]>
+	</fx:Script>
+	
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Label text="大纲视图"/>
-	<mx:Tree id="tree" width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.view.OutlineTreeItem" showRoot="false"></mx:Tree>
+	<mx:Tree id="tree" width="100%" height="100%" showRoot="false"
+			 itemRenderer="potato.designer.plugin.uidesigner.view.OutlineViewItem" ></mx:Tree>
 </s:Group>

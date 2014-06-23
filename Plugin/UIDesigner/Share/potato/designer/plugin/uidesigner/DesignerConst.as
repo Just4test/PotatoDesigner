@@ -21,6 +21,8 @@ package potato.designer.plugin.uidesigner
 		 */		
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";
 		
+		public static const PLUGIN_NAME:String = "UIDesigner";
+		
 		
 		
 		
@@ -56,7 +58,14 @@ package potato.designer.plugin.uidesigner
 			 */
 			public static const EVENT_EXPORT_FAILED:String = "UID_EVENT_EXPORT_FAILED";
 			
-			public static const PLUGIN_NAME:String = "UIDesigner";
+			/**单击大纲条目，执行选中操作*/
+			public static const OUTLINE_ITEM_CLICK:String = "OUTLINE_ITEM_CLICK";
+			
+			/**双击大纲条目，执行展开操作*/
+			public static const OUTLINE_ITEM_DOUBLE_CLICK:String = "OUTLINE_ITEM_DOUBLE_CLICK";
+			
+			/**在大纲条目上右键删除*/
+			public static const OUTLINE_ITEM_DELETE:String = "OUTLINE_ITEM_DELETE";
 		}
 	}
 }

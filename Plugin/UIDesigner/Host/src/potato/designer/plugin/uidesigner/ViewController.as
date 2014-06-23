@@ -31,7 +31,6 @@ package potato.designer.plugin.uidesigner
 		
 		/**组件视图*/
 		protected static var _componentTypeView:ComponentView;
-		/**大纲视图*/
 		protected static var _outlineView:OutlineView;
 		
 		/***更改了视图列表后调用此方法，以便应用更改。*/
@@ -74,7 +73,7 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
-		internal static function init(componentTypeViewDataProvider:ArrayList, outlineTree:XML, componentTypeCreaterDataProvider:ArrayList):void
+		internal static function init(componentTypeViewDataProvider:ArrayList, componentTypeCreaterDataProvider:ArrayList):void
 		{
 			
 			//注册视图并显示窗口
@@ -87,11 +86,16 @@ package potato.designer.plugin.uidesigner
 			window0Views.push(_componentTypeView);
 			
 			_outlineView = new OutlineView;
-			
-			_outlineView.tree.dataProvider = outlineTree
+
 			window0Views.push(_outlineView);
 			
 			updateWindow();
+		}
+
+		/**大纲视图*/
+		public static function get outlineView():OutlineView
+		{
+			return _outlineView;
 		}
 		
 		

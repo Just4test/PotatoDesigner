@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXTreeItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  dataChange="_dataChangeHandler(event)"
+                      click="_clickHandler(event)"
+                      doubleClick="_doubleClickHandler(event)"
+                      doubleClickEnabled="true">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import potato.designer.framework.DesignerEvent;
+			import potato.designer.framework.EventCenter;
+			import potato.designer.plugin.uidesigner.DesignerConst;
+
+            protected function _clickHandler(event:MouseEvent):void
+            {
+                EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.OUTLINE_ITEM_CLICK, treeListData.item));
+				
+            }
+
+            protected function _doubleClickHandler(event:MouseEvent):void
+            {
+                EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.OUTLINE_ITEM_DOUBLE_CLICK, treeListData.item));
+            }
+			
+			protected function _dataChangeHandler(event:FlexEvent):void
+			{
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="normal" />            
+		<s:State name="hovered" />
+		<s:State name="selected" />
+	</s:states>
+	<s:HGroup left="0" right="0" top="0" bottom="0" verticalAlign="middle">
+		<s:Rect id="indentationSpacer" width="{treeListData.indent}" percentHeight="100" alpha="0">
+			<s:fill>
+				<s:SolidColor color="0xFFFFFF" />
+			</s:fill>
+		</s:Rect>
+		<s:Group id="disclosureGroup">
+			<s:BitmapImage source="{treeListData.disclosureIcon}" visible="{treeListData.hasChildren}" />
+		</s:Group>
+		<s:BitmapImage source="{treeListData.icon}" />
+		<s:Label id="labelField" text="{(treeListData.item as XML).@name }" paddingTop="2"/>
+	</s:HGroup>
+</s:MXTreeItemRenderer>

@@ -2,7 +2,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 {
 	import flash.net.registerClassAlias;
 	import flash.utils.getDefinitionByName;
-	import flash.utils.getQualifiedClassName;
 	
 	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;

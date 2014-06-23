@@ -27,9 +27,6 @@ package potato.designer.plugin.uidesigner
 		/**组件视图数据提供程序*/
 		protected static var _componentTypeViewDataProvider:ArrayList;
 		
-		/**大纲视图数据提供程序*/
-		protected static var _outlineTree:XML;
-		
 		/**添加组件菜单数据提供程序*/
 		protected static var _componentTypeCreaterDataProvider:ArrayList;
 		
@@ -37,13 +34,12 @@ package potato.designer.plugin.uidesigner
 		public function start(info:PluginInfo):void
 		{
 			_componentTypeViewDataProvider = new ArrayList;
-			_outlineTree = <root/>;
 			_componentTypeCreaterDataProvider = new ArrayList;
 			
 			clearStage();
 			
 			//初始化UI
-			ViewController.init(_componentTypeViewDataProvider, _outlineTree, _componentTypeCreaterDataProvider);
+			ViewController.init(_componentTypeViewDataProvider, _componentTypeCreaterDataProvider);
 			
 			//初始化基础编译器
 			BasicCompiler.init(info);
@@ -90,7 +86,7 @@ package potato.designer.plugin.uidesigner
 			
 			if(lock.isFree)
 			{
-				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+				finishInit();
 			}
 			
 			function lockHandler(event:Event):void
@@ -100,12 +96,19 @@ package potato.designer.plugin.uidesigner
 				
 				if(MultiLock.EVENT_UNLOCKED == event.type)
 				{
-					logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+					finishInit();
 				}
 				else
 				{
 					logf("[{0}] 客户端[{1}]初始化失败：{2}", DesignerConst.PLUGIN_NAME, guest.id, MultiLock(event.target).locks);
 				}
+			}
+			
+			function finishInit():void
+			{
+				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+				
+				guest.send(DesignerConst.S2C_UPDATE, [_rootCompilerProfile && _rootCompilerProfile.targetProfile, _foldPath, _focusIndex]);
 			}
 		}
 	
@@ -320,6 +323,29 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static function addComponent(type:String):void
 		{
+			if(!_foldPath.length)
+			{
+				if(_rootCompilerProfile)
+				{
+					//根组件不是容器却尝试创建子组件
+					if(_componentTypeTable[_rootCompilerProfile.type].isContainer)
+					{
+						logf("[{0}] 根组件不是容器，因此无法添加组件。", DesignerConst.PLUGIN_NAME);
+						return;
+					}
+				}
+				else
+				{
+					//如果尝试创建一个不是容器的根组件
+					if(!_componentTypeTable[type].isContainer)
+					{
+						logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
+					}
+				}
+			}
+			
+			
+			
 			var cp:CompilerProfile = new CompilerProfile(type);
 			
 			for (var i:int = 0; i < compilerList.length; i++) 
@@ -337,7 +363,13 @@ package potato.designer.plugin.uidesigner
 			else
 			{
 				_rootCompilerProfile = cp;
+				if(_componentTypeTable[type].isContainer)
+				{
+					_foldPath.push(0);
+				}
 			}
+			
+			ViewController.outlineView.add(type, _foldPath);
 			
 			updateGuest();
 			

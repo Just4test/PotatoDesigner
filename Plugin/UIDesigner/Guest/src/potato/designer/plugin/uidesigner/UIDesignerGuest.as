@@ -99,7 +99,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
-			log("!!!!!!!!!!!updateHandler!!!!!!!!!!!!!")
+			logf("更新组件树，展开路径{0}，焦点索引{1}", msg.data[1], msg.data[2])
 			_rootTargetProfile = msg.data[0];
 			_foldPath = msg.data[1];
 			_focusIndex = msg.data[2];
@@ -138,30 +138,32 @@ package potato.designer.plugin.uidesigner
 			ret.selected = -2 == focus;
 			ret.unfolded = null != fold;
 			
-			
-			for (var i:int = 0; i < targetTree.children.length; i++) 
+			if(targetTree.children)
 			{
-				var subFold:Vector.<uint> = null;
-				var subFocus:int = -1;
-				
-				if(fold)//如果处在路径上
+				for (var i:int = 0; i < targetTree.children.length; i++) 
 				{
-					if(fold.length)//如果还有子路径，确定子fold
+					var subFold:Vector.<uint> = null;
+					var subFocus:int = -1;
+					
+					if(fold)//如果处在路径上
 					{
-						if(i == fold[0])
+						if(fold.length)//如果还有子路径，确定子fold
 						{
-							subFold = fold.slice(1);
-							subFocus = focus;
-							
+							if(i == fold[0])
+							{
+								subFold = fold.slice(1);
+								subFocus = focus;
+								
+							}
+						}
+						else//没有子路径了，确定focus
+						{
+							subFocus = i == focus ? -2 : -1;
 						}
 					}
-					else//没有子路径了，确定focus
-					{
-						subFocus = i == focus ? -2 : -1;
-					}
+					
+					makeSubstitute(targetTree.children[i], subFold, subFocus, ret);
 				}
-
-				makeSubstitute(targetTree.children[i], subFold, subFocus, ret);
 			}
 			
 			
