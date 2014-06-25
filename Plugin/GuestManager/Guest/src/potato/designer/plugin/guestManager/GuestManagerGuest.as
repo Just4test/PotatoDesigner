@@ -122,7 +122,6 @@ package potato.designer.plugin.guestManager
 			
 			while(_udpSocket.receive(bytes) > 0)
 			{
-				trace("收到组播消息！", bytes.length);
 				try
 				{
 					if(NetConst.HOST_MULTICAST_PORT == _udpSocket.remotePort && NetConst.S2C_HELLO == bytes.readUTFBytes(bytes.length))

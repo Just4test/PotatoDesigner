@@ -122,6 +122,7 @@ public class ComponentSubstitute extends UIComponent
     public function refresh():void
     {
         addEventListener(Event.ENTER_FRAME, actualRefersh);
+		actualRefersh(null);
     }
 
     protected function actualRefersh(e:Event):void
@@ -129,6 +130,7 @@ public class ComponentSubstitute extends UIComponent
         removeEventListener(Event.ENTER_FRAME, actualRefersh);
 
 		_image ||= new Image(null);
+		addChild(_image);
 		
         var displayObj:DisplayObject = _prototype as DisplayObject;
         if(!displayObj)
@@ -144,37 +146,31 @@ public class ComponentSubstitute extends UIComponent
 		var bounes:Rectangle = displayObj.getBounds(displayObj);
 		
 
-
-
-        if(bounes.width && bounes.height)
-        {
-            //绘制原型自身
-            if(_unfolded)//暂时隐藏所有子节点
-            {
-                var hidden:Array = new Array;
-                for each(var iSubstitute:ComponentSubstitute in subSubstitutes)
-                {
-                    var subDisplayObject:DisplayObject = iSubstitute._prototype as DisplayObject;
-                    if(subDisplayObject && subDisplayObject.visible)
-                    {
-                        hidden.push(subDisplayObject);
-                        subDisplayObject.visible = false
-                    }
-                }
-            }
-			
-			var renderTexture:RenderTexture = new RenderTexture(bounes.width || 1, bounes.height || 1);//防止显示对象尺寸为0
-			renderTexture.draw(displayObj);
-			
-            if(_unfolded)//重新显示隐藏的子节点
-            {
-                while(hidden.length)
-                {
-                    hidden.pop().visible = true;
-                }
-            }
-
-        }
+		//绘制原型自身
+		if(_unfolded)//暂时隐藏所有子节点
+		{
+			var hidden:Array = new Array;
+			for each(var iSubstitute:ComponentSubstitute in subSubstitutes)
+			{
+				var subDisplayObject:DisplayObject = iSubstitute._prototype as DisplayObject;
+				if(subDisplayObject && subDisplayObject.visible)
+				{
+					hidden.push(subDisplayObject);
+					subDisplayObject.visible = false
+				}
+			}
+		}
+		
+		var renderTexture:RenderTexture = new RenderTexture(bounes.width || 1, bounes.height || 1);//防止显示对象尺寸为0
+		renderTexture.draw(displayObj);
+		
+		if(_unfolded)//重新显示隐藏的子节点
+		{
+			while(hidden.length)
+			{
+				hidden.pop().visible = true;
+			}
+		}
 		
 		
 		
@@ -188,6 +184,8 @@ public class ComponentSubstitute extends UIComponent
         }
 		
 		_image.texture = renderTexture;
+		
+		logf("替身重绘完成!宽度{0} 高度{1} 原型{2}，{3}, {4}", width, height, _prototype, _parentSubstitute && _parentSubstitute._prototype, parent);
     }
 
     /**

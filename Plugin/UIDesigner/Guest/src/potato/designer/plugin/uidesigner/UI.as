@@ -8,8 +8,6 @@ package potato.designer.plugin.uidesigner
 	import core.display.RenderTexture;
 	import core.display.Stage;
 	import core.display.SuperTexture;
-	import core.display.Texture;
-	import core.display.TextureData;
 	
 	import potato.designer.plugin.uidesigner.factory.TargetTree;
 	
@@ -22,6 +20,7 @@ package potato.designer.plugin.uidesigner
 		protected static var _stageHeight:int;
 		protected static var _stageBackground:Image;
 		protected static var _stageContainer:DisplayObjectContainer;
+
 		
 		protected static var _foldPath:Vector.<uint>;
 		protected static var _focus:int;

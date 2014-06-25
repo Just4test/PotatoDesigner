@@ -2,6 +2,7 @@ package potato.designer.plugin.uidesigner
 {
 	
 	import flash.events.Event;
+	import flash.net.registerClassAlias;
 	
 	import mx.collections.ArrayList;
 	
@@ -33,6 +34,8 @@ package potato.designer.plugin.uidesigner
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
+			registerClassAlias("ITargetProfile", ITargetProfile);
+			
 			_componentTypeViewDataProvider = new ArrayList;
 			_componentTypeCreaterDataProvider = new ArrayList;
 			
@@ -328,7 +331,7 @@ package potato.designer.plugin.uidesigner
 				if(_rootCompilerProfile)
 				{
 					//根组件不是容器却尝试创建子组件
-					if(_componentTypeTable[_rootCompilerProfile.type].isContainer)
+					if(!_componentTypeTable[_rootCompilerProfile.type].isContainer)
 					{
 						logf("[{0}] 根组件不是容器，因此无法添加组件。", DesignerConst.PLUGIN_NAME);
 						return;
@@ -358,7 +361,7 @@ package potato.designer.plugin.uidesigner
 			
 			if(folder)
 			{
-				folder.addChildAt(cp, _focusIndex);
+				folder.addChildAt(cp, _focusIndex + 1);
 			}
 			else
 			{

@@ -33,10 +33,10 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		 */
 		protected static var _paramTypeTable:Object;
 		
-		/**类昵称到类描述文件映射表*/
-		protected static var _classProfileNickTable:Object = {};
+		/**类名到类描述文件映射表*/
+		protected static var _className2ProfileTable:Object = {};
 		/**类昵称到类名映射表*/
-		protected static var _classProfileNameTable:Object = {};
+		protected static var _nickName2ClassNameTable:Object = {};
 		
 		
 		public static const instance:BasicCompiler = new BasicCompiler;
@@ -65,7 +65,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		
 		public function addTarget(profile:CompilerProfile):Boolean
 		{
-			var cp:ClassProfile = _classProfileNickTable[profile.type];
+			var cp:ClassProfile = getClassProfileByNickName(profile.type);
 			if(!cp)
 			{
 				return false;
@@ -87,7 +87,15 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			}
 			
 			tp.className = cp.className;
-			tp.constructorParam = cp.constructor.hasDefaultValue ? Vector.<*>(cp.constructor.defaultValue) : new Vector.<*>();
+			
+			if(cp.constructor && cp.constructor.hasDefaultValue)
+			{
+				tp.constructorParam = Vector.<*>(cp.constructor.defaultValue);
+			}
+			else
+			{
+				tp.constructorParam = new Vector.<*>();
+			}
 			
 			return false;
 		}
@@ -108,7 +116,15 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		
 		public function initGuest(guest:Guest, lock:MultiLock):Boolean
 		{
-			//请求type
+			//传送类配置文件表
+			var classTable:Object = {};
+			for each(var i:ClassProfile in _className2ProfileTable)
+			{
+				classTable[i.className] = i.getClientProfile();
+			}
+			guest.send(BasicConst.S2C_PUSH_CLASS_TABLE, classTable);
+			
+			//请求type表
 			var typeLock:SubLock = lock.getLock("从Guest端获取type表");
 			guest.send(BasicConst.S2C_REQ_TYPE_TABLE, null,
 				function(msg:Message):void
@@ -134,17 +150,18 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		 */
 		public static function regClass(nickName:String, classProfile:ClassProfile):void
 		{
-			for(var i:String in _classProfileNickTable) 
+			//删除class对应的原有nickName
+			for(var i:String in _nickName2ClassNameTable) 
 			{
-				if(classProfile.className == _classProfileNickTable[i].className)
+				if(classProfile.className == _nickName2ClassNameTable[i])
 				{
-					delete _classProfileNickTable[i];
+					delete _nickName2ClassNameTable[i];
 					UIDesignerHost.removeComponentType(i);
 				}
 			}
 			
-			_classProfileNickTable[nickName] = classProfile;
-			_classProfileNameTable[classProfile.className] = classProfile;
+			_nickName2ClassNameTable[nickName] = classProfile.className;
+			_className2ProfileTable[classProfile.className] = classProfile;
 			UIDesignerHost.regComponentType(nickName, classProfile.isDisplayObjContainer);
 			
 			//向客户端传输组件配置文件
@@ -157,17 +174,21 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		/**
 		 *根据类昵称获取类配置文件 
 		 */
-		public static function getClassProfileByNickName(name:String):ClassProfile
+		public static function getClassProfileByNickName(nickName:String):ClassProfile
 		{
-			return _classProfileNickTable[name];
+			var className:String = _nickName2ClassNameTable[nickName];
+			if(className)
+				return _className2ProfileTable[className];
+			else
+				return null;
 		}
 		
 		/**
 		 *根据类全名获取类配置文件 
 		 */
-		public static function getClassProfileByClassName(name:String):ClassProfile
+		public static function getClassProfileByClassName(className:String):ClassProfile
 		{
-			return _classProfileNameTable[name];
+			return _className2ProfileTable[className];
 		}
 		
 		/**

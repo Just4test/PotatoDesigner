@@ -1,5 +1,6 @@
 package potato.designer.plugin.uidesigner
 {
+	import flash.net.registerClassAlias;
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
 	
@@ -20,6 +21,8 @@ package potato.designer.plugin.uidesigner
 	{	
 		public function start(info:PluginInfo):void
 		{
+			registerClassAlias("ITargetProfile", ITargetProfile);
+			
 			//注册消息
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_INIT, initDesignerHandler);
@@ -99,7 +102,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
-			logf("更新组件树，展开路径{0}，焦点索引{1}", msg.data[1], msg.data[2])
+			logf("更新组件树{2}，展开路径{0}，焦点索引{1}", msg.data[1], msg.data[2], msg.data[0]);
 			_rootTargetProfile = msg.data[0];
 			_foldPath = msg.data[1];
 			_focusIndex = msg.data[2];
@@ -111,9 +114,13 @@ package potato.designer.plugin.uidesigner
 				log(_rootTargetTree.target.width, _rootTargetTree.target.height);
 			}
 			
+			while(UI.designerStage.numChildren)
+				UI.designerStage.removeChildAt(0);
+			
 			_rootSubstitute = makeSubstitute(_rootTargetTree, _foldPath, _focusIndex);
 			
-			Stage.getStage().addChild(_rootSubstitute);
+			log("根替身",_rootSubstitute.width, _rootSubstitute.height);
+			
 			Stage.getStage().addChild(_rootTargetTree.target);
 			
 		}
@@ -133,10 +140,14 @@ package potato.designer.plugin.uidesigner
 				return null;
 			}
 			
+			logf("为{0}创建替身，{1}，{2}", targetTree.target, targetTree.target.width, targetTree.target.height);
 			var ret:ComponentSubstitute = new ComponentSubstitute(targetTree.target, parent);
 			
 			ret.selected = -2 == focus;
 			ret.unfolded = null != fold;
+			
+			logf("选中{0} 展开{1}", ret.selected, ret.unfolded);
+			
 			
 			if(targetTree.children)
 			{
@@ -167,6 +178,7 @@ package potato.designer.plugin.uidesigner
 			}
 			
 			
+			UI.designerStage.addChild(ret);
 			
 			return ret;
 		}

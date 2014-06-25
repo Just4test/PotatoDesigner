@@ -72,6 +72,7 @@ package potato.designer.plugin.uidesigner
 			}
 			
 			_children.splice(index, 0, child);
+
 			targetProfile.children.splice(index, 0, child.targetProfile);
 		}
 		

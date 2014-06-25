@@ -35,13 +35,18 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 */
 		public const membersParam:Vector.<Vector.<*>> = new Vector.<Vector.<*>>;
 		
-		protected const _children:Vector.<BasicTargetProfile> = new Vector.<BasicTargetProfile>;
+		protected var _children:Vector.<ITargetProfile> = new Vector.<ITargetProfile>;
+		
 		
 		public function get children():Vector.<ITargetProfile>
 		{
-			return _children as Vector.<ITargetProfile>;
+			return _children;
 		}
 		
+		public function set children(value:Vector.<ITargetProfile>):void
+		{
+			_children = value;
+		}
 		
 		CONFIG::HOST
 		{
@@ -114,6 +119,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				membersParam.push(Vector.<*>([value]));
 				
 			}
+
 		
 		}
 		
