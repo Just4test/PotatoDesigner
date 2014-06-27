@@ -19,6 +19,12 @@
 				tree.dataProvider = _rootXml
 			}
 			
+			public function setXml(xml:XML):void
+			{
+				_rootXml = xml;
+				tree.dataProvider = _rootXml
+			}
+			
 			public function add(name:String, path:Vector.<uint>):void
 			{
 				//当仅仅具有根组件时，showRoot=false失效，且添加了子组件也不会立即重新启用。需要做一下改变以触发相关重绘
@@ -118,9 +124,16 @@
 				return xml;
 			}
 			
-			protected function pathToIndex(path:Vector.<uint>):int
+			protected function getPathByXml(xml:XML):Vector.<uint>
 			{
-				return 0;
+				var path:Vector.<uint> = new Vector.<uint>;
+				var parent:XML;
+				while(parent = xml.parent())
+				{
+					path.unshift(xml.childIndex());
+					xml = parent;
+				}
+				return path;
 			}
 			
 		]]>

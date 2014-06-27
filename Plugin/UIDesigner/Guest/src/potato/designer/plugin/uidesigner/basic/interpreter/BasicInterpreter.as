@@ -353,8 +353,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			return false;
 		}
 		
-		//////////////////////基本的翻译器3+6-
-		////////////////////////////////////////
+		//////////////////////基本的翻译器////////////////////////////////////////
 		
 		protected static function getInt(value:String):int
 		{

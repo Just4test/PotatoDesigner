@@ -24,25 +24,26 @@ package potato.designer.plugin.uidesigner
 	 * 
 	 */
 	public class UIDesignerHost implements IPluginActivator
-	{		
-		/**组件视图数据提供程序*/
-		protected static var _componentTypeViewDataProvider:ArrayList;
+	{
 		
-		/**添加组件菜单数据提供程序*/
-		protected static var _componentTypeCreaterDataProvider:ArrayList;
+		/**编译器队列*/
+		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
+		
+		/**组件类型映射表*/
+		protected static const _componentTypeTable:Object = {};
+		
+		/**编译器配置文件树的根*/
+		protected static var _rootCompilerProfile:CompilerProfile;
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
 		{
 			registerClassAlias("ITargetProfile", ITargetProfile);
 			
-			_componentTypeViewDataProvider = new ArrayList;
-			_componentTypeCreaterDataProvider = new ArrayList;
-			
 			clearStage();
 			
 			//初始化UI
-			ViewController.init(_componentTypeViewDataProvider, _componentTypeCreaterDataProvider);
+			ViewController.init();
 			
 			//初始化基础编译器
 			BasicCompiler.init(info);
@@ -118,24 +119,8 @@ package potato.designer.plugin.uidesigner
 		
 		//////////////////////////////////////////////////////////////////////////////
 		
-		/**编译器队列*/
-		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
-		
-		
-		/**编译器配置文件树的根*/
-		protected static var _rootCompilerProfile:CompilerProfile;
-		
-		/**展开路径*/
 		protected static var _foldPath:Vector.<uint>;
-		/**焦点索引*/
 		protected static var _focusIndex:int;
-		
-		
-//		protected static var _multiLock:MultiLock;
-//		protected static var _componentProfile:Object;
-		
-		/**组件类型映射表*/
-		protected static const _componentTypeTable:Object = {};
 		
 		
 		
@@ -157,6 +142,9 @@ package potato.designer.plugin.uidesigner
 			return null;
 		}
 		
+		
+//		protected static var _multiLock:MultiLock;
+//		protected static var _componentProfile:Object;
 		/**
 		 *检查编译器是否锁定。当导出发布版本未完成时，编译器锁定。此时不应对组件配置有任何修改。
 		 */
@@ -178,7 +166,7 @@ package potato.designer.plugin.uidesigner
 		public static function regComponentType(name:String, isContainer:Boolean, icon:* = null):void
 		{
 			_componentTypeTable[name] = new ComponentType(name, isContainer, icon);
-			_componentTypeViewDataProvider.addItem(_componentTypeTable[name]);
+			ViewController.regComponentType(_componentTypeTable[name]);
 		}
 		
 		/**
@@ -191,40 +179,11 @@ package potato.designer.plugin.uidesigner
 		{
 			if(_componentTypeTable[name])
 			{
-				_componentTypeViewDataProvider.removeItem(_componentTypeTable[name]);
+				ViewController.removeComponentType(_componentTypeTable[name]);
 				delete _componentTypeTable[name];
 				return true;
 			}
 			return false;
-		}
-		
-		/**
-		 *注册组件类型创建器菜单项
-		 * <br>在设计器UI中，组件视图的左上角有一个添加组件下拉菜单。使用此方法注册新的菜单项
-		 * @param label 菜单项的标签
-		 * @param func 点击菜单项后调用的方法
-		 * 
-		 */
-		public static function regComponentTypeCreater(label:String, func:Function):void
-		{
-			_componentTypeCreaterDataProvider.addItem({label:label, func:func, toString:function():String{return label}});
-		}
-		
-		/**
-		 * 移除组件类型创建器菜单项
-		 * @param label 菜单项的标签
-		 * 
-		 */
-		public static function removeComponentTypeCreater(label:String):void
-		{
-			for(var i:int = 0; i < _componentTypeCreaterDataProvider.length; i++)
-			{
-				var obj:Object = _componentTypeCreaterDataProvider.getItemAt(i);
-				if(obj.label == label)
-				{
-					delete _componentTypeCreaterDataProvider.removeItem(obj)
-				}
-			}
 		}
 		
 //		protected static function 
@@ -365,18 +324,17 @@ package potato.designer.plugin.uidesigner
 			}
 			else
 			{
+				//正在创建根组件
 				_rootCompilerProfile = cp;
-				if(_componentTypeTable[type].isContainer)
+				if(_componentTypeTable[type].isContainer)//如果刚刚创建的根组件是容器，则展开该容器
 				{
 					_foldPath.push(0);
 				}
 			}
 			
-			ViewController.outlineView.add(type, _foldPath);
+			ViewController.addComponent(type);
 			
 			updateGuest();
-			
-			
 		}
 		
 		/**
@@ -407,34 +365,55 @@ package potato.designer.plugin.uidesigner
 			
 			return cp;
 		}
+
+		/**展开路径
+		 * <br>请不要直接使用foldPath.shift()等方式修改展开路径，而是修改后使用赋值应用更改。
+		 */
+		public static function get foldPath():Vector.<uint>
+		{
+			return _foldPath.concat();
+		}
+		public static function set foldPath(value:Vector.<uint>):void
+		{
+			_foldPath = value;
+			ViewController.foldPath = _foldPath;
+		}
+		
+		/**焦点索引*/
+		public static function get focusIndex():int
+		{
+			return _focusIndex;
+		}
+		
+		public static function set focusIndex(value:int):void
+		{
+			_focusIndex = value;
+			ViewController.focusIndex = _focusIndex;
+		}
 		
 		
-	}
-}
-
-
-import potato.designer.plugin.uidesigner.UIDesignerHost;
-
-/**
- *组件类型 
- * @author Just4test
- * 
- */
-class ComponentType
-{
-	public var name:String;
-	public var isContainer:Boolean;
-	public var icon:*;
-	
-	public function add():void
-	{
-		UIDesignerHost.addComponent(name);
-	}
-	
-	function ComponentType(name:String, isContainer:Boolean, icon:* = null)
-	{
-		this.name = name;
-		this.isContainer = isContainer;
-		this.icon = icon;
+		/**焦点路径，当直接点击了某个焦点对象时使用此设置方式。
+		 * <br>如果当前没有指定焦点，会返回null。
+		 * <br>请不要直接使用focusPath.shift()等方式修改焦点路径，而是修改后使用赋值应用更改。
+		 */
+		public static function get focusPath():Vector.<uint>
+		{
+			if(-1 == _focusIndex)
+			{
+				return null;
+			}
+			else
+			{
+				return _foldPath.concat(_focusIndex);
+			}
+		}
+		public static function set focusPath(value:Vector.<uint>):void
+		{
+			_focusIndex = value.pop();
+			_foldPath = value;
+			ViewController.focusPath = value;
+		}
+		
+		
 	}
 }
