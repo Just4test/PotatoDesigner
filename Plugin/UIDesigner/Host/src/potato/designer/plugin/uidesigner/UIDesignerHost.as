@@ -112,15 +112,16 @@ package potato.designer.plugin.uidesigner
 			{
 				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
 				
-				guest.send(DesignerConst.S2C_UPDATE, [_rootCompilerProfile && _rootCompilerProfile.targetProfile, _foldPath, _focusIndex]);
+				
+				ViewController.refreshGuest(_rootCompilerProfile ? _rootCompilerProfile.targetProfile : null, guest);
 			}
 		}
 	
 		
 		//////////////////////////////////////////////////////////////////////////////
 		
-		protected static var _foldPath:Vector.<uint>;
-		protected static var _focusIndex:int;
+//		protected static var _foldPath:Vector.<uint>;
+//		protected static var _focusIndex:int;
 		
 		
 		
@@ -133,8 +134,7 @@ package potato.designer.plugin.uidesigner
 		public static function clearStage():void
 		{
 			_rootCompilerProfile = null;
-			_foldPath = new Vector.<uint>;
-			_focusIndex = -1;
+			ViewController.clearStage();
 		}
 		
 		public static function get exportResult():Object
@@ -200,10 +200,7 @@ package potato.designer.plugin.uidesigner
 			if(_rootCompilerProfile)
 				update(_rootCompilerProfile);
 			
-			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
-			{
-				i.send(DesignerConst.S2C_UPDATE, [_rootCompilerProfile && _rootCompilerProfile.targetProfile, _foldPath, _focusIndex]);
-			}
+			ViewController.refreshGuest(_rootCompilerProfile ? _rootCompilerProfile.targetProfile : null);
 		}
 		
 		
@@ -285,28 +282,16 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static function addComponent(type:String):void
 		{
-			if(!_foldPath.length)
+			if(_rootCompilerProfile && !_componentTypeTable[_rootCompilerProfile.type].isContainer)
 			{
-				if(_rootCompilerProfile)
-				{
-					//根组件不是容器却尝试创建子组件
-					if(!_componentTypeTable[_rootCompilerProfile.type].isContainer)
-					{
-						logf("[{0}] 根组件不是容器，因此无法添加组件。", DesignerConst.PLUGIN_NAME);
-						return;
-					}
-				}
-				else
-				{
-					//如果尝试创建一个不是容器的根组件
-					if(!_componentTypeTable[type].isContainer)
-					{
-						logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
-					}
-				}
+				logf("[{0}] 根组件不是容器，因此无法添加组件。", DesignerConst.PLUGIN_NAME);
+				return;
 			}
-			
-			
+			//如果尝试创建一个不是容器的根组件
+			if(!_rootCompilerProfile && !_componentTypeTable[type].isContainer)
+			{
+				logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
+			}
 			
 			var cp:CompilerProfile = new CompilerProfile(type);
 			
@@ -316,11 +301,12 @@ package potato.designer.plugin.uidesigner
 					break;
 			}
 			
-			var folder:CompilerProfile = getCompilerProfileAtPath(_rootCompilerProfile, _foldPath);
+			ViewController.addComponent(type);
 			
+			var folder:CompilerProfile = getCompilerProfileAtPath(_rootCompilerProfile, ViewController.foldPath);
 			if(folder)
 			{
-				folder.addChildAt(cp, _focusIndex + 1);
+				folder.addChildAt(cp, ViewController.focusIndex + 1);
 			}
 			else
 			{
@@ -328,11 +314,9 @@ package potato.designer.plugin.uidesigner
 				_rootCompilerProfile = cp;
 				if(_componentTypeTable[type].isContainer)//如果刚刚创建的根组件是容器，则展开该容器
 				{
-					_foldPath.push(0);
+					ViewController.foldPath = new <uint>[0];
 				}
 			}
-			
-			ViewController.addComponent(type);
 			
 			updateGuest();
 		}
@@ -366,53 +350,53 @@ package potato.designer.plugin.uidesigner
 			return cp;
 		}
 
-		/**展开路径
-		 * <br>请不要直接使用foldPath.shift()等方式修改展开路径，而是修改后使用赋值应用更改。
-		 */
-		public static function get foldPath():Vector.<uint>
-		{
-			return _foldPath.concat();
-		}
-		public static function set foldPath(value:Vector.<uint>):void
-		{
-			_foldPath = value;
-			ViewController.foldPath = _foldPath;
-		}
+//		/**展开路径
+//		 * <br>请不要直接使用foldPath.shift()等方式修改展开路径，而是修改后使用赋值应用更改。
+//		 */
+//		public static function get foldPath():Vector.<uint>
+//		{
+//			return _foldPath.concat();
+//		}
+//		public static function set foldPath(value:Vector.<uint>):void
+//		{
+//			_foldPath = value;
+//			ViewController.foldPath = _foldPath;
+//		}
+//		
+//		/**焦点索引*/
+//		public static function get focusIndex():int
+//		{
+//			return _focusIndex;
+//		}
+//		
+//		public static function set focusIndex(value:int):void
+//		{
+//			_focusIndex = value;
+//			ViewController.focusIndex = _focusIndex;
+//		}
 		
-		/**焦点索引*/
-		public static function get focusIndex():int
-		{
-			return _focusIndex;
-		}
 		
-		public static function set focusIndex(value:int):void
-		{
-			_focusIndex = value;
-			ViewController.focusIndex = _focusIndex;
-		}
-		
-		
-		/**焦点路径，当直接点击了某个焦点对象时使用此设置方式。
-		 * <br>如果当前没有指定焦点，会返回null。
-		 * <br>请不要直接使用focusPath.shift()等方式修改焦点路径，而是修改后使用赋值应用更改。
-		 */
-		public static function get focusPath():Vector.<uint>
-		{
-			if(-1 == _focusIndex)
-			{
-				return null;
-			}
-			else
-			{
-				return _foldPath.concat(_focusIndex);
-			}
-		}
-		public static function set focusPath(value:Vector.<uint>):void
-		{
-			_focusIndex = value.pop();
-			_foldPath = value;
-			ViewController.focusPath = value;
-		}
+//		/**焦点路径，当直接点击了某个焦点对象时使用此设置方式。
+//		 * <br>如果当前没有指定焦点，会返回null。
+//		 * <br>请不要直接使用focusPath.shift()等方式修改焦点路径，而是修改后使用赋值应用更改。
+//		 */
+//		public static function get focusPath():Vector.<uint>
+//		{
+//			if(-1 == _focusIndex)
+//			{
+//				return null;
+//			}
+//			else
+//			{
+//				return _foldPath.concat(_focusIndex);
+//			}
+//		}
+//		public static function set focusPath(value:Vector.<uint>):void
+//		{
+//			_focusIndex = value.pop();
+//			_foldPath = value;
+//			ViewController.focusPath = value;
+//		}
 		
 		
 	}

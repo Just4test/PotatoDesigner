@@ -5,6 +5,8 @@ package potato.designer.plugin.uidesigner
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
+	import potato.designer.plugin.guestManager.Guest;
+	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.view.ComponentView;
 	import potato.designer.plugin.uidesigner.view.OutlineView;
 	import potato.designer.plugin.window.ViewWindow;
@@ -14,7 +16,7 @@ package potato.designer.plugin.uidesigner
 
 	/**
 	 *视图控制器
-	 * <br>显示编辑器UI等功能。客户端的视图也由该类控制。
+	 * <br>控制编辑器UI与客户端视图。
 	 * @author Administrator
 	 * 
 	 */
@@ -41,8 +43,8 @@ package potato.designer.plugin.uidesigner
 		/**大纲视图*/
 		protected static var _outlineView:OutlineView;
 		
-		protected static var _foldPath:Vector.<uint>;
-		protected static var _focusIndex:int;
+		protected static var _foldPath:Vector.<uint> = new <uint>[];
+		protected static var _focusIndex:int = -1;
 		
 		/***更改了视图列表后调用此方法，以便应用更改。*/
 		public static function updateWindow():void
@@ -84,6 +86,13 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
+		internal static function clearStage():void
+		{
+			_foldPath.length = 0;
+			_focusIndex = -1;
+			//TODO
+		}
+		
 		internal static function init():void
 		{
 			
@@ -104,6 +113,25 @@ package potato.designer.plugin.uidesigner
 			
 			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_CLICK, outlineItemClickHandler);
 			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_DOUBLE_CLICK, outlineItemDoubleClickHandler);
+		}
+		
+		/**
+		 *将组件配置文件分发至客户端 
+		 * @param guest
+		 * 
+		 */
+		internal static function refreshGuest(targetProfile:ITargetProfile, guest:Guest = null):void
+		{
+			if(!guest)
+			{
+				for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+				{
+					refreshGuest(targetProfile, i);
+				}
+				return;
+			}
+			
+			guest.send(DesignerConst.S2C_UPDATE, [targetProfile, _foldPath, _focusIndex]);
 		}
 		
 		
@@ -179,17 +207,17 @@ package potato.designer.plugin.uidesigner
 		
 		///////////////////////
 		
-		internal static function set foldPath(value:Vector.<uint>):void
+		public static function set foldPath(value:Vector.<uint>):void
 		{
 			_foldPath = value;
 			//TODO：向客户端分发更改
 		}
-		internal static function set focusIndex(value:int):void
+		public static function set focusIndex(value:int):void
 		{
 			_focusIndex = value;
 			//TODO：向客户端分发更改
 		}
-		internal static function set focusPath(value:Vector.<uint>):void
+		public static function set focusPath(value:Vector.<uint>):void
 		{
 			_focusIndex = value.pop();
 			_foldPath = value;
@@ -198,7 +226,20 @@ package potato.designer.plugin.uidesigner
 		
 		internal static function addComponent(type:String):void
 		{
-			_outlineView.add(type, _foldPath);
+			var path:Vector.<uint> = _foldPath;
+			path.push(_focusIndex + 1);
+//			path = _foldPath.concat(_focusIndex + 1);//这句话报错，强转失败
+			_outlineView.add(type, path);
+		}
+
+		public static function get foldPath():Vector.<uint>
+		{
+			return _foldPath.concat();
+		}
+
+		public static function get focusIndex():int
+		{
+			return _focusIndex;
 		}
 		
 		

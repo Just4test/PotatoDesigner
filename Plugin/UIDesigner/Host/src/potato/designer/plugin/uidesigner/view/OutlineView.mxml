@@ -2,7 +2,7 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
 		 xmlns:s="library://ns.adobe.com/flex/spark"
 		 xmlns:mx="library://ns.adobe.com/flex/mx"
-		 width="200" height="400" initialize="initializeHandler(event)">
+		 width="300" height="400" initialize="initializeHandler(event)">
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
@@ -25,6 +25,9 @@
 				tree.dataProvider = _rootXml
 			}
 			
+			/**
+			 *添加组件到大纲视图。指定组件的全路径，包括展开路径和组件本身的index。 
+			 */
 			public function add(name:String, path:Vector.<uint>):void
 			{
 				//当仅仅具有根组件时，showRoot=false失效，且添加了子组件也不会立即重新启用。需要做一下改变以触发相关重绘
