@@ -14,12 +14,30 @@ package potato.designer.plugin.uidesigner
 		public static const S2C_REQ_DESCRIBE_TYPE:String = "UID_S2C_REQ_DESCRIBE_TYPE";
 		/**初始化UIDesigner
 		 * <br>这是一个异步方法。
-		 */		
+		 */
 		public static const S2C_INIT:String = "UID_S2C_INIT";
-		/**组件更新
+		
+		/**
+		 *组件更新，同时焦点可能也已经改变
+		 */
+		public static const UPDATE:String = "UID_UPDATE";
+		/**更新客户端组件树
 		 * msg = [rootTargetProfile, foldPath, focusIndex]
-		 */		
+		 */
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";
+		
+		/**
+		 *选中的组件已经改变 
+		 */
+		public static const FOCUS_CHANGED:String = "FOCUS_CHANGED";
+		/**通知客户端选中的组件已经改变
+		 * msg = [foldPath, focusIndex]
+		 */		
+		public static const S2C_FOCUS_CHANGED:String = "S2C_FOCUS_CHANGED";
+		/**向宿主端发出改变选中组件的请求
+		 * msg = [foldPath, focusIndex]
+		 */		
+		public static const C2S_CHANGE_FOCUS:String = "C2S_CHANGE_FOCUS";
 		
 		public static const PLUGIN_NAME:String = "UIDesigner";
 		

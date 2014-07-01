@@ -1,12 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="300" height="700">
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="300" height="700"
+		 initialize="initializeHandler(event)">
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayList;
+			import mx.events.FlexEvent;
+			
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
+			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
+			
+			internal static var classProfile:ClassProfile;
+			
+			protected function initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected var _data:BasicTargetProfile;
+			
+			public function setData(data:BasicTargetProfile):void
+			{
+				_data = data;
+				refresh();
+			}
+			
+			public function refresh():void
+			{
+				var dp:ArrayList = new ArrayList;
+				var cp:ClassProfile = BasicCompiler.getClassProfileByClassName(_data.className);
+				var addedMap:Object = {};
+				//添加构造方法
+				if(cp.constructor)
+				{
+					dp.addItem([cp.constructor, _data.constructorParam]);
+				}
+				//添加具有值的成员
+				for(var i:int = 0; i < _data.membersName.length; i++)
+				{
+					var mp:IMemberProfile = cp.getMember(_data.membersName[i]);
+					addedMap[mp.name] = true;
+					var param:Vector.<*> = _data.membersParam[i];
+					dp.addItem([mp, param]);
+				}
+				//添加没有值的属性
+				for each(mp in cp.accessors)
+				{
+					if(mp.enable && !addedMap[mp.name])
+					{
+						dp.addItem[mp, null];
+					}
+				}
+				//添加方法
+				for each(mp in cp.methods)
+				{
+					if(mp.enable)
+					{
+						dp.addItem[mp, null];
+					}
+				}
+				
+				
+				
+				list.dataProvider = dp;
+			}
+			
+		]]>
+	</fx:Script>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:List width="100%" height="100%"></s:List>
+	<s:List id="list" width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.basic.compiler.MemberViewItem"></s:List>
 </s:Group>

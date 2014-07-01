@@ -1,7 +1,11 @@
 package potato.designer.plugin.uidesigner
 {
+	import flash.events.Event;
+	
 	import mx.collections.ArrayList;
 	import mx.core.UIComponent;
+	
+	import spark.layouts.VerticalLayout;
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
@@ -11,8 +15,7 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.uidesigner.view.OutlineView;
 	import potato.designer.plugin.window.ViewWindow;
 	import potato.designer.plugin.window.WindowManager;
-	
-	import spark.layouts.VerticalLayout;
+	import potato.designer.utils.MultiLock;
 
 	/**
 	 *视图控制器
@@ -45,6 +48,7 @@ package potato.designer.plugin.uidesigner
 		
 		protected static var _foldPath:Vector.<uint> = new <uint>[];
 		protected static var _focusIndex:int = -1;
+		protected static var _targetProfile:ITargetProfile;
 		
 		/***更改了视图列表后调用此方法，以便应用更改。*/
 		public static function updateWindow():void
@@ -63,6 +67,7 @@ package potato.designer.plugin.uidesigner
 				if(_window0)
 				{
 					_window0.refresh();
+					_window0.close();
 					_window0 = null;
 				}
 			}
@@ -81,6 +86,7 @@ package potato.designer.plugin.uidesigner
 				if(_window1)
 				{
 					_window1.refresh();
+					_window1.close();
 					_window1 = null;
 				}
 			}
@@ -113,6 +119,73 @@ package potato.designer.plugin.uidesigner
 			
 			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_CLICK, outlineItemClickHandler);
 			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_DOUBLE_CLICK, outlineItemDoubleClickHandler);
+			
+			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
+			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
+			for each(var guest:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			{
+				initGuest(guest);
+			}
+		}
+		
+		protected static function guestPluginActivatedHandler(event:DesignerEvent):void
+		{
+			if(DesignerConst.PLUGIN_NAME == event.data[1])
+			{
+				initGuest(event.data[0]);
+			}
+		}
+		
+		protected static function guestConnectedHandler(event:DesignerEvent):void
+		{
+			if(Guest(event.data).isPluginActived(DesignerConst.PLUGIN_NAME))
+			{
+				initGuest(event.data);
+			}
+		}
+		
+		protected static function initGuest(guest:Guest):void
+		{
+			var lock:MultiLock = new MultiLock;
+			lock.addEventListener(MultiLock.EVENT_DEAD, lockHandler);
+			
+			for (var i:int = 0; i < UIDesignerHost.compilerList.length; i++) 
+			{
+				if(UIDesignerHost.compilerList[i].initGuest(guest, lock))
+					break;
+			}
+			
+			if(lock.isFree)
+			{
+				finishInit();
+			}
+			else
+			{
+				lock.addEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
+			}
+			
+			function lockHandler(event:Event):void
+			{
+				lock.removeEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
+				lock.removeEventListener(MultiLock.EVENT_DEAD, lockHandler);
+				
+				if(MultiLock.EVENT_UNLOCKED == event.type)
+				{
+					finishInit();
+				}
+				else
+				{
+					logf("[{0}] 客户端[{1}]初始化失败：{2}", DesignerConst.PLUGIN_NAME, guest.id, MultiLock(event.target).locks);
+				}
+			}
+			
+			function finishInit():void
+			{
+				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+				
+				
+				ViewController.refreshGuest(_targetProfile, guest);
+			}
 		}
 		
 		/**
@@ -120,17 +193,8 @@ package potato.designer.plugin.uidesigner
 		 * @param guest
 		 * 
 		 */
-		internal static function refreshGuest(targetProfile:ITargetProfile, guest:Guest = null):void
+		internal static function refreshGuest(targetProfile:ITargetProfile, guest:Guest):void
 		{
-			if(!guest)
-			{
-				for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
-				{
-					refreshGuest(targetProfile, i);
-				}
-				return;
-			}
-			
 			guest.send(DesignerConst.S2C_UPDATE, [targetProfile, _foldPath, _focusIndex]);
 		}
 		
@@ -207,30 +271,22 @@ package potato.designer.plugin.uidesigner
 		
 		///////////////////////
 		
-		public static function set foldPath(value:Vector.<uint>):void
-		{
-			_foldPath = value;
-			//TODO：向客户端分发更改
-		}
-		public static function set focusIndex(value:int):void
-		{
-			_focusIndex = value;
-			//TODO：向客户端分发更改
-		}
-		public static function set focusPath(value:Vector.<uint>):void
-		{
-			_focusIndex = value.pop();
-			_foldPath = value;
-			//TODO：向客户端分发更改
-		}
+//		public static function set foldPath(value:Vector.<uint>):void
+//		{
+//			setFoldAndFocus(value, _focusIndex);
+//		}
+//		public static function set focusIndex(value:int):void
+//		{
+//			setFoldAndFocus(_foldPath, value);
+//		}
 		
-		internal static function addComponent(type:String):void
-		{
-			var path:Vector.<uint> = _foldPath;
-			path.push(_focusIndex + 1);
-//			path = _foldPath.concat(_focusIndex + 1);//这句话报错，强转失败
-			_outlineView.add(type, path);
-		}
+//		internal static function addComponent(type:String):void
+//		{
+//			var path:Vector.<uint> = _foldPath;
+//			path.push(_focusIndex + 1);
+////			path = _foldPath.concat(_focusIndex + 1);//这句话报错，强转失败
+//			_outlineView.add(type, path);
+//		}
 
 		public static function get foldPath():Vector.<uint>
 		{
@@ -240,6 +296,42 @@ package potato.designer.plugin.uidesigner
 		public static function get focusIndex():int
 		{
 			return _focusIndex;
+		}
+		
+		/**派发焦点更改事件*/
+		protected static function setFoldAndFocus(foldPath:Vector.<uint>, focusIndex:int):void
+		{
+			_foldPath = foldPath;
+			_focusIndex = focusIndex;
+			
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOCUS_CHANGED, [_foldPath, _focusIndex]));
+			
+			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			{
+				i.send(DesignerConst.S2C_FOCUS_CHANGED, [_foldPath, _focusIndex]);
+			}
+		}
+		
+		/**
+		 *派发组件树更新事件 
+		 * @param tp 组件树
+		 * 
+		 */
+		public static function update(rootTarget:ITargetProfile, foldPath:Vector.<uint> = null, focusIndex:int = -1):void
+		{
+			_targetProfile = rootTarget;
+			if(foldPath)
+			{
+				_foldPath = foldPath;
+				_focusIndex = focusIndex;
+			}
+			
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.UPDATE, [rootTarget, _foldPath, _focusIndex]));
+			
+			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			{
+				i.send(DesignerConst.S2C_UPDATE, [rootTarget, _foldPath, _focusIndex]);
+			}
 		}
 		
 		

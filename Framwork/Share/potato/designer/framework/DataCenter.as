@@ -25,9 +25,9 @@ package potato.designer.framework
 	
 	/**
 	 * 数据中心
-	 * <br/>使用数据中心存储插件之间的共享数据，或者将其保存到工作空间。
+	 * <br/>使用数据中心存储插件之间的共享数据。可以在数据改变时自动派发事件。
 	 * <br/>数据中心特别适合不互相依赖的插件之间共享数据。不过也请注意避免命名冲突。
-	 * <br/>数据中心需要先载入工作空间才能使用
+	 * <br/>数据中心需要先载入工作空间才能使用。也可以将数据中心中存储的共享数据保存到工作空间。
 	 * @author Just4test
 	 * 
 	 */
@@ -95,25 +95,6 @@ package potato.designer.framework
 			CONFIG::HOST
 			{
 				var folder:File = new File(_workSpaceFolderPath);
-//				if(folder.exists && !folder.isDirectory)
-//				{
-//					log("[DataCenter] 载入工作空间失败。路径是一个已经存在的文件\n", _workSpaceFolderPath);
-//					return false;
-//				}
-//				
-//				try
-//				{
-//					if(!folder.exists || 0 == folder.getDirectoryListing().length)
-//					{
-//						var template:File = File.applicationDirectory.resolvePath(WORKSPACE_TEMPLATE_FOLDER);
-//						template.copyTo(folder, true);
-//					}
-//				} 
-//				catch(error:Error) 
-//				{
-//					log("[DataCenter] 拷贝工作空间模板时发生错误：\n", error);
-//					return false;
-//				}
 				
 				try
 				{
@@ -346,7 +327,7 @@ package potato.designer.framework
 		 * <br>{
 		 * <br>&emsp;return new File(name);
 		 * <br>}
-		 * <br>DataCenter.instance.regProperty("file", int, fileFilter);
+		 * <br>DataCenter.instance.regProperty("file", fileFilter);
 		 * <br>DataCenter.instance.file = "a.txt";
 		 * <br>trace(DataCenter.instance.file is File);// true
 		 * 

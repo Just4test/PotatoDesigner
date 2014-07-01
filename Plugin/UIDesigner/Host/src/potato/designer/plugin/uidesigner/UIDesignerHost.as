@@ -48,73 +48,8 @@ package potato.designer.plugin.uidesigner
 			//初始化基础编译器
 			BasicCompiler.init(info);
 			
-			//初始化客户端
-			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
-			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
-			for each(var guest:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
-			{
-				initGuest(guest);
-			}
-			
 			info.started();
 			
-		}
-		
-		protected function guestPluginActivatedHandler(event:DesignerEvent):void
-		{
-			if(DesignerConst.PLUGIN_NAME == event.data[1])
-			{
-				initGuest(event.data[0]);
-			}
-		}
-		
-		protected function guestConnectedHandler(event:DesignerEvent):void
-		{
-			if(Guest(event.data).isPluginActived(DesignerConst.PLUGIN_NAME))
-			{
-				initGuest(event.data);
-			}
-		}
-		
-		protected function initGuest(guest:Guest):void
-		{
-			var lock:MultiLock = new MultiLock;
-			lock.addEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
-			lock.addEventListener(MultiLock.EVENT_DEAD, lockHandler);
-			
-			for (var i:int = 0; i < compilerList.length; i++) 
-			{
-				if(compilerList[i].initGuest(guest, lock))
-					break;
-			}
-			
-			if(lock.isFree)
-			{
-				finishInit();
-			}
-			
-			function lockHandler(event:Event):void
-			{
-				lock.removeEventListener(MultiLock.EVENT_UNLOCKED, lockHandler);
-				lock.removeEventListener(MultiLock.EVENT_DEAD, lockHandler);
-				
-				if(MultiLock.EVENT_UNLOCKED == event.type)
-				{
-					finishInit();
-				}
-				else
-				{
-					logf("[{0}] 客户端[{1}]初始化失败：{2}", DesignerConst.PLUGIN_NAME, guest.id, MultiLock(event.target).locks);
-				}
-			}
-			
-			function finishInit():void
-			{
-				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
-				
-				
-				ViewController.refreshGuest(_rootCompilerProfile ? _rootCompilerProfile.targetProfile : null, guest);
-			}
 		}
 	
 		
@@ -189,35 +124,34 @@ package potato.designer.plugin.uidesigner
 //		protected static function 
 		
 		
+		
+		
 		/**
-		 *刷新客户端组件树
-		 * <br>当属性更改或者向组件树添加了新组件后调用这个方法。
-		 * <br>这个方法将先派发EVENT_MAKE_COMPONENT_PROFILE事件，以创建组件配置文件；
-		 * <br>然后将组件配置文件传输至客户端，指示其刷新设计舞台。
+		 *更新组件树 
+		 * @param profile 仅更新指定的组件树。不提供该值将更新根组件树。
+		 * 
 		 */
-		public static function updateGuest():void
+		public static function update(dispatch:Boolean, profile:CompilerProfile = null):void
 		{
-			if(_rootCompilerProfile)
-				update(_rootCompilerProfile);
+			profile ||= _rootCompilerProfile;
 			
-			ViewController.refreshGuest(_rootCompilerProfile ? _rootCompilerProfile.targetProfile : null);
-		}
-		
-		
-		public static function update(profile:CompilerProfile):void
-		{
-			for (var i:int = 0; i < profile.children.length; i++) 
+			if(profile)
 			{
-				update(profile.children[i]);
+				for (var i:int = 0; i < profile.children.length; i++) 
+				{
+					update(false, profile.children[i]);
+				}
+				
+				for (var j:int = 0; j < compilerList.length; j++) 
+				{
+					if(compilerList[j].update(profile))
+						break;
+				}
 			}
 			
 			
-			for (var j:int = 0; j < compilerList.length; j++) 
-			{
-				if(compilerList[j].update(profile))
-					break;
-			}
-			
+			if(dispatch)
+				ViewController.update(_rootCompilerProfile ? _rootCompilerProfile.targetProfile : null);
 		}
 		
 		/**
@@ -318,7 +252,7 @@ package potato.designer.plugin.uidesigner
 				}
 			}
 			
-			updateGuest();
+			update(false);
 		}
 		
 		/**

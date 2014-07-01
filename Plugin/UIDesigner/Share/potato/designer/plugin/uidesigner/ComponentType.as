@@ -1,6 +1,11 @@
 package potato.designer.plugin.uidesigner
 {
 	
+	/**
+	 *组件类型 
+	 * @author Administrator
+	 * 
+	 */
 	public class ComponentType
 	{
 		public var name:String;
