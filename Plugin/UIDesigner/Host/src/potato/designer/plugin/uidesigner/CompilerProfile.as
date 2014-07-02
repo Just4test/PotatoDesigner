@@ -126,6 +126,26 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		/**
+		 *获取指定路径上的子配置文件
+		 * @param path
+		 * @return 
+		 * 
+		 */
+		public function getCompilerProfileByPath(path:Vector.<uint>):CompilerProfile
+		{
+			if(!path.length)
+			{
+				return this;
+			}
+			var child:CompilerProfile = _children[path.shift()];
+			if(!path.length)
+			{
+				return child;
+			}
+			return child.getCompilerProfileByPath(path);
+		}
+		
+		/**
 		 * 应用TargetProfile树
 		 */
 		public function applyTargetProfile(value:ITargetProfile):void

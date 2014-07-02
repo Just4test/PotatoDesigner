@@ -63,7 +63,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			
 		}
 		
-		public function addTarget(profile:CompilerProfile):Boolean
+		public function addTarget(profile:CompilerProfile, parent:CompilerProfile):Boolean
 		{
 			var cp:ClassProfile = getClassProfileByNickName(profile.type);
 			if(!cp)

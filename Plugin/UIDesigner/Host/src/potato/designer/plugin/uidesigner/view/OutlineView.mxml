@@ -11,120 +11,37 @@
 		<![CDATA[
 			import mx.events.FlexEvent;
 			
-			protected var _rootXml:XML
+			import potato.designer.framework.DesignerEvent;
+			import potato.designer.framework.EventCenter;
+			import potato.designer.plugin.uidesigner.CompilerProfile;
+			import potato.designer.plugin.uidesigner.DesignerConst;
+			import potato.designer.plugin.uidesigner.UIDesignerHost;
+			import potato.designer.plugin.uidesigner.ViewController;
 			
-			public function clear():void
-			{
-				_rootXml = <root name="尚未添加根组件"></root>;
-				tree.dataProvider = _rootXml
-			}
-			
-			public function setXml(xml:XML):void
-			{
-				_rootXml = xml;
-				tree.dataProvider = _rootXml
-			}
-			
-			/**
-			 *添加组件到大纲视图。指定组件的全路径，包括展开路径和组件本身的index。 
-			 */
-			public function add(name:String, path:Vector.<uint>):void
-			{
-				//当仅仅具有根组件时，showRoot=false失效，且添加了子组件也不会立即重新启用。需要做一下改变以触发相关重绘
-				if(!_rootXml.children().length())
-				{
-					tree.showRoot = true;
-					tree.showRoot = false;
-				}
-				
-				var childIndex:uint = path.pop();
-				var parent:XML = getXmlByPath(path);
-				var children:XMLList = parent.children();
-				var newNode:XML = <node name={name}/>;
-				if(!children.length())
-				{
-					parent.appendChild(newNode);
-				}
-				else
-				{
-					if(0 == childIndex)
-					{
-						parent.insertChildBefore(children[0], newNode);
-					}
-					else
-					{
-						parent.insertChildAfter(children[childIndex - 1], newNode);
-					}
-				}
-			}
-			
-			public function rename(name:String, path:Vector.<uint>):void
-			{
-				var xml:XML = getXmlByPath(path);
-				xml.@name = name;
-			}
-			
-			public function remove(path:Vector.<uint>):void
-			{
-				delete getXmlByPath(path);
-			}
-			
-			public function moveTree(path:Vector.<uint>, newPath:Vector.<uint>):void
-			{
-				//新路径不能是原路径的子路径
-				if(newPath.length > path.length)
-				{
-					var flag:Boolean;
-					for (var i:int = 0; i < path.length; i++) 
-					{
-						if(path[i] != newPath[i])
-						{
-							flag = true;
-							break;
-						}
-					}
-					if(!flag)
-						throw new Error("移动组件树时，新路径被指定为原有路径的子路径。");
-					
-				}
-				
-				var node:XML = getXmlByPath(path);
-				var childIndex:uint = newPath.pop();
-				var newParent:XML = getXmlByPath(newPath);
-				var children:XMLList = newParent.children();
-				
-				delete getXmlByPath(path);
-				
-				if(!children.length())
-				{
-					newParent.appendChild(node);
-				}
-				else
-				{
-					if(0 == childIndex)
-					{
-						newParent.insertChildBefore(children[0], node);
-					}
-					else
-					{
-						newParent.insertChildAfter(children[childIndex - 1], node);
-					}
-				}
-			}
+			protected var _rootXml:XML;
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
-				clear();
+				EventCenter.addEventListener(DesignerConst.FOCUS_CHANGED, focusChangedHandler);
+				EventCenter.addEventListener(DesignerConst.UPDATE, updateHandler);
+				
+				EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_CLICK, outlineItemClickHandler);
+				EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_DOUBLE_CLICK, outlineItemDoubleClickHandler);
 			}
 			
-			protected function getXmlByPath(path:Vector.<uint>):XML
+			protected function outlineItemClickHandler(event:DesignerEvent):void
 			{
-				var xml:XML = _rootXml;
-				for each(var index:uint in path)
-				{
-					xml = xml.children()[index];
-				}
-				return xml;
+				var path:Vector.<uint> = getPathByXml(event.data);
+				log("点击了", path);
+				var index:int = path.pop();
+				ViewController.setFoldAndFocus(path, index);
+			}
+			
+			protected function outlineItemDoubleClickHandler(event:DesignerEvent):void
+			{
+				var path:Vector.<uint> = getPathByXml(event.data);
+				log("双击了", path);
+				ViewController.setFoldAndFocus(path, -1);
 			}
 			
 			protected function getPathByXml(xml:XML):Vector.<uint>
@@ -136,8 +53,49 @@
 					path.unshift(xml.childIndex());
 					xml = parent;
 				}
+				path.unshift(0);
 				return path;
 			}
+			
+			public function focusChangedHandler(event:DesignerEvent):void
+			{
+				
+			}
+			
+			protected function updateHandler(event:DesignerEvent):void
+			{
+				if(UIDesignerHost.rootCompilerProfile)
+				{
+					tree.dataProvider = creatXML(UIDesignerHost.rootCompilerProfile);
+					tree.validateNow();
+					focusChangedHandler(event);
+				}
+				else
+				{
+					tree.dataProvider = null;
+				}
+			}
+			
+			protected function creatXML(cp:CompilerProfile):XML
+			{
+				var xml:XML = <target name={cp.name || cp.type}/>;
+				for each(var childCP:CompilerProfile in cp.children)
+				{
+					xml.appendChild(creatXML(childCP));
+				}
+				return xml;
+			}
+			
+//			protected function getXmlByPath(path:Vector.<uint>):XML
+//			{
+//				var xml:XML = _rootXml;
+//				for each(var index:uint in path)
+//				{
+//					xml = xml.children()[index];
+//				}
+//				return xml;
+//			}
+//			
 			
 		]]>
 	</fx:Script>
@@ -146,6 +104,5 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Label text="大纲视图"/>
-	<mx:Tree id="tree" width="100%" height="100%" showRoot="false"
-			 itemRenderer="potato.designer.plugin.uidesigner.view.OutlineViewItem" ></mx:Tree>
+	<mx:Tree id="tree" width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.view.OutlineViewItem" ></mx:Tree>
 </s:Group>

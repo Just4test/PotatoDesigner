@@ -15,14 +15,22 @@ package potato.designer.plugin.uidesigner
 	{
 		/**
 		 * 添加一个目标对象。
-		 * @param targetType 目标对象的类型
-		 * @param profile 编译器配置文件。
+		 * @param profile 编译器配置文件。检查profile.type确定创建的目标对象的类型。
 		 * <br>创建或修改profile.targetProfile。如果需要的话，修改profile.name（初始值被设为targetType）。
 		 * <br>此时profile还没有parent。
 		 * @return 返回true则跳过后面的编译器。通常返回false。
 		 * 
 		 */
-		function addTarget(profile:CompilerProfile):Boolean;
+		/**
+		 * 添加一个目标对象。
+		 * @param profile 编译器配置文件。检查profile.type确定创建的目标对象的类型。
+		 * <br>创建或修改profile.targetProfile。如果需要的话，修改profile.name（初始值被设为targetType）。
+		 * <br>此时profile.parent为null。
+		 * @param parent 父组件
+		 * @return 
+		 * 
+		 */
+		function addTarget(profile:CompilerProfile, parent:CompilerProfile):Boolean;
 		
 		
 		/**

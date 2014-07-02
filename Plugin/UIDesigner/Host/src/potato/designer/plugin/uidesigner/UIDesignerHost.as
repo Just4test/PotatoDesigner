@@ -32,8 +32,14 @@ package potato.designer.plugin.uidesigner
 		/**组件类型映射表*/
 		protected static const _componentTypeTable:Object = {};
 		
-		/**编译器配置文件树的根*/
 		protected static var _rootCompilerProfile:CompilerProfile;
+
+		/**编译器配置文件树的根*/
+		public static function get rootCompilerProfile():CompilerProfile
+		{
+			return _rootCompilerProfile;
+		}
+
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
@@ -216,43 +222,49 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static function addComponent(type:String):void
 		{
-			if(_rootCompilerProfile && !_componentTypeTable[_rootCompilerProfile.type].isContainer)
+			var parrentCP:CompilerProfile;
+			if(_rootCompilerProfile)
 			{
-				logf("[{0}] 根组件不是容器，因此无法添加组件。", DesignerConst.PLUGIN_NAME);
-				return;
+				var path:Vector.<uint> = ViewController.foldPath;
+				path.shift();
+				parrentCP = _rootCompilerProfile.getCompilerProfileByPath(path);
+				if(!_componentTypeTable[parrentCP.type].isContainer)
+				{
+					logf("[{0}] 当前展开对象不是容器，因此无法添加子组件。", DesignerConst.PLUGIN_NAME);
+					return;
+				}
 			}
-			//如果尝试创建一个不是容器的根组件
-			if(!_rootCompilerProfile && !_componentTypeTable[type].isContainer)
+			else
 			{
-				logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
+				//如果尝试创建一个不是容器的根组件
+				if(!_componentTypeTable[type].isContainer)
+				{
+					logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
+				}
 			}
 			
 			var cp:CompilerProfile = new CompilerProfile(type);
 			
 			for (var i:int = 0; i < compilerList.length; i++) 
 			{
-				if(compilerList[i].addTarget(cp))
+				if(compilerList[i].addTarget(cp, parrentCP))
 					break;
 			}
-			
-			ViewController.addComponent(type);
-			
-			var folder:CompilerProfile = getCompilerProfileAtPath(_rootCompilerProfile, ViewController.foldPath);
-			if(folder)
+			if(!cp.targetProfile)
 			{
-				folder.addChildAt(cp, ViewController.focusIndex + 1);
+				logf("[{0}] 尝试创建组件[{1}]，但是所有已安装的编译器都没有对此作出反应。", DesignerConst.PLUGIN_NAME, type);
+			}
+			
+			if(_rootCompilerProfile)//如果有根组件，就有父组件
+			{
+				parrentCP.addChildAt(cp, ViewController.focusIndex + 1);
 			}
 			else
 			{
-				//正在创建根组件
 				_rootCompilerProfile = cp;
-				if(_componentTypeTable[type].isContainer)//如果刚刚创建的根组件是容器，则展开该容器
-				{
-					ViewController.foldPath = new <uint>[0];
-				}
 			}
 			
-			update(false);
+			ViewController.update(_rootCompilerProfile.targetProfile, ViewController.foldPath, ViewController.focusIndex + 1);
 		}
 		
 		/**

@@ -116,10 +116,6 @@ package potato.designer.plugin.uidesigner
 			
 			updateWindow();
 			
-			
-			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_CLICK, outlineItemClickHandler);
-			EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_DOUBLE_CLICK, outlineItemDoubleClickHandler);
-			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
 			for each(var guest:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
@@ -182,20 +178,8 @@ package potato.designer.plugin.uidesigner
 			function finishInit():void
 			{
 				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
-				
-				
-				ViewController.refreshGuest(_targetProfile, guest);
+				guest.send(DesignerConst.S2C_UPDATE, [_targetProfile, _foldPath, _focusIndex]);
 			}
-		}
-		
-		/**
-		 *将组件配置文件分发至客户端 
-		 * @param guest
-		 * 
-		 */
-		internal static function refreshGuest(targetProfile:ITargetProfile, guest:Guest):void
-		{
-			guest.send(DesignerConst.S2C_UPDATE, [targetProfile, _foldPath, _focusIndex]);
 		}
 		
 		
@@ -259,16 +243,6 @@ package potato.designer.plugin.uidesigner
 //			return _outlineView;
 //		}
 		
-		protected static function outlineItemClickHandler(event:DesignerEvent):void
-		{
-			
-		}
-		
-		protected static function outlineItemDoubleClickHandler(event:DesignerEvent):void
-		{
-			
-		}
-		
 		///////////////////////
 		
 //		public static function set foldPath(value:Vector.<uint>):void
@@ -288,27 +262,54 @@ package potato.designer.plugin.uidesigner
 //			_outlineView.add(type, path);
 //		}
 
+		/**
+		 *展开路径
+		 * <br>展开路径是展开组件的路径。当展开一个组件时，可以编辑其子组件，或创建新的子组件。
+		 * <br>容器组件才可以展开。
+		 * <br>特别的，foldPath[0]只可能为0。
+		 */
 		public static function get foldPath():Vector.<uint>
 		{
 			return _foldPath.concat();
 		}
 
+		/**
+		 *焦点索引
+		 * <br>指示展开组件中，正在编辑的组件的索引。
+		 * <br>如果没有在编辑任何组件，此值为-1。
+		 */
 		public static function get focusIndex():int
 		{
 			return _focusIndex;
 		}
 		
 		/**派发焦点更改事件*/
-		protected static function setFoldAndFocus(foldPath:Vector.<uint>, focusIndex:int):void
+		public static function setFoldAndFocus(foldPath:Vector.<uint>, focusIndex:int):void
 		{
+			if(_focusIndex == focusIndex && _foldPath.length == foldPath.length)
+			{
+				var flug:Boolean;
+				for(var i:int = 0; i < _foldPath.length; i++)
+				{
+					if(_foldPath[i] != foldPath[i])
+					{
+						flug = true;
+						break;
+					}
+				}
+				
+				if(!flug)
+					return;
+			}
+			
 			_foldPath = foldPath;
 			_focusIndex = focusIndex;
 			
 			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOCUS_CHANGED, [_foldPath, _focusIndex]));
 			
-			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			for each(var j:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
 			{
-				i.send(DesignerConst.S2C_FOCUS_CHANGED, [_foldPath, _focusIndex]);
+				j.send(DesignerConst.S2C_FOCUS_CHANGED, [_foldPath, _focusIndex]);
 			}
 		}
 		
