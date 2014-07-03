@@ -16,6 +16,7 @@ package potato.designer.plugin.uidesigner
 		protected var _parent:CompilerProfile;
 		protected const _children:Vector.<CompilerProfile> = new Vector.<CompilerProfile>;
 		
+		[Bindable]
 		/**
 		 *目标名。这会显示在大纲视图中。
 		 */
@@ -47,16 +48,35 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		/**
-		 * 无法直接在children数组上添加子代。使用addChild添加。
+		 * Array形式的子代数组
+		 *<br>为大纲视图作出的妥协，大纲视图中的Tree组件可以检查Object对象的children属性以确定树结构。使用这种结构可以大大简化大纲视图的实现逻辑
+		 * <br>当不存在子代时返回null。
 		 */
-		public function get children():Vector.<CompilerProfile>
+		public function get children():Array
+		{
+			if(!_children.length)
+				return null;
+			
+			var arr:Array = [];
+			for each(var i:CompilerProfile in _children)
+			{
+				arr.push(i);
+			}
+			return arr;
+		}
+		
+		/**
+		 * 子代数组
+		 * <br/>无法直接在children数组上添加子代。使用addChild添加。
+		 */
+		public function get childrenVector():Vector.<CompilerProfile>
 		{
 			return _children.concat();
 		}
 		
 		public function addChild(child:CompilerProfile):void
 		{
-			addChildAt(child, children.length)
+			addChildAt(child, childrenVector.length)
 		}
 		
 		public function addChildAt(child:CompilerProfile, index:uint):void
@@ -70,6 +90,7 @@ package potato.designer.plugin.uidesigner
 			{
 				child._parent.removeChild(child);
 			}
+			child._parent = this;
 			
 			_children.splice(index, 0, child);
 
@@ -126,8 +147,8 @@ package potato.designer.plugin.uidesigner
 		}
 		
 		/**
-		 *获取指定路径上的子配置文件
-		 * @param path
+		 *获取指定子路径上的子配置文件。
+		 * @param path 子路径。不包含对象本身。
 		 * @return 
 		 * 
 		 */

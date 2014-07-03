@@ -31,7 +31,8 @@
 			
 			protected function outlineItemClickHandler(event:DesignerEvent):void
 			{
-				var path:Vector.<uint> = getPathByXml(event.data);
+//				var path:Vector.<uint> = getPathByXml(event.data);
+				var path:Vector.<uint> = (event.data as CompilerProfile).path;
 				log("点击了", path);
 				var index:int = path.pop();
 				ViewController.setFoldAndFocus(path, index);
@@ -39,7 +40,8 @@
 			
 			protected function outlineItemDoubleClickHandler(event:DesignerEvent):void
 			{
-				var path:Vector.<uint> = getPathByXml(event.data);
+//				var path:Vector.<uint> = getPathByXml(event.data);
+				var path:Vector.<uint> = (event.data as CompilerProfile).path;
 				log("双击了", path);
 				ViewController.setFoldAndFocus(path, -1);
 			}
@@ -66,7 +68,8 @@
 			{
 				if(UIDesignerHost.rootCompilerProfile)
 				{
-					tree.dataProvider = creatXML(UIDesignerHost.rootCompilerProfile);
+//					tree.dataProvider = creatXML(UIDesignerHost.rootCompilerProfile);
+					tree.dataProvider = UIDesignerHost.rootCompilerProfile;
 					tree.validateNow();
 					focusChangedHandler(event);
 				}
@@ -79,7 +82,7 @@
 			protected function creatXML(cp:CompilerProfile):XML
 			{
 				var xml:XML = <target name={cp.name || cp.type}/>;
-				for each(var childCP:CompilerProfile in cp.children)
+				for each(var childCP:CompilerProfile in cp.childrenVector)
 				{
 					xml.appendChild(creatXML(childCP));
 				}

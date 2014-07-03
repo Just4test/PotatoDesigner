@@ -1,19 +1,10 @@
 package potato.designer.plugin.uidesigner
 {
-	
-	import flash.events.Event;
 	import flash.net.registerClassAlias;
 	
-	import mx.collections.ArrayList;
-	
-	import potato.designer.framework.DesignerEvent;
-	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
-	import potato.designer.plugin.guestManager.Guest;
-	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
-	import potato.designer.utils.MultiLock;
 	
 	/**
 	 *管理编译器的Host端
@@ -143,9 +134,9 @@ package potato.designer.plugin.uidesigner
 			
 			if(profile)
 			{
-				for (var i:int = 0; i < profile.children.length; i++) 
+				for (var i:int = 0; i < profile.childrenVector.length; i++) 
 				{
-					update(false, profile.children[i]);
+					update(false, profile.childrenVector[i]);
 				}
 				
 				for (var j:int = 0; j < compilerList.length; j++) 
@@ -226,6 +217,11 @@ package potato.designer.plugin.uidesigner
 			if(_rootCompilerProfile)
 			{
 				var path:Vector.<uint> = ViewController.foldPath;
+				if(!path.length)
+				{
+					logf("[{0}] 当根组件不为空时，您只能向容器添加子组件。请展开任何容器以添加子组件。", DesignerConst.PLUGIN_NAME);
+					return;
+				}
 				path.shift();
 				parrentCP = _rootCompilerProfile.getCompilerProfileByPath(path);
 				if(!_componentTypeTable[parrentCP.type].isContainer)
@@ -280,17 +276,17 @@ package potato.designer.plugin.uidesigner
 			while(foldPath.length)
 			{
 				var index:int = foldPath.shift();
-				if(cp.children.length <= index)
+				if(cp.childrenVector.length <= index)
 					return null;
-				cp = cp.children[index];
+				cp = cp.childrenVector[index];
 				
 			}
 			
 			if(-1 != focusIndex)
 			{
-				if(cp.children.length <= focusIndex)
+				if(cp.childrenVector.length <= focusIndex)
 					return null;
-				cp = cp.children[focusIndex];
+				cp = cp.childrenVector[focusIndex];
 			}
 			
 			return cp;

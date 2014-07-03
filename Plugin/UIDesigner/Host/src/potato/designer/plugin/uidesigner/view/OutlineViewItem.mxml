@@ -12,6 +12,7 @@
 			
 			import potato.designer.framework.DesignerEvent;
 			import potato.designer.framework.EventCenter;
+			import potato.designer.plugin.uidesigner.CompilerProfile;
 			import potato.designer.plugin.uidesigner.DesignerConst;
 
             protected function _clickHandler(event:MouseEvent):void
@@ -27,6 +28,7 @@
 			
 			protected function _dataChangeHandler(event:FlexEvent):void
 			{
+				trace(data);
 			}
 			
 		]]>
@@ -47,6 +49,6 @@
 			<s:BitmapImage source="{treeListData.disclosureIcon}" visible="{treeListData.hasChildren}" />
 		</s:Group>
 		<s:BitmapImage source="{treeListData.icon}" />
-		<s:Label id="labelField" text="{(treeListData.item as XML).@name }" paddingTop="2"/>
+		<s:Label id="labelField" text="{(data as CompilerProfile).name || (data as CompilerProfile).type}" paddingTop="2"/>
 	</s:HGroup>
 </s:MXTreeItemRenderer>
