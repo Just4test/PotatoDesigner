@@ -12,11 +12,6 @@ package potato.designer.plugin.uidesigner
 		public var isContainer:Boolean;
 		public var icon:*;
 		
-		public function add():void
-		{
-			UIDesignerHost.addComponent(name);
-		}
-		
 		public function ComponentType(name:String, isContainer:Boolean, icon:* = null)
 		{
 			this.name = name;

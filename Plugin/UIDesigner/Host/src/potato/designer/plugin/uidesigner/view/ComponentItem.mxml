@@ -12,7 +12,7 @@
 			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			protected function doubleClickHandler(event:MouseEvent):void
 			{
-				data.add();
+				UIDesignerHost.addComponent(data.name);
 			}
 		]]>
 	</fx:Script>

@@ -31,7 +31,6 @@
 			
 			protected function outlineItemClickHandler(event:DesignerEvent):void
 			{
-//				var path:Vector.<uint> = getPathByXml(event.data);
 				var path:Vector.<uint> = (event.data as CompilerProfile).path;
 				log("点击了", path);
 				var index:int = path.pop();
@@ -40,27 +39,43 @@
 			
 			protected function outlineItemDoubleClickHandler(event:DesignerEvent):void
 			{
-//				var path:Vector.<uint> = getPathByXml(event.data);
 				var path:Vector.<uint> = (event.data as CompilerProfile).path;
 				log("双击了", path);
 				ViewController.setFoldAndFocus(path, -1);
 			}
 			
-			protected function getPathByXml(xml:XML):Vector.<uint>
-			{
-				var path:Vector.<uint> = new Vector.<uint>;
-				var parent:XML;
-				while(parent = xml.parent())
-				{
-					path.unshift(xml.childIndex());
-					xml = parent;
-				}
-				path.unshift(0);
-				return path;
-			}
-			
 			public function focusChangedHandler(event:DesignerEvent):void
 			{
+				var cp:CompilerProfile = UIDesignerHost.rootCompilerProfile;
+				if(!cp)
+					return;
+				
+				var fold:Vector.<uint> = ViewController.foldPath;
+				if(fold.length)
+				{
+					fold.shift();
+					openFold(cp, fold);
+				}
+				else
+				{
+					openFold(cp, null);
+				}
+				
+				tree.selectedItem = UIDesignerHost.getCompilerProfileByPath(ViewController.foldPath);
+			}
+			
+			/**
+			 * 遍历CP树以打开和关闭分支
+			 * @param fold 展开树。展开树为null时，cp关闭，否则展开。
+			 */
+			protected function openFold(cp:CompilerProfile, fold:Vector.<uint>):void
+			{
+				tree.expandItem(cp, null != fold);
+				var index:int = fold && fold.length ? fold.shift() : -1;
+				for (var i:int = 0; i < cp.childrenVector.length; i++) 
+				{
+					openFold(cp.childrenVector[i], index == i ? fold : null);
+				}
 				
 			}
 			
@@ -68,7 +83,6 @@
 			{
 				if(UIDesignerHost.rootCompilerProfile)
 				{
-//					tree.dataProvider = creatXML(UIDesignerHost.rootCompilerProfile);
 					tree.dataProvider = UIDesignerHost.rootCompilerProfile;
 					tree.validateNow();
 					focusChangedHandler(event);
@@ -78,27 +92,6 @@
 					tree.dataProvider = null;
 				}
 			}
-			
-			protected function creatXML(cp:CompilerProfile):XML
-			{
-				var xml:XML = <target name={cp.name || cp.type}/>;
-				for each(var childCP:CompilerProfile in cp.childrenVector)
-				{
-					xml.appendChild(creatXML(childCP));
-				}
-				return xml;
-			}
-			
-//			protected function getXmlByPath(path:Vector.<uint>):XML
-//			{
-//				var xml:XML = _rootXml;
-//				for each(var index:uint in path)
-//				{
-//					xml = xml.children()[index];
-//				}
-//				return xml;
-//			}
-//			
 			
 		]]>
 	</fx:Script>

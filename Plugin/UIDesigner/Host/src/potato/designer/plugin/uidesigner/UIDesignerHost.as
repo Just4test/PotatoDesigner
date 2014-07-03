@@ -30,6 +30,15 @@ package potato.designer.plugin.uidesigner
 		{
 			return _rootCompilerProfile;
 		}
+		
+		public static function getCompilerProfileByPath(path:Vector.<uint>):CompilerProfile
+		{
+			//没有根组件、路径长度为0、路径第一位不是0都直接返回null
+			if(!_rootCompilerProfile || !path.length || path.shift())
+				return null;
+
+			return _rootCompilerProfile.getCompilerProfileByPath(path);
+		}
 
 		
 		/**插件注册方法*/
@@ -217,13 +226,12 @@ package potato.designer.plugin.uidesigner
 			if(_rootCompilerProfile)
 			{
 				var path:Vector.<uint> = ViewController.foldPath;
-				if(!path.length)
+				parrentCP = UIDesignerHost.getCompilerProfileByPath(path);
+				if(!parrentCP)
 				{
 					logf("[{0}] 当根组件不为空时，您只能向容器添加子组件。请展开任何容器以添加子组件。", DesignerConst.PLUGIN_NAME);
 					return;
 				}
-				path.shift();
-				parrentCP = _rootCompilerProfile.getCompilerProfileByPath(path);
 				if(!_componentTypeTable[parrentCP.type].isContainer)
 				{
 					logf("[{0}] 当前展开对象不是容器，因此无法添加子组件。", DesignerConst.PLUGIN_NAME);
