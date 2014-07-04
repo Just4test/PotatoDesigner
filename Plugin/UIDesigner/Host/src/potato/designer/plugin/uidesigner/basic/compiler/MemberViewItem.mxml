@@ -368,9 +368,19 @@
 				redraw(TYPE_ALL);
 			}
 			
+			protected var currentParams:Vector.<*>;
 			/**点击时显示编辑文本框*/
 			protected function clickHandler(event:MouseEvent):void
 			{
+				//TODO
+				var params:Vector.<*> = data[1];
+				currentParams = params || new Vector.<*>;
+				var access:AccessorProfile = data[0] as AccessorProfile;
+				var method:MethodProfile = data[0] as MethodProfile;
+				if(method && !method.numParameter)
+				{
+					
+				}
 				if(data is AccessorProfile || (data as MethodProfile).numParameter)
 				{
 					editPoint = 0;
@@ -378,6 +388,18 @@
 					type_combo.textInput.setFocus();
 				}
 				
+			}
+			
+			protected function applyParams():void
+			{
+				//TODO
+				var params:Vector.<*> = data[1];
+				var access:AccessorProfile = data[0] as AccessorProfile;
+				var method:MethodProfile = data[0] as MethodProfile;
+				if(!params)
+				{
+					
+				}
 			}
 			
 		]]>
