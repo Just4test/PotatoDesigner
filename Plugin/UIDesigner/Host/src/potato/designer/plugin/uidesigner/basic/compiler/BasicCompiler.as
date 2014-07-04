@@ -17,7 +17,6 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.Suggest;
 	import potato.designer.plugin.uidesigner.basic.interpreter.BasicClassProfile;
-	import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetMemberProfile;
 	import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
 	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
@@ -42,7 +41,6 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		public static function init(info:PluginInfo):void
 		{
 			registerClassAlias("BasicTargetProfile", BasicTargetProfile);
-			registerClassAlias("BasicTargetMemberProfile", BasicTargetMemberProfile);
 			registerClassAlias("BasicClassProfile", BasicClassProfile);
 			
 			Suggest.loadSuggestFile(info.getAbsolutePath(BasicConst.SUGGEST_FILE_PATH));

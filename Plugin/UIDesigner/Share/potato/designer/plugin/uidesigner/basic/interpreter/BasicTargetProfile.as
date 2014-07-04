@@ -15,7 +15,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	 * <br>本类是动态类，因而可以自由的扩充您所需要的参数。
 	 * @author Just4test
 	 */
-	public dynamic class BasicTargetProfile implements ITargetProfile
+	public class BasicTargetProfile implements ITargetProfile
 	{
 		/**类全名*/
 		public var className:String;

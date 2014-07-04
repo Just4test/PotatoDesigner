@@ -36,7 +36,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			Factory.interpreterList.push(instance);
 			
 			registerClassAlias("BasicTargetProfile", BasicTargetProfile);
-			registerClassAlias("BasicTargetMemberProfile", BasicTargetMemberProfile);
 			registerClassAlias("BasicClassProfile", BasicClassProfile);
 			
 			//注册类型
@@ -270,25 +269,26 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			}
 			
 			//遍历
-			for each (var member:BasicTargetMemberProfile in basicProfile.member) 
+			for (var i:int = 0, length:int = basicProfile.membersName.length; i < length; i++) 
 			{
-				var name:String = member.name;
+				var name:String = basicProfile.membersName[i];
+				var param:Vector.<*> = basicProfile.membersParam[i];
 				var F:Function = memberTable[name];
 				CONFIG::DEBUG
-				{
-					if(!F)
 					{
-						throw new Error("组件描述文件指定的成员[" + name + "]在类描述文件中不存在");
+						if(!F)
+						{
+							throw new Error("组件描述文件指定的成员[" + name + "]在类描述文件中不存在");
+						}
 					}
-				}
-				var values:Array;
+					var values:Array;
 				switch(classProfile.getMemberType(name))
 				{
 					case BasicClassProfile.TYPE_ACCESSOR:
-						component[name] = F(member.values)[0];
+						component[name] = F(param)[0];
 						break;
 					case BasicClassProfile.TYPE_METHOD:
-						Function(component[name]).apply(null, F(member.values));
+						Function(component[name]).apply(null, F(param));
 						break;
 					
 					default:
