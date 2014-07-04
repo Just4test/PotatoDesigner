@@ -85,26 +85,26 @@
 			/**重绘*/
 			protected function redraw(type:String = null):void
 			{
-				var value:BasicTargetMemberProfile = data[1] as BasicTargetMemberProfile;
-				var access:AccessorProfile = data[0] as AccessorProfile;
+				var value:BasicTargetMemberProfile = data[1];
 				var method:MethodProfile;
-				if(access)
+				if(data[0] is AccessorProfile)
 				{
+					var access:AccessorProfile = data[0];
 					if(-1 == editPoint)
 					{
-						before_label.text = access.name + ":" + (access.type || "?");
+						before_label.text = formatStr("{0}:{1} = {2}", access.name, access.type, value.values[0]);
 						
 					}
 					else
 					{
-						before_label.text = access.name + ":";
+						before_label.text = formatStr("{0}:{1} =", access.name, access.type);
 						setTypeCombo(access);
 					}
 					after_label.text = "";
 				}
 				else
 				{
-					method = data[0] as MethodProfile;
+					method = data[0];
 					var paras:Vector.<ParameterProfile> = method.parameters;
 					var text:String = method.name + "(";
 					for(var i:int = 0; i <paras.length; i++)

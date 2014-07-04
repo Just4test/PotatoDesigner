@@ -22,8 +22,6 @@ package potato.designer.plugin.uidesigner.basic.compiler
 	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
 	import potato.designer.utils.SubLock;
-	
-	import spark.layouts.BasicLayout;
 
 	public class BasicCompiler implements ICompiler
 	{
@@ -51,6 +49,9 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			
 			UIDesignerHost.compilerList.push(instance);
 			ViewController.regComponentTypeCreater("添加类", addClassType);
+			
+			ViewController.window1Views.push(new MemberView);
+			ViewController.updateWindow();
 		}
 		
 		
@@ -65,7 +66,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		
 		public function addTarget(profile:CompilerProfile, parent:CompilerProfile):Boolean
 		{
-			var cp:ClassProfile = getClassProfileByNickName(profile.type);
+			var cp:ClassProfile = getClassProfileByNickName(profile.type.name);
 			if(!cp)
 			{
 				return false;

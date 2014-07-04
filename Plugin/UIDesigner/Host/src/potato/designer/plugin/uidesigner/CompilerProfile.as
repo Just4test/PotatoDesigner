@@ -12,7 +12,7 @@ package potato.designer.plugin.uidesigner
 	 */
 	public class CompilerProfile
 	{
-		protected var _type:String;
+		protected var _type:ComponentType;
 		protected var _parent:CompilerProfile;
 		protected const _children:Vector.<CompilerProfile> = new Vector.<CompilerProfile>;
 		
@@ -27,16 +27,17 @@ package potato.designer.plugin.uidesigner
 		 */
 		public var targetProfile:ITargetProfile;
 		
-		public function CompilerProfile(type:String)
+		public function CompilerProfile(type:ComponentType)
 		{
 			_type = type;
+			name = type.name;
 		}
 		
 		
 		/**
 		 *目标类型
 		 */
-		public function get type():String
+		public function get type():ComponentType
 		{
 			return _type;
 		}
@@ -54,7 +55,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		public function get children():Array
 		{
-			if(!_children.length)
+			if(!type.isContainer)
 				return null;
 			
 			var arr:Array = [];

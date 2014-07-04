@@ -2,6 +2,8 @@ package potato.designer.plugin.uidesigner.basic
 {
 	public class BasicConst
 	{
+		/**建议值文件所在位置*/
+		public static const SUGGEST_FILE_PATH:String = "suggest.json";
 		
 		
 		/**解释器数据中类描述文件的key*/
@@ -14,15 +16,16 @@ package potato.designer.plugin.uidesigner.basic
 		
 		/**向解释器推送类描述文件映射表*/
 		public static const S2C_PUSH_CLASS_TABLE:String = "S2C_PUSH_CLASS_TABLE";
-		/**
-		 *向解释器注册类描述文件
-		 */
+		
+		/**向解释器注册单个类描述文件*/
 		public static const S2C_REG_CLASS:String = "S2C_REG_CLASS";
 		
 		
 		
-		/**建议值文件所在位置*/
-		public static const SUGGEST_FILE_PATH:String = "suggest.json";
+		/**设置指定对象的属性。data=[path, accessor]*/
+		public static const C2S_SET_ACCESSOR:String = "C2S_SET_ACCESSOR";
+		
+		
 		
 	}
 }

@@ -5,17 +5,18 @@ package potato.designer.plugin.uidesigner
 	import mx.collections.ArrayList;
 	import mx.core.UIComponent;
 	
-	import spark.layouts.VerticalLayout;
-	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
 	import potato.designer.plugin.uidesigner.view.ComponentView;
+	import potato.designer.plugin.uidesigner.view.LaunchLocalHostView;
 	import potato.designer.plugin.uidesigner.view.OutlineView;
 	import potato.designer.plugin.window.ViewWindow;
 	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
+	
+	import spark.layouts.VerticalLayout;
 
 	/**
 	 *视图控制器
@@ -113,6 +114,8 @@ package potato.designer.plugin.uidesigner
 			
 			_outlineView = new OutlineView;
 			window0Views.push(_outlineView);
+			
+			window0Views.push(new LaunchLocalHostView);
 			
 			updateWindow();
 			

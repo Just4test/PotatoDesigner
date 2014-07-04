@@ -20,8 +20,17 @@ package potato.designer.plugin.uidesigner
 		/**编译器队列*/
 		public static const compilerList:Vector.<ICompiler> = new Vector.<ICompiler>;
 		
-		/**组件类型映射表*/
+		/**组件类型映射表副本*/
 		protected static const _componentTypeTable:Object = {};
+
+//		public static function get componentTypeTable():Object
+//		{
+//			function constructor():void{};
+//			constructor.prototype = _componentTypeTable;
+//			
+//			return new constructor();
+//		}
+
 		
 		protected static var _rootCompilerProfile:CompilerProfile;
 
@@ -220,9 +229,10 @@ package potato.designer.plugin.uidesigner
 		 * @param type
 		 * 
 		 */
-		public static function addComponent(type:String):void
+		public static function addComponent(typeName:String):void
 		{
 			var parrentCP:CompilerProfile;
+			var type:ComponentType = _componentTypeTable[typeName];
 			if(_rootCompilerProfile)
 			{
 				var path:Vector.<uint> = ViewController.foldPath;
@@ -232,7 +242,7 @@ package potato.designer.plugin.uidesigner
 					logf("[{0}] 当根组件不为空时，您只能向容器添加子组件。请展开任何容器以添加子组件。", DesignerConst.PLUGIN_NAME);
 					return;
 				}
-				if(!_componentTypeTable[parrentCP.type].isContainer)
+				if(!parrentCP.type.isContainer)
 				{
 					logf("[{0}] 当前展开对象不是容器，因此无法添加子组件。", DesignerConst.PLUGIN_NAME);
 					return;
@@ -241,7 +251,7 @@ package potato.designer.plugin.uidesigner
 			else
 			{
 				//如果尝试创建一个不是容器的根组件
-				if(!_componentTypeTable[type].isContainer)
+				if(!type.isContainer)
 				{
 					logf("[{0}] 警告：为根组件指定了不是容器的类型。这将导致无法添加任何其他组件。", DesignerConst.PLUGIN_NAME);
 				}
@@ -256,7 +266,7 @@ package potato.designer.plugin.uidesigner
 			}
 			if(!cp.targetProfile)
 			{
-				logf("[{0}] 尝试创建组件[{1}]，但是所有已安装的编译器都没有对此作出反应。", DesignerConst.PLUGIN_NAME, type);
+				logf("[{0}] 尝试创建组件[{1}]，但是所有已安装的编译器都没有对此作出反应。", DesignerConst.PLUGIN_NAME, type.name);
 			}
 			
 			if(_rootCompilerProfile)//如果有根组件，就有父组件

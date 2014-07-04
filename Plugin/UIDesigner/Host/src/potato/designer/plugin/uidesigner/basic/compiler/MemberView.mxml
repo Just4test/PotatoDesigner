@@ -11,6 +11,11 @@
 			import mx.collections.ArrayList;
 			import mx.events.FlexEvent;
 			
+			import potato.designer.framework.DesignerEvent;
+			import potato.designer.framework.EventCenter;
+			import potato.designer.plugin.uidesigner.DesignerConst;
+			import potato.designer.plugin.uidesigner.UIDesignerHost;
+			import potato.designer.plugin.uidesigner.ViewController;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
@@ -19,34 +24,46 @@
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
-				// TODO Auto-generated method stub
-				
+				EventCenter.addEventListener(DesignerConst.FOCUS_CHANGED, updateHandler);
+				EventCenter.addEventListener(DesignerConst.UPDATE, updateHandler);
 			}
 			
-			protected var _data:BasicTargetProfile;
-			
-			public function setData(data:BasicTargetProfile):void
+			protected function updateHandler(event:DesignerEvent):void
 			{
-				_data = data;
 				refresh();
 			}
 			
-			public function refresh():void
+			protected function refresh():void
 			{
+				if(-1 == ViewController.focusIndex)
+				{
+					list.dataProvider = null;
+					return;
+				}
+				var path:Vector.<uint> = ViewController.foldPath;
+				path.push(ViewController.focusIndex);
+				var tp:BasicTargetProfile = UIDesignerHost.getCompilerProfileByPath(path).targetProfile as BasicTargetProfile;
+				if(!tp)
+				{
+					list.dataProvider = null;
+					return;
+				}
+				
 				var dp:ArrayList = new ArrayList;
-				var cp:ClassProfile = BasicCompiler.getClassProfileByClassName(_data.className);
+				var cp:ClassProfile = BasicCompiler.getClassProfileByClassName(tp.className);
 				var addedMap:Object = {};
 				//添加构造方法
 				if(cp.constructor)
 				{
-					dp.addItem([cp.constructor, _data.constructorParam]);
+					dp.addItem([cp.constructor, tp.constructorParam]);
 				}
+				var mp:IMemberProfile;
 				//添加具有值的成员
-				for(var i:int = 0; i < _data.membersName.length; i++)
+				for(var i:int = 0; i < tp.membersName.length; i++)
 				{
-					var mp:IMemberProfile = cp.getMember(_data.membersName[i]);
+					mp = cp.getMember(tp.membersName[i]);
 					addedMap[mp.name] = true;
-					var param:Vector.<*> = _data.membersParam[i];
+					var param:Vector.<*> = tp.membersParam[i];
 					dp.addItem([mp, param]);
 				}
 				//添加没有值的属性
@@ -54,7 +71,7 @@
 				{
 					if(mp.enable && !addedMap[mp.name])
 					{
-						dp.addItem[mp, null];
+						dp.addItem([mp, null]);
 					}
 				}
 				//添加方法
@@ -62,7 +79,7 @@
 				{
 					if(mp.enable)
 					{
-						dp.addItem[mp, null];
+						dp.addItem([mp, null]);
 					}
 				}
 				
@@ -76,5 +93,6 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
+	<s:Label text="属性视图"/>
 	<s:List id="list" width="100%" height="100%" itemRenderer="potato.designer.plugin.uidesigner.basic.compiler.MemberViewItem"></s:List>
 </s:Group>

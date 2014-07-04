@@ -49,6 +49,6 @@
 			<s:BitmapImage source="{treeListData.disclosureIcon}" visible="{treeListData.hasChildren}" />
 		</s:Group>
 		<s:BitmapImage source="{treeListData.icon}" />
-		<s:Label id="labelField" text="{(data as CompilerProfile).name || (data as CompilerProfile).type}" paddingTop="2"/>
+		<s:Label id="labelField" text="{(data as CompilerProfile).name}" paddingTop="2"/>
 	</s:HGroup>
 </s:MXTreeItemRenderer>

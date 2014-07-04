@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="300">
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import potato.designer.plugin.guestManager.GuestManagerHost;
+			protected function button_clickHandler(event:MouseEvent):void
+			{
+				var arr:Array = combo.textInput.text.split("x");
+				if(arr && 2 == arr.length)
+				{
+					GuestManagerHost.startLocalGuest(int(arr[0]), int(arr[1]));
+				}
+				else
+				{
+					GuestManagerHost.startLocalGuest();
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:ComboBox id="combo"  left="5" top="5" width="100%" selectedIndex="0">
+		<s:ArrayList>
+			<fx:String>480x320</fx:String>
+			<fx:String>800x480</fx:String>
+			<fx:String>960x640</fx:String>
+			<fx:String>1136x640</fx:String>
+			<fx:String>1024x768</fx:String>
+			<fx:String>1920x1080</fx:String>
+		</s:ArrayList>
+			
+	</s:ComboBox>
+	<s:Button x="159" y="10" label="启动本地客户端" click="button_clickHandler(event)"/>
+</s:Group>
