@@ -55,7 +55,7 @@
 				//添加构造方法
 				if(cp.constructor)
 				{
-					dp.addItem([cp.constructor, tp.constructorParam]);
+					dp.addItem([tp, cp.constructor, tp.constructorParam]);
 				}
 				var mp:IMemberProfile;
 				//添加具有值的成员
@@ -64,14 +64,14 @@
 					mp = cp.getMember(tp.membersName[i]);
 					addedMap[mp.name] = true;
 					var param:Vector.<*> = tp.membersParam[i];
-					dp.addItem([mp, param]);
+					dp.addItem([tp, mp, param]);
 				}
 				//添加没有值的属性
 				for each(mp in cp.accessors)
 				{
 					if(mp.enable && !addedMap[mp.name])
 					{
-						dp.addItem([mp, null]);
+						dp.addItem([tp, mp, null]);
 					}
 				}
 				//添加方法
@@ -79,7 +79,7 @@
 				{
 					if(mp.enable)
 					{
-						dp.addItem([mp, null]);
+						dp.addItem([tp, mp, null]);
 					}
 				}
 				

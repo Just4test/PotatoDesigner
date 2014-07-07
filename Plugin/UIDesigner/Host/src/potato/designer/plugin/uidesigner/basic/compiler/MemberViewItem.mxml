@@ -20,10 +20,13 @@
 			import mx.events.FlexEvent;
 			import mx.utils.StringUtil;
 			
+			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
+			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ITypeValue;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.MethodProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
+			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
 			
 			import spark.events.TextOperationEvent;
 			import spark.utils.TextFlowUtil;
@@ -33,11 +36,12 @@
 			/**类型描述：方法*/
 			protected var method:MethodProfile;
 			/**已有参数。如果是未启用的成员，则此值为空*/
-			protected var params:Vector.<String>;
+			protected var params:Vector.<*>;
 			/**编辑参数。由于可以指定"undefined"（表示尚未配置该值），所以使用*类型。*/
 			protected var editParams:Vector.<*>;
 			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
 			protected var editPoint:int = -1;
+			protected var inputIsNull:Boolean;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
@@ -56,7 +60,9 @@
 				{
 					if(0 == input.selectionAnchorPosition && 0 == input.selectionActivePosition)
 					{
-						apply();
+						if(-1 != editPoint)
+							editParams[editPoint] = inputIsNull ? null : input.text;
+						
 						previous();
 					}
 				}
@@ -65,7 +71,9 @@
 					var lastIndex:int = input.text.length;
 					if(lastIndex == input.selectionAnchorPosition && lastIndex == input.selectionActivePosition)
 					{
-						apply();
+						if(-1 != editPoint)
+							editParams[editPoint] = inputIsNull ? null : input.text;
+						
 						next();
 					}
 				}
@@ -78,6 +86,9 @@
 					}
 					else
 					{
+						if(-1 != editPoint)
+							editParams[editPoint] = inputIsNull ? null : input.text;
+						
 						apply();
 					}
 				}
@@ -91,11 +102,28 @@
 			}
 			
 			
+			/**点击时显示编辑文本框*/
+			protected function editHandler(event:MouseEvent):void
+			{
+				if(method && !method.numParameter)//如果是无参方法，则立即启用，不显示编辑框
+				{
+					apply();
+					return;
+				}
+				editPoint = 0;
+				redraw(TYPE_ALL);
+				input.setFocus();
+			}
+			
+			
 			protected function dataChangeHandler(event:FlexEvent):void
 			{
-				access = data[0] as AccessorProfile;
-				method = data[0] as MethodProfile;
-				params = data[1];
+				if(!data)
+					return;
+				
+				access = data[1] as AccessorProfile;
+				method = data[1] as MethodProfile;
+				params = data[2];
 				editPoint = -1;
 				
 				redraw();
@@ -179,7 +207,7 @@
 					
 					//如果字符串包含换行符，则将编辑框设定为多行模式
 					str = editParams[editPoint];
-					input.multiline = -1 != str.indexOf("\r") || -1 != str.indexOf("\n");
+					input.multiline = str && (-1 != str.indexOf("\r") || -1 != str.indexOf("\n"));
 					
 					if(access)
 					{
@@ -244,6 +272,7 @@
 				function setStr(str:String):void
 				{
 					input.text = str || "null";
+					inputIsNull = !str;
 //					input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
 					input.setStyle("color", str ? 0x0: 0xff0000);
 				}
@@ -253,6 +282,9 @@
 			/**应用输入的值*/
 			protected function apply():void
 			{
+				if(!data)
+					return;
+				
 				//检测输入有效性。
 				for (var i:int = 0; i < editParams.length; i++) 
 				{
@@ -268,10 +300,26 @@
 					}
 				}
 				
+				var tp:BasicTargetProfile = data[0];
 				if(params)
 				{
-					//TODO
+					var index:int = tp.membersParam.indexOf(params);
+					if(-1 == index)//构造方法
+					{
+						tp.constructorParam = editParams;
+					}
+					else
+					{
+						tp.membersParam[index] = editParams;
+					}
 				}
+				else
+				{
+					tp.membersName.push((data[1] as IMemberProfile).name);
+					tp.membersParam.push(editParams);
+				}
+				
+				UIDesignerHost.update();
 				
 			}
 			
@@ -310,33 +358,6 @@
 					}
 				}
 				redraw(TYPE_ALL);
-			}
-			
-			protected var currentParams:Vector.<*>;
-			
-			/**点击时显示编辑文本框*/
-			protected function editHandler(event:MouseEvent):void
-			{
-				if(method && !method.numParameter)//如果是无参方法，则立即启用，不显示编辑框
-				{
-					apply();
-					return;
-				}
-				editPoint = 0;
-				redraw(TYPE_ALL);
-				input.setFocus();
-			}
-			
-			protected function applyParams():void
-			{
-				//TODO
-				var params:Vector.<*> = data[1];
-				var access:AccessorProfile = data[0] as AccessorProfile;
-				var method:MethodProfile = data[0] as MethodProfile;
-				if(!params)
-				{
-					
-				}
 			}
 			
 		]]>

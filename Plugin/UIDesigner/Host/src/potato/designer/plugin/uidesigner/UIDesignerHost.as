@@ -146,7 +146,7 @@ package potato.designer.plugin.uidesigner
 		 * @param profile 仅更新指定的组件树。不提供该值将更新根组件树。
 		 * 
 		 */
-		public static function update(dispatch:Boolean, profile:CompilerProfile = null):void
+		public static function update(dispatch:Boolean = true, profile:CompilerProfile = null):void
 		{
 			profile ||= _rootCompilerProfile;
 			
