@@ -41,77 +41,102 @@
 			protected var editParams:Vector.<*>;
 			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
 			protected var editPoint:int = -1;
-			protected var inputIsNull:Boolean;
+			protected var changed:Boolean;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
-				input.addEventListener(TextOperationEvent.CHANGE, input_changeHandler);
-				input.addEventListener(KeyboardEvent.KEY_DOWN, input_keyDownHandler);
-				input.addEventListener(FocusEvent.FOCUS_OUT, inputOverHandler);
 			}
 			
 			protected function input_changeHandler(event:TextOperationEvent):void
 			{
+				editParams[editPoint] = input.text;
 			}
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
 			{
-				if(Keyboard.LEFT == event.keyCode)
+				changed = true;
+				
+				switch(event.keyCode)
 				{
-					if(0 == input.selectionAnchorPosition && 0 == input.selectionActivePosition)
-					{
-						if(-1 != editPoint)
-							editParams[editPoint] = inputIsNull ? null : input.text;
-						
-						previous();
-					}
-				}
-				else if(Keyboard.RIGHT == event.keyCode)
-				{
-					var lastIndex:int = input.text.length;
-					if(lastIndex == input.selectionAnchorPosition && lastIndex == input.selectionActivePosition)
-					{
-						if(-1 != editPoint)
-							editParams[editPoint] = inputIsNull ? null : input.text;
-						
-						next();
-					}
-				}
-				else if(Keyboard.ENTER == event.keyCode)
-				{
-					event.preventDefault();
-					if(event.shiftKey)//shift + enter 是输入换行符
-					{
-						input.insertText(File.lineEnding);
-					}
-					else
-					{
-						if(-1 != editPoint)
-							editParams[editPoint] = inputIsNull ? null : input.text;
-						
-						apply();
-					}
+					//上一个参数
+					case Keyboard.LEFT:
+						if(0 == input.selectionAnchorPosition && 0 == input.selectionActivePosition)
+						{
+							event.preventDefault();
+							previous();
+						}
+						break;
+					
+					//下一个参数
+					case Keyboard.RIGHT:
+						var lastIndex:int = input.text.length;
+						if(lastIndex == input.selectionAnchorPosition && lastIndex == input.selectionActivePosition)
+						{
+							event.preventDefault();
+							next();
+						}
+						break;
+					
+					//完成输入或者输入回车
+					case Keyboard.ENTER:
+						event.preventDefault();
+						if(event.shiftKey)//shift + enter 是输入换行符
+						{
+							input.insertText(File.lineEnding);
+						}
+						else
+						{
+							apply();
+						}
+						break;
+					
+					//输入null
+					case Keyboard.DELETE:
+					case Keyboard.BACKSPACE:
+						if(0 == input.text.length)
+						{
+							editParams[editPoint] = null;
+							setInput();
+							event.preventDefault();
+						}
+						break;
+					
+					case Keyboard.LEFT:
+						break;
+					
+					default:
+						if(!editParams[editPoint])
+						{
+							event.preventDefault();
+							editParams[editPoint] = "";
+							setInput();
+							input.appendText(String.fromCharCode(event.charCode));
+						}
+					
 				}
 			}
 			
-			protected function inputOverHandler(e:Event):void
+			protected function input_focusOutHandler(e:Event):void
 			{
 				apply();
 				editPoint = -1;
-				redraw();
+				redraw(false);
 			}
 			
 			
 			/**点击时显示编辑文本框*/
 			protected function editHandler(event:MouseEvent):void
 			{
+				if(-1 != editPoint)
+					return;
+				
 				if(method && !method.numParameter)//如果是无参方法，则立即启用，不显示编辑框
 				{
 					apply();
 					return;
 				}
 				editPoint = 0;
-				redraw(TYPE_ALL);
+				redraw(true);
 				input.setFocus();
 			}
 			
@@ -124,9 +149,11 @@
 				access = data[1] as AccessorProfile;
 				method = data[1] as MethodProfile;
 				params = data[2];
+				editParams = params ? params.concat() : new Vector.<String>;
+				editParams.length = access ? 1 : method.numParameter;
 				editPoint = -1;
 				
-				redraw();
+				redraw(true);
 				
 				contextMenu = new ContextMenu;
 				var item:ContextMenuItem;
@@ -144,17 +171,16 @@
 			{
 				//TODO
 			}
-			
-			
-			protected static const TYPE_ALL:String = "all";
-			protected static const TYPE_BEGIN:String = "begin";
-			protected static const TYPE_END:String = "end";
-			
+
 			/**重绘*/
-			protected function redraw(type:String = null):void
+			protected function redraw(isForced:Boolean):void
 			{
 				if(!data)
 					return;
+				
+				if(!isForced && !changed)
+					return;
+				changed = false;
 				
 				var str:String;
 				
@@ -173,7 +199,7 @@
 					}
 					else
 					{
-						str = access.name + "(";
+						str = method.name + "(";
 						for(var i:int = 0; i <method.parameters.length; i++)
 						{
 							if(params && params.length > i)
@@ -182,7 +208,7 @@
 							}
 							else
 							{
-								str += html(params[i]);
+								str += "?:" + method.parameters[i].type;
 							}
 							
 							if(i < method.parameters.length - 1)
@@ -198,13 +224,7 @@
 					after_label.parent && removeElement(after_label);
 				}
 				else//编辑模式
-				{
-					if(!editParams)
-					{
-						editParams = params ? params.concat() : new Vector.<String>;
-						editParams.length = access ? 1 : method.numParameter;
-					}
-					
+				{					
 					//如果字符串包含换行符，则将编辑框设定为多行模式
 					str = editParams[editPoint];
 					input.multiline = str && (-1 != str.indexOf("\r") || -1 != str.indexOf("\n"));
@@ -217,15 +237,15 @@
 					}
 					else
 					{
-						str = access.name + "(";
+						str = method.name + "(";
 						for(i = 0; i <method.parameters.length; i++)
 						{
 							
 							if(i == editPoint)
 							{
-								before_label.text = str;
+								setHtml(before_label, str);
 								str = "";
-								setStr(editParams[editPoint]);
+								setInput();
 							}
 							else
 							{
@@ -235,7 +255,7 @@
 								}
 								else
 								{
-									str += html(params[i]);
+									str += "?:" + method.parameters[i].type;
 								}
 							}
 							
@@ -247,10 +267,12 @@
 						str += ")";
 					}
 					
+					setHtml(after_label, str);
 					addElement(input);
 					addElement(after_label);
 				}
 				
+				commitProperties();
 				
 				function html(param:String):String
 				{
@@ -269,14 +291,16 @@
 				}
 				
 				
-				function setStr(str:String):void
-				{
-					input.text = str || "null";
-					inputIsNull = !str;
-//					input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
-					input.setStyle("color", str ? 0x0: 0xff0000);
-				}
 				
+			}
+			
+			
+			protected function setInput():void
+			{
+				var str:String = editParams[editPoint];
+				input.text = null == str ? "null" : str;
+				//input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
+				input.setStyle("color", str ? 0x0: 0xff0000);
 			}
 			
 			/**应用输入的值*/
@@ -327,7 +351,7 @@
 			/**导航至下一个参数*/
 			protected function next():void
 			{
-				if(data is AccessorProfile)
+				if(access)
 				{
 					editPoint = 0;
 				}
@@ -339,13 +363,13 @@
 						editPoint = 0;
 					}
 				}
-				redraw(TYPE_ALL);
+				redraw(true);
 			}
 			
 			/**导航至上一个参数*/
 			protected function previous():void
 			{
-				if(data is AccessorProfile)
+				if(access)
 				{
 					editPoint = 0;
 				}
@@ -357,14 +381,17 @@
 						editPoint = method.numParameter -1;
 					}
 				}
-				redraw(TYPE_ALL);
+				redraw(true);
 			}
 			
 		]]>
 	</fx:Script>
 	
-	<s:RichText id="before_label" width="100%" text="function("/>
-	<s:RichEditableText id="input" width="100"/>
-	<s:RichText id="after_label" width="50%" text=" )"/>
+	<s:RichText id="before_label" width="100%" height="20" text="function(" verticalAlign="top"/>
+	<s:RichEditableText id="input" width="100"
+						change="input_changeHandler(event)"
+						focusOut="input_focusOutHandler(event)"
+						keyDown="input_keyDownHandler(event)"/>
+	<s:RichText id="after_label" width="50%" height="20" text=" )"/>
 	
 </s:ItemRenderer>
