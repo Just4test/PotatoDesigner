@@ -67,6 +67,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		{
 			_classTable = {};
 			_classMemberTable = {};
+			log("!!!!!!!!!!!!!!!!!!!清理类");
 			for each(var i:BasicClassProfile in msg.data)
 			{
 				setClassProfile(i);
@@ -208,25 +209,26 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		public function construct(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
 			//如果配置文件不是所需要的格式则跳过本解释器
-			var basicProfile:BasicTargetProfile = profile as BasicTargetProfile;
-			if(!basicProfile)
+			var targetProfile:BasicTargetProfile = profile as BasicTargetProfile;
+			if(!targetProfile)
 			{
 				return false;
 			}
-			var classProfile:BasicClassProfile = _classTable[basicProfile.className];
+			var classProfile:BasicClassProfile = _classTable[targetProfile.className];
 			if(!classProfile)
 			{
-				throw new Error("组件配置文件中使用的类[" + basicProfile.className + "]找不到对应的类配置文件");
+				throw new Error("组件配置文件中使用的类[" + targetProfile.className + "]找不到对应的类配置文件");
 			}
+			
+			var memberTable:Object = _classMemberTable[targetProfile.className];
 			
 			//如果没有传入组件，则创建组件
 			var component:* = tree.target;
 			if(!component)
 			{
 				
-				var memberTable:Object = _classMemberTable[basicProfile.className];
-				var array:Array = memberTable[CONSTRUCTOR_NAME](basicProfile.constructorParam);
-				var C:Class = getDefinitionByName(basicProfile.className) as Class;
+				var array:Array = memberTable[CONSTRUCTOR_NAME](targetProfile.constructorParam);
+				var C:Class = getDefinitionByName(targetProfile.className) as Class;
 				switch(array.length)
 				{
 					case 0:
@@ -268,11 +270,16 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				tree.target = component;
 			}
 			
+			trace("成员个数", targetProfile.membersName.length, targetProfile.membersName)
+			trace(targetProfile.className, "core.display::Quad" == targetProfile.className, memberTable)
 			//遍历
-			for (var i:int = 0, length:int = basicProfile.membersName.length; i < length; i++) 
+			for (var i:int = 0, length:int = targetProfile.membersName.length; i < length; i++) 
 			{
-				var name:String = basicProfile.membersName[i];
-				var param:Vector.<Object> = basicProfile.membersParam[i];
+				var name:String = targetProfile.membersName[i];
+				var param:Vector.<Object> = targetProfile.membersParam[i];
+				
+				trace("成员名", name, "参数", param );
+				
 				var F:Function = memberTable[name];
 				CONFIG::DEBUG
 					{

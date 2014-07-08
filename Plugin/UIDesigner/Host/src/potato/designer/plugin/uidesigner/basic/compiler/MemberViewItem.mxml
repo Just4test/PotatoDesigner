@@ -50,6 +50,7 @@
 			protected function input_changeHandler(event:TextOperationEvent):void
 			{
 				editParams[editPoint] = input.text;
+				trace("写入!", input.text, editPoint, editParams)
 			}
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
@@ -247,7 +248,7 @@
 							{
 								if(params && params.length > i)
 								{
-									str += formatStr("{0}:{1}", html(params[i]), method.parameters[i].type);
+									str += formatStr("{0}:{1}", html(editParams[i]), method.parameters[i].type);
 								}
 								else
 								{
@@ -268,18 +269,15 @@
 					addElement(after_label);
 				}
 				
-				commitProperties();
-				input.parent && input.getFocus();
+//				commitProperties();
+//				input.parent && input.getFocus();
 				
 				function html(param:String):String
 				{
-					if(!param)
+					if(null == param)
 						return "<b>null</b>";
-					else	
-					{
-						var ret:String = formatStr('"<b>{0}</b>"', param);
-						return ret;
-					}
+					else
+						return formatStr('"<b>{0}</b>"', param);
 				}
 				
 				var textImporter:ITextImporter;
@@ -299,6 +297,7 @@
 			{
 				var str:String = editParams[editPoint] as String;
 				input.text = null == str ? "null" : str;
+				trace("输入框！", str);
 				//input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
 				input.setStyle("color", null == str ? 0xff0000 : 0);
 			}
@@ -327,6 +326,8 @@
 						break;
 					}
 				}
+				
+				trace("应用!", editParams, "到", params)
 				
 				var tp:BasicTargetProfile = data[0];
 				if(params)

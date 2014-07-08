@@ -1,5 +1,9 @@
 package potato.designer.plugin.uidesigner.basic.interpreter
 {	
+	import flash.utils.IDataInput;
+	import flash.utils.IDataOutput;
+	import flash.utils.IExternalizable;
+	
 	import potato.designer.plugin.uidesigner.ITargetProfile;
 	
 	CONFIG::HOST
@@ -15,7 +19,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	 * <br>本类是动态类，因而可以自由的扩充您所需要的参数。
 	 * @author Just4test
 	 */
-	public class BasicTargetProfile implements ITargetProfile
+	public class BasicTargetProfile implements ITargetProfile, IExternalizable
 	{
 		/**类全名*/
 		public var className:String;
@@ -28,12 +32,12 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		/**
 		 *成员名，包含方法和存取器/变量 
 		 */
-		public const membersName:Vector.<String> = new Vector.<String>;
+		public var membersName:Vector.<String> = new Vector.<String>;
 		/**
 		 *与成员名所对应的成员参数 
 		 * 通常应存储字符串。在优化后可以传入其他类型的参数。
 		 */
-		public const membersParam:Vector.<Vector.<Object>> = new Vector.<Vector.<Object>>;
+		public var membersParam:Vector.<Vector.<Object>> = new Vector.<Vector.<Object>>;
 		
 		protected var _children:Vector.<ITargetProfile> = new Vector.<ITargetProfile>;
 		
@@ -46,6 +50,27 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		public function set children(value:Vector.<ITargetProfile>):void
 		{
 			_children = value;
+		}
+		
+		
+		
+		public function readExternal(input:IDataInput):void
+		{
+			className = input.readUTF();
+			constructorParam = Vector.<Object>(input.readObject());
+			membersName = Vector.<String>(input.readObject());
+			membersParam = Vector.<Vector.<Object>>(input.readObject());
+			_children = input.readObject();
+			
+		}
+		
+		public function writeExternal(output:IDataOutput):void
+		{
+			output.writeUTF(className);
+			output.writeObject(constructorParam);
+			output.writeObject(membersName);
+			output.writeObject(membersParam);
+			output.writeObject(_children);
 		}
 		
 		CONFIG::HOST

@@ -157,7 +157,7 @@ package potato.designer.plugin.uidesigner
 					update(false, profile.childrenVector[i]);
 				}
 				
-				for (var j:int = 0; j < compilerList.length; j++) 
+				for (var j:int = 0; j < compilerList.length; j++)
 				{
 					if(compilerList[j].update(profile))
 						break;
