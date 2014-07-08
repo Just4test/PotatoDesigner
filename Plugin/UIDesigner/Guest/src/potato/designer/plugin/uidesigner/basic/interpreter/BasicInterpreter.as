@@ -67,7 +67,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		{
 			_classTable = {};
 			_classMemberTable = {};
-			log("!!!!!!!!!!!!!!!!!!!清理类");
 			for each(var i:BasicClassProfile in msg.data)
 			{
 				setClassProfile(i);
@@ -270,15 +269,11 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				tree.target = component;
 			}
 			
-			trace("成员个数", targetProfile.membersName.length, targetProfile.membersName)
-			trace(targetProfile.className, "core.display::Quad" == targetProfile.className, memberTable)
 			//遍历
 			for (var i:int = 0, length:int = targetProfile.membersName.length; i < length; i++) 
 			{
 				var name:String = targetProfile.membersName[i];
 				var param:Vector.<Object> = targetProfile.membersParam[i];
-				
-				trace("成员名", name, "参数", param );
 				
 				var F:Function = memberTable[name];
 				CONFIG::DEBUG

@@ -26,9 +26,6 @@ package potato.designer.plugin.uidesigner.factory
 		 */
 		public static const interpreterList:Vector.<IInterpreter> = new Vector.<IInterpreter>;
 		
-		{
-			interpreterList.push(BasicInterpreter.instance);
-		}
 		/**
 		 *设置数据 
 		 * <br>不同的解释器需要不同格式的数据。数据被组织为一个Object对象，内部包含了各种对象：构建配置文件或其他。

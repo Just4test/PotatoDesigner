@@ -50,8 +50,6 @@ package potato.designer.plugin.guestManager
 		
 		/**网络发现使用的timer*/
 		private static var timer:Timer;
-		/**网络发现使用的DatagramSocket数组*/
-		private static var udpSockets:Vector.<DatagramSocket>;
 		
 		/**插件注册方法*/
 		public function start(info:PluginInfo):void
@@ -211,61 +209,64 @@ package potato.designer.plugin.guestManager
 				log("[GuestManager] 当前的客户端AIR配置文件不支持UDP协议。无法启用Host发现服务。");
 				return;
 			}
-			if(!udpSockets)
+			if(!NetworkInfo.isSupported)
 			{
-				udpSockets = new Vector.<DatagramSocket>;
-				//发现本机地址
-				if(!NetworkInfo.isSupported)
-				{
-					log("[GuestManager] 当前的客户端AIR配置文件不支持本机地址发现。无法启用Host发现服务。");
-					return;
-				}
-				var interfaces:Vector.<NetworkInterface>= NetworkInfo.networkInfo.findInterfaces(); 
-				if(interfaces)
-				{
-					for each(var interfaceObj:NetworkInterface in interfaces)
-					{
-						if(!interfaceObj.active)
-							continue;
-						
-						for each(var address:InterfaceAddress in interfaceObj.addresses)
-						{
-							if("IPv4" != address.ipVersion)
-								continue;
-							
-							log("发现本机地址:", address.address);
-							var socket:DatagramSocket = new DatagramSocket();
-							socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
-							socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
-							udpSockets.push(socket);
-						}
-					}
-				}
+				log("[GuestManager] 当前的客户端AIR配置文件不支持本机地址发现。无法启用Host发现服务。");
+				return;
 			}
-			if(udpSockets.length)
-				log("开始本机地址广播");
 			
 			if(!timer)
 			{
 				timer = new Timer(NetConst.HOST_MULTICAST_INTERVAL, 0);
-				timer.addEventListener(TimerEvent.TIMER, timerHandler);
+				timer.addEventListener(TimerEvent.TIMER, timerMultiCastHandler);
 			}
 			
+			
+			
+			log("开始本机地址广播");
+			timer.reset();
+			timer.start();
+			
+			timerMultiCastHandler(null);
+			
+			
+		}
+		
+		protected static function timerMultiCastHandler(event:TimerEvent):void
+		{
 			var bytes:ByteArray = new ByteArray();
 			bytes.writeUTFBytes(NetConst.S2C_HELLO);
 			
-			timer.reset();
-			timer.start();
-			timerHandler(null);
+			var udpSockets:Vector.<DatagramSocket> = new Vector.<DatagramSocket>;
 			
-			
-			function timerHandler(event:TimerEvent):void
+			//发现本机地址
+			var interfaces:Vector.<NetworkInterface>= NetworkInfo.networkInfo.findInterfaces(); 
+			if(interfaces)
 			{
-				for each (var i:DatagramSocket in udpSockets) 
+				for each(var interfaceObj:NetworkInterface in interfaces)
 				{
-					i.send(bytes);
+					if(!interfaceObj.active)
+						continue;
+					
+					for each(var address:InterfaceAddress in interfaceObj.addresses)
+					{
+						if("IPv4" != address.ipVersion)
+							continue;
+						
+						var socket:DatagramSocket = new DatagramSocket();
+						socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
+						socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
+						udpSockets.push(socket);
+					}
 				}
 			}
+			
+			for each (var i:DatagramSocket in udpSockets) 
+			{
+				i.send(bytes);
+			}
+			
+			
 		}
 		
 		public static function stopHostMultiCast():void
