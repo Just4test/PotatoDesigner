@@ -92,13 +92,13 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 * <br>一个目标类可以对应多个类型。在Host端指定属性/参数类型时，设计器将提示用户与需要的类对应的所有类型。
 		 * 然而，允许指定与目标类不匹配的类型。比如，需要Number类时，可以手动输入int类型。设计器不会检查类型是否匹配。
 		 * @param typeName 类型名
-		 * @param translater 翻译器。这是一个方法，它接受一个String作为参数，并返回目标类型
+		 * @param converter 转换器。这是一个方法，它接受一个String作为参数，并返回目标类型
 		 * @param isSerializable 指示翻译器的返回是否可以序列化。如果该参数为true，则发布版中将仅包含翻译过的结果，而不是初始的String。这样做可以加速发行版本的构建速度。
 		 * @param className 指示该类型所对应的目标类。
 		 */
-		public static function regType(typeName:String, translater:Function, isSerializable:Boolean = false, className:String = null):void
+		public static function regType(typeName:String, converter:Function, isSerializable:Boolean = false, className:String = null):void
 		{
-			_typeTable[typeName] = new BasicTypeProfile(typeName, translater, isSerializable, className);
+			_typeTable[typeName] = new BasicTypeProfile(typeName, converter, isSerializable, className);
 		}
 		
 		/**
@@ -133,7 +133,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			
 			function addFunction(name:String, types:Vector.<String>):void
 			{
-				var translaters:Vector.<Function> = new Vector.<Function>;
+				var converters:Vector.<Function> = new Vector.<Function>;
 				
 				for(var i:int = 0; i < types.length; i++)
 				{
@@ -143,7 +143,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 					var typeProfile:BasicTypeProfile = _typeTable[type];
 					if(!typeProfile)
 						throw new Error("[基础解释器] 指定的type未注册：" + type);
-					translaters[i] = typeProfile.translater;
+					converters[i] = typeProfile.converter;
 				}
 				
 				memberTable[name] = 
@@ -152,7 +152,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 						var ret:Array = [];
 						CONFIG::DEBUG
 						{
-							if(paras.length > translaters.length)
+							if(paras.length > converters.length)
 							{
 								throw new Error("[基础解释器] 给予的参数比需要的参数多：" + profile.className + "::" + name);
 							}
@@ -160,14 +160,14 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 						
 						for(var j:int = 0; j < paras.length; j++)
 						{
-							var translater:Function = translaters[j];
+							var converter:Function = converters[j];
 							
 							if(CONFIG::DEBUG)
 							{
 								var value:*;
 								try
 								{
-									value = translater ? translater(paras[j]): paras[j];
+									value = converter ? converter(paras[j]): paras[j];
 									ret.push(value);
 								} 
 								catch(error:Error) 
@@ -177,7 +177,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 							}
 							else
 							{
-								ret.push(translater ? translater(paras[j]): paras[j]);
+								ret.push(converter ? converter(paras[j]): paras[j]);
 							}
 							
 							

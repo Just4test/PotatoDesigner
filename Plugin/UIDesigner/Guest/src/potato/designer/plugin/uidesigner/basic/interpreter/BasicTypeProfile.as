@@ -3,14 +3,14 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	public class BasicTypeProfile
 	{
 		protected var _typeName:String;
-		protected var _translater:Function;
+		protected var _converter:Function;
 		protected var _isSerializable:Boolean;
 		protected var _className:String;
 		
-		public function BasicTypeProfile(typeName:String, translater:Function, isSerializable:Boolean = false, className:String = null)
+		public function BasicTypeProfile(typeName:String, converter:Function, isSerializable:Boolean = false, className:String = null)
 		{
 			_typeName = typeName;
-			_translater = translater;
+			_converter = converter;
 			_isSerializable = isSerializable;
 			_className = className;
 		}
@@ -22,9 +22,9 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			return _typeName;
 		}
 
-		public function get translater():Function
+		public function get converter():Function
 		{
-			return _translater;
+			return _converter;
 		}
 
 		public function get isSerializable():Boolean

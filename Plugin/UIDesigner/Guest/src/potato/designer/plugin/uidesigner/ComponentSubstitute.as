@@ -122,7 +122,6 @@ public class ComponentSubstitute extends UIComponent
     public function refresh():void
     {
         addEventListener(Event.ENTER_FRAME, actualRefersh);
-		actualRefersh(null);
     }
 
     protected function actualRefersh(e:Event):void
