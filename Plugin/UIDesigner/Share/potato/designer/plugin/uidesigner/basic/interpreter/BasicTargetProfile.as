@@ -23,7 +23,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		/**构造方法参数
 		 * 通常应存储字符串。在优化后可以传入其他类型的参数。
 		 */
-		public var constructorParam:Vector.<*>;
+		public var constructorParam:Vector.<Object>;
 		
 		/**
 		 *成员名，包含方法和存取器/变量 
@@ -33,7 +33,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		 *与成员名所对应的成员参数 
 		 * 通常应存储字符串。在优化后可以传入其他类型的参数。
 		 */
-		public const membersParam:Vector.<Vector.<*>> = new Vector.<Vector.<*>>;
+		public const membersParam:Vector.<Vector.<Object>> = new Vector.<Vector.<Object>>;
 		
 		protected var _children:Vector.<ITargetProfile> = new Vector.<ITargetProfile>;
 		
@@ -74,7 +74,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				{
 					if(name == membersName[i])
 					{
-						return membersParam[i][0];
+						return membersParam[i][0] as String;
 					}
 				}
 				
@@ -116,7 +116,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 				}
 				
 				membersName.push(name);
-				membersParam.push(Vector.<*>([value]));
+				membersParam.push(Vector.<Object>([value]));
 				
 			}
 

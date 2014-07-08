@@ -63,7 +63,7 @@
 				{
 					mp = cp.getMember(tp.membersName[i]);
 					addedMap[mp.name] = true;
-					var param:Vector.<*> = tp.membersParam[i];
+					var param:Vector.<Object> = tp.membersParam[i];
 					dp.addItem([tp, mp, param]);
 				}
 				//添加没有值的属性

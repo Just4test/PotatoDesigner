@@ -12,13 +12,16 @@
 		<![CDATA[
 			import flash.filesystem.File;
 			
-			import flashx.textLayout.conversion.ITextImporter;
-			import flashx.textLayout.conversion.TextConverter;
-			
 			import mx.collections.ArrayList;
 			import mx.core.UIComponent;
 			import mx.events.FlexEvent;
 			import mx.utils.StringUtil;
+			
+			import spark.events.TextOperationEvent;
+			import spark.utils.TextFlowUtil;
+			
+			import flashx.textLayout.conversion.ITextImporter;
+			import flashx.textLayout.conversion.TextConverter;
 			
 			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
@@ -28,17 +31,14 @@
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
 			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
 			
-			import spark.events.TextOperationEvent;
-			import spark.utils.TextFlowUtil;
-			
 			/**类型描述：变量和存取器*/
 			protected var access:AccessorProfile;
 			/**类型描述：方法*/
 			protected var method:MethodProfile;
 			/**已有参数。如果是未启用的成员，则此值为空*/
-			protected var params:Vector.<*>;
-			/**编辑参数。由于可以指定"undefined"（表示尚未配置该值），所以使用*类型。*/
-			protected var editParams:Vector.<*>;
+			protected var params:Vector.<Object>;
+			/**编辑参数。由于可以指定"undefined"（表示尚未配置该值），所以使用Object类型。*/
+			protected var editParams:Vector.<Object>;
 			/**编辑点。指示当前正在编辑哪个参数。为-1说明未启用编辑器。*/
 			protected var editPoint:int = -1;
 			protected var changed:Boolean;
@@ -105,7 +105,7 @@
 						break;
 					
 					default:
-						if(!editParams[editPoint])
+						if(null == editParams[editPoint])
 						{
 							event.preventDefault();
 							editParams[editPoint] = "";
@@ -120,7 +120,7 @@
 			{
 				apply();
 				editPoint = -1;
-				redraw(false);
+				redraw();
 			}
 			
 			
@@ -136,7 +136,7 @@
 					return;
 				}
 				editPoint = 0;
-				redraw(true);
+				redraw();
 				input.setFocus();
 			}
 			
@@ -149,11 +149,11 @@
 				access = data[1] as AccessorProfile;
 				method = data[1] as MethodProfile;
 				params = data[2];
-				editParams = params ? params.concat() : new Vector.<String>;
+				editParams = params ? params.concat() : new Vector.<Object>;
 				editParams.length = access ? 1 : method.numParameter;
 				editPoint = -1;
 				
-				redraw(true);
+				redraw();
 				
 				contextMenu = new ContextMenu;
 				var item:ContextMenuItem;
@@ -172,15 +172,11 @@
 				//TODO
 			}
 
-			/**重绘*/
-			protected function redraw(isForced:Boolean):void
+			/**重绘。传入true强制重绘，传入false只有在键入了文字之后才会重绘。*/
+			protected function redraw():void
 			{
 				if(!data)
 					return;
-				
-				if(!isForced && !changed)
-					return;
-				changed = false;
 				
 				var str:String;
 				
@@ -226,13 +222,13 @@
 				else//编辑模式
 				{					
 					//如果字符串包含换行符，则将编辑框设定为多行模式
-					str = editParams[editPoint];
+					str = editParams[editPoint] as String;
 					input.multiline = str && (-1 != str.indexOf("\r") || -1 != str.indexOf("\n"));
 					
 					if(access)
 					{
 						before_label.text = formatStr("{0}:{1} = ", access.name, access.type);
-						input.text = editParams[editPoint];
+						setInput();
 						after_label.text = "";
 					}
 					else
@@ -273,13 +269,17 @@
 				}
 				
 				commitProperties();
+				input.parent && input.getFocus();
 				
 				function html(param:String):String
 				{
 					if(!param)
 						return "<b>null</b>";
-					else
-						return "\"<b>" + param + "</b>\"";
+					else	
+					{
+						var ret:String = formatStr('"<b>{0}</b>"', param);
+						return ret;
+					}
 				}
 				
 				var textImporter:ITextImporter;
@@ -297,10 +297,10 @@
 			
 			protected function setInput():void
 			{
-				var str:String = editParams[editPoint];
+				var str:String = editParams[editPoint] as String;
 				input.text = null == str ? "null" : str;
 				//input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
-				input.setStyle("color", str ? 0x0: 0xff0000);
+				input.setStyle("color", null == str ? 0xff0000 : 0);
 			}
 			
 			/**应用输入的值*/
@@ -308,6 +308,10 @@
 			{
 				if(!data)
 					return;
+				
+				if(!changed)
+					return;
+				changed = false;
 				
 				//检测输入有效性。
 				for (var i:int = 0; i < editParams.length; i++) 
@@ -363,7 +367,7 @@
 						editPoint = 0;
 					}
 				}
-				redraw(true);
+				redraw();
 			}
 			
 			/**导航至上一个参数*/
@@ -381,17 +385,17 @@
 						editPoint = method.numParameter -1;
 					}
 				}
-				redraw(true);
+				redraw();
 			}
 			
 		]]>
 	</fx:Script>
 	
-	<s:RichText id="before_label" width="100%" height="20" text="function(" verticalAlign="top"/>
+	<s:RichText id="before_label" height="20" text="function(" verticalAlign="top"/>
 	<s:RichEditableText id="input" width="100"
 						change="input_changeHandler(event)"
 						focusOut="input_focusOutHandler(event)"
 						keyDown="input_keyDownHandler(event)"/>
-	<s:RichText id="after_label" width="50%" height="20" text=" )"/>
+	<s:RichText id="after_label" height="20" text=" )"/>
 	
 </s:ItemRenderer>

@@ -272,7 +272,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 			for (var i:int = 0, length:int = basicProfile.membersName.length; i < length; i++) 
 			{
 				var name:String = basicProfile.membersName[i];
-				var param:Vector.<*> = basicProfile.membersParam[i];
+				var param:Vector.<Object> = basicProfile.membersParam[i];
 				var F:Function = memberTable[name];
 				CONFIG::DEBUG
 					{

@@ -89,11 +89,11 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			
 			if(cp.constructor && cp.constructor.hasDefaultValue)
 			{
-				tp.constructorParam = Vector.<*>(cp.constructor.defaultValue);
+				tp.constructorParam = Vector.<Object>(cp.constructor.defaultValue);
 			}
 			else
 			{
-				tp.constructorParam = new Vector.<*>();
+				tp.constructorParam = new Vector.<Object>;
 			}
 			
 			return false;
