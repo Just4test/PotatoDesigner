@@ -12,13 +12,9 @@
 		<![CDATA[
 			import flash.filesystem.File;
 			
-			import mx.collections.ArrayList;
-			import mx.core.UIComponent;
 			import mx.events.FlexEvent;
-			import mx.utils.StringUtil;
 			
 			import spark.events.TextOperationEvent;
-			import spark.utils.TextFlowUtil;
 			
 			import flashx.textLayout.conversion.ITextImporter;
 			import flashx.textLayout.conversion.TextConverter;
@@ -26,9 +22,7 @@
 			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
-			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ITypeValue;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.MethodProfile;
-			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
 			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
 			
 			/**类型描述：变量和存取器*/
@@ -50,7 +44,11 @@
 			protected function input_changeHandler(event:TextOperationEvent):void
 			{
 				editParams[editPoint] = input.text;
-				trace("写入!", input.text, editPoint, editParams)
+				trace("写入!", input.text.length, input.text, editPoint, editParams)
+				for(var i:int = 0; i < input.text.length; i++)
+				{
+					trace(input.text.charCodeAt(i), input.text.charAt(i), "~~")
+				}
 			}
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
@@ -78,15 +76,32 @@
 						}
 						break;
 					
+					//下一个参数
+					case Keyboard.TAB:
+						event.preventDefault();
+						if(event.ctrlKey)//ctrl+tab真的是插入tab
+						{
+							input.insertText("\t");
+						}
+						else if(!event.shiftKey)
+						{
+							next();
+						}
+						else
+						{
+							previous();
+						}
+						break;
+					
 					//完成输入或者输入回车
 					case Keyboard.ENTER:
-						event.preventDefault();
 						if(event.shiftKey)//shift + enter 是输入换行符
 						{
 							input.insertText(File.lineEnding);
 						}
 						else
 						{
+							event.preventDefault();
 							apply();
 						}
 						break;
@@ -173,7 +188,7 @@
 				//TODO
 			}
 
-			/**重绘。传入true强制重绘，传入false只有在键入了文字之后才会重绘。*/
+			/**重绘*/
 			protected function redraw():void
 			{
 				if(!data)
@@ -265,8 +280,8 @@
 					}
 					
 					setHtml(after_label, str);
-					addElement(input);
-					addElement(after_label);
+					input.parent || addElement(input);
+					after_label.parent || addElement(after_label);
 				}
 				
 //				commitProperties();
@@ -287,19 +302,16 @@
 					textImporter ||= TextConverter.getImporter(TextConverter.TEXT_FIELD_HTML_FORMAT);
 					richText.textFlow = textImporter.importToFlow(html);
 				}
-				
-				
-				
 			}
 			
 			
 			protected function setInput():void
 			{
 				var str:String = editParams[editPoint] as String;
-				input.text = null == str ? "null" : str;
-				trace("输入框！", str);
-				//input.setStyle("backgroundColor", str ? 0xFFFFFF : 0xB62222);
-				input.setStyle("color", null == str ? 0xff0000 : 0);
+				input.text = null == str ? "" : str;
+				trace("已经设置input.text，首字符", null == input.text ? null : input.text.charCodeAt(0));
+				input.setStyle("backgroundColor", null == str ? 0xff0000 : 0xffffff);
+//				input.setStyle("color", null == str ? 0xff0000 : 0);
 			}
 			
 			/**应用输入的值*/
