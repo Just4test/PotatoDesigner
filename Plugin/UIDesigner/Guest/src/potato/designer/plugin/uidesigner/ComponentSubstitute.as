@@ -1,5 +1,6 @@
 package potato.designer.plugin.uidesigner
 {
+import flash.geom.Matrix;
 import flash.geom.Rectangle;
 
 import core.display.DisplayObject;
@@ -46,6 +47,7 @@ public class ComponentSubstitute extends UIComponent
 	
 	protected static const SELECTED_FILTER:Filter = new BorderFilter();
 	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
+	protected static const BORDER_WIDTH:int = 5;
 	
 	
 
@@ -130,6 +132,7 @@ public class ComponentSubstitute extends UIComponent
 
 		_image ||= new Image(null);
 		addChild(_image);
+		_image.x = _image.y = -BORDER_WIDTH;
 		
         var displayObj:DisplayObject = _prototype as DisplayObject;
         if(!displayObj)
@@ -160,8 +163,10 @@ public class ComponentSubstitute extends UIComponent
 			}
 		}
 		
-		var renderTexture:RenderTexture = new RenderTexture(bounes.width || 1, bounes.height || 1);//防止显示对象尺寸为0
-		renderTexture.draw(displayObj);
+		var renderTexture:RenderTexture = new RenderTexture(bounes.width + BORDER_WIDTH * 2, bounes.height + BORDER_WIDTH * 2);//防止显示对象尺寸为0
+		var matrix:Matrix = new Matrix;
+		matrix.tx = matrix.ty = BORDER_WIDTH;
+		renderTexture.draw(displayObj, matrix);
 		
 		if(_unfolded)//重新显示隐藏的子节点
 		{
