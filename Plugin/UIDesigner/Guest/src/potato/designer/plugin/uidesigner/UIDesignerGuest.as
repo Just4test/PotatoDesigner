@@ -27,6 +27,7 @@ package potato.designer.plugin.uidesigner
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_INIT, initDesignerHandler);
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_UPDATE, updateHandler);
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_FOCUS_CHANGED, focusChangedHandler);
 			
 			//初始化UI
 			
@@ -102,85 +103,31 @@ package potato.designer.plugin.uidesigner
 		 */
 		protected function updateHandler(msg:Message):void
 		{
-			logf("更新组件树{2}，展开路径{0}，焦点索引{1}", msg.data[1], msg.data[2], msg.data[0]);
+			logf("更新组件树{0}，展开路径{1}，焦点索引{2}", msg.data[0], msg.data[1], msg.data[2]);
 			_rootTargetProfile = msg.data[0];
 			_foldPath = msg.data[1];
 			_focusIndex = msg.data[2];
 			
 			_rootTargetTree = Factory.compileProfile(_rootTargetProfile);
-			log("根组件",_rootTargetTree.target);
-			if(_rootTargetTree.target is DisplayObject)
-			{
-				log(_rootTargetTree.target.width, _rootTargetTree.target.height);
-			}
 			
-			while(UI.designerStage.numChildren)
-				UI.designerStage.removeChildAt(0);
+			UI.update(_rootTargetTree, _foldPath, _focusIndex);
 			
-			_rootSubstitute = makeSubstitute(_rootTargetTree, _foldPath, _focusIndex);
-			
-			log("根替身",_rootSubstitute.width, _rootSubstitute.height);
-			
-			Stage.getStage().addChild(_rootTargetTree.target);
-			
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.UPDATE, [_rootTargetProfile, _foldPath, _focusIndex]));
 		}
 		
 		/**
-		 *创建替身树 
-		 * @param targetTree 目标树
-		 * @param fold 展开路径。如果为null说明不在展开路径上。
-		 * @param focus 焦点目标。-2表示当前对象是焦点，-1表示没有选中焦点，0及正数表示子节点是焦点。
-		 * 
+		 * 选中另一个组件
 		 */
-		protected static function makeSubstitute(targetTree:TargetTree, fold:Vector.<uint>,
-												 focus:int, parent:ComponentSubstitute = null):ComponentSubstitute
+		protected function focusChangedHandler(msg:Message):void
 		{
-			if(!targetTree)
-			{
-				return null;
-			}
+			logf("展开路径{0}，焦点索引{1}", msg.data[0], msg.data[1]);
+			_foldPath = msg.data[0];
+			_focusIndex = msg.data[1];
 			
-			logf("为{0}创建替身，{1}，{2}", targetTree.target, targetTree.target.width, targetTree.target.height);
-			var ret:ComponentSubstitute = new ComponentSubstitute(targetTree.target, parent);
+			UI.update(_rootTargetTree, _foldPath, _focusIndex);
 			
-			ret.selected = -2 == focus;
-			ret.unfolded = null != fold;
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOCUS_CHANGED, [_foldPath, _focusIndex]));
 			
-			logf("选中{0} 展开{1}", ret.selected, ret.unfolded);
-			
-			
-			if(targetTree.children)
-			{
-				for (var i:int = 0; i < targetTree.children.length; i++) 
-				{
-					var subFold:Vector.<uint> = null;
-					var subFocus:int = -1;
-					
-					if(fold)//如果处在路径上
-					{
-						if(fold.length)//如果还有子路径，确定子fold
-						{
-							if(i == fold[0])
-							{
-								subFold = fold.slice(1);
-								subFocus = focus;
-								
-							}
-						}
-						else//没有子路径了，确定focus
-						{
-							subFocus = i == focus ? -2 : -1;
-						}
-					}
-					
-					makeSubstitute(targetTree.children[i], subFold, subFocus, ret);
-				}
-			}
-			
-			
-			UI.designerStage.addChild(ret);
-			
-			return ret;
 		}
 	}
 }

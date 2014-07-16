@@ -46,7 +46,7 @@ public class ComponentSubstitute extends UIComponent
 	protected var startDrugY:int;
 	
 	protected static const SELECTED_FILTER:Filter = new BorderFilter();
-	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
+	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, false);
 	protected static const BORDER_WIDTH:int = 5;
 	
 	

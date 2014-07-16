@@ -3,7 +3,7 @@
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
 					   xmlns:mx="library://ns.adobe.com/flex/mx"
 					   fontSize="16" fontFamily="微软雅黑"
-					   applicationComplete="application1_applicationCompleteHandler(event)">
+					   applicationComplete="applicationCompleteHandler(event)">
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
@@ -22,7 +22,7 @@
 			
 			import spark.components.Window;
 			
-			protected function application1_applicationCompleteHandler(event:FlexEvent):void
+			protected function applicationCompleteHandler(event:FlexEvent):void
 			{	
 				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
 				

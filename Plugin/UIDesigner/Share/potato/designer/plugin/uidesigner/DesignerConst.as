@@ -19,10 +19,12 @@ package potato.designer.plugin.uidesigner
 		
 		/**
 		 *组件更新，同时焦点可能也已经改变
+		 * <br>客户端派发此事件时，替身树已经重绘完成。
 		 */
 		public static const UPDATE:String = "UID_UPDATE";
+		
 		/**更新客户端组件树
-		 * msg = [rootTargetProfile, foldPath, focusIndex]
+		 * <br>msg = [rootTargetProfile, foldPath, focusIndex]
 		 */
 		public static const S2C_UPDATE:String = "UID_S2C_UPDATE";
 		
@@ -31,11 +33,11 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static const FOCUS_CHANGED:String = "FOCUS_CHANGED";
 		/**通知客户端选中的组件已经改变
-		 * msg = [foldPath, focusIndex]
-		 */		
+		 * <br>msg = [foldPath, focusIndex]
+		 */
 		public static const S2C_FOCUS_CHANGED:String = "S2C_FOCUS_CHANGED";
 		/**向宿主端发出改变选中组件的请求
-		 * msg = [foldPath, focusIndex]
+		 * <br>msg = [foldPath, focusIndex]
 		 */		
 		public static const C2S_CHANGE_FOCUS:String = "C2S_CHANGE_FOCUS";
 		

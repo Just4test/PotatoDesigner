@@ -309,7 +309,7 @@
 			{
 				var str:String = editParams[editPoint] as String;
 				input.text = null == str ? "" : str;
-				trace("已经设置input.text，首字符", null == input.text ? null : input.text.charCodeAt(0));
+				trace("已经设置input.text，首字符", input.text ? input.text.charCodeAt(0) : null);
 				input.setStyle("backgroundColor", null == str ? 0xff0000 : 0xffffff);
 //				input.setStyle("color", null == str ? 0xff0000 : 0);
 			}
