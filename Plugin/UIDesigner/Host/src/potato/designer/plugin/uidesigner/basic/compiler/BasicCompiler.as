@@ -48,8 +48,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			UIDesignerHost.compilerList.push(instance);
 			ViewController.regComponentTypeCreater("添加类", addClassType);
 			
-			ViewController.window1Views.push(new MemberView);
-			ViewController.updateWindow();
+			ViewController.window.addElement(new MemberView);
 		}
 		
 		

@@ -5,6 +5,10 @@ package potato.designer.plugin.uidesigner
 	import mx.collections.ArrayList;
 	import mx.core.UIComponent;
 	
+	import spark.components.Group;
+	import spark.components.VGroup;
+	import spark.layouts.HorizontalLayout;
+	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.plugin.guestManager.Guest;
@@ -15,8 +19,6 @@ package potato.designer.plugin.uidesigner
 	import potato.designer.plugin.window.ViewWindow;
 	import potato.designer.plugin.window.WindowManager;
 	import potato.designer.utils.MultiLock;
-	
-	import spark.layouts.VerticalLayout;
 
 	/**
 	 *视图控制器
@@ -27,15 +29,17 @@ package potato.designer.plugin.uidesigner
 	public class ViewController
 	{
 		
-		/**窗口0的视图列表。默认是组件类型视图和大纲视图*/
-		public static const window0Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		/**窗口0*/
-		protected static var _window0:ViewWindow;
+//		/**窗口0的视图列表。默认是组件类型视图和大纲视图*/
+//		public static const window0Views:Vector.<UIComponent> = new Vector.<UIComponent>;
+//		/**窗口0*/
+//		protected static var _window0:ViewWindow;
+//		
+//		/**窗口1的视图列表。默认是属性视图*/
+//		public static const window1Views:Vector.<UIComponent> = new Vector.<UIComponent>;
+//		/**窗口1*/
+//		protected static var _window1:ViewWindow;
 		
-		/**窗口1的视图列表。默认是属性视图*/
-		public static const window1Views:Vector.<UIComponent> = new Vector.<UIComponent>;
-		/**窗口1*/
-		protected static var _window1:ViewWindow;
+		public static var window:ViewWindow;
 		
 		/**组件视图*/
 		protected static var _componentTypeView:ComponentView;
@@ -51,47 +55,47 @@ package potato.designer.plugin.uidesigner
 		protected static var _focusIndex:int = -1;
 		protected static var _targetProfile:ITargetProfile;
 		
-		/***更改了视图列表后调用此方法，以便应用更改。*/
-		public static function updateWindow():void
-		{
-			if(window0Views.length)
-			{
-				if(!_window0)
-				{
-					_window0 = WindowManager.openWindow("", window0Views, new VerticalLayout);
-				}
-				
-				_window0.refresh();
-			}
-			else
-			{
-				if(_window0)
-				{
-					_window0.refresh();
-					_window0.close();
-					_window0 = null;
-				}
-			}
-			
-			if(window1Views.length)
-			{
-				if(!_window1)
-				{
-					_window1 = WindowManager.openWindow("", window1Views, new VerticalLayout);
-				}
-				
-				_window1.refresh();
-			}
-			else
-			{
-				if(_window1)
-				{
-					_window1.refresh();
-					_window1.close();
-					_window1 = null;
-				}
-			}
-		}
+//		/***更改了视图列表后调用此方法，以便应用更改。*/
+//		public static function updateWindow():void
+//		{
+//			if(window0Views.length)
+//			{
+//				if(!_window0)
+//				{
+//					_window0 = WindowManager.openWindow("", window0Views, new VerticalLayout);
+//				}
+//				
+//				_window0.refresh();
+//			}
+//			else
+//			{
+//				if(_window0)
+//				{
+//					_window0.refresh();
+//					_window0.close();
+//					_window0 = null;
+//				}
+//			}
+//			
+//			if(window1Views.length)
+//			{
+//				if(!_window1)
+//				{
+//					_window1 = WindowManager.openWindow("", window1Views, new VerticalLayout);
+//				}
+//				
+//				_window1.refresh();
+//			}
+//			else
+//			{
+//				if(_window1)
+//				{
+//					_window1.refresh();
+//					_window1.close();
+//					_window1 = null;
+//				}
+//			}
+//		}
 		
 		internal static function clearStage():void
 		{
@@ -107,17 +111,7 @@ package potato.designer.plugin.uidesigner
 			//注册视图并显示窗口
 			_componentTypeViewDataProvider = new ArrayList;
 			_componentTypeCreaterDataProvider = new ArrayList;
-			_componentTypeView = new ComponentView;
-			_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
-			_componentTypeView.add_drop.dataProvider = _componentTypeCreaterDataProvider;
-			window0Views.push(_componentTypeView);
-			
-			_outlineView = new OutlineView;
-			window0Views.push(_outlineView);
-			
-			window0Views.push(new LaunchLocalHostView);
-			
-			updateWindow();
+			initWindow();
 			
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
 			EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED, guestConnectedHandler);
@@ -125,6 +119,31 @@ package potato.designer.plugin.uidesigner
 			{
 				initGuest(guest);
 			}
+		}
+		
+		protected static function initWindow():void
+		{
+			if(window)
+				window.close();
+			
+			var group:Group = new VGroup;
+			
+			if(!_componentTypeView)
+			{
+				_componentTypeView = new ComponentView;
+				_componentTypeView.list.dataProvider = _componentTypeViewDataProvider;
+				_componentTypeView.add_drop.dataProvider = _componentTypeCreaterDataProvider;
+			}
+			group.addElement(_componentTypeView);
+			
+			_outlineView ||= new OutlineView;
+			group.addElement(_outlineView);
+			
+			group.addElement(new LaunchLocalHostView);
+			
+			
+			
+			window = WindowManager.openWindow("UIDesigner", new <UIComponent>[group], new HorizontalLayout);
 		}
 		
 		protected static function guestPluginActivatedHandler(event:DesignerEvent):void

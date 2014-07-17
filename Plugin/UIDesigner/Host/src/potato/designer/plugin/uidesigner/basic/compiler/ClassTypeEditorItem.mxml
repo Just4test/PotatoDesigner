@@ -15,13 +15,13 @@
 			import mx.events.FlexEvent;
 			import mx.utils.StringUtil;
 			
+			import spark.events.TextOperationEvent;
+			
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ITypeValue;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.MethodProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
-			
-			import spark.events.TextOperationEvent;
 			
 			protected function creationCompleteHandler(event:FlexEvent):void
 			{
@@ -40,22 +40,51 @@
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
 			{
-				if(Keyboard.LEFT == event.keyCode)
+				
+				switch(event.keyCode)
 				{
-					if(0 == type_combo.textInput.selectionAnchorPosition && 0 == type_combo.textInput.selectionActivePosition)
-					{
+					//上一个参数
+					case Keyboard.LEFT:
+						if(0 == type_combo.textInput.selectionAnchorPosition && 0 == type_combo.textInput.selectionActivePosition)
+						{
+							testOrApply(false);
+							previous();
+						}
+						break;
+					
+					//下一个参数
+					case Keyboard.RIGHT:
+						var lastIndex:int = type_combo.textInput.text.length;
+						if(lastIndex == type_combo.textInput.selectionAnchorPosition && lastIndex == type_combo.textInput.selectionActivePosition)
+						{
+							testOrApply(false);
+							next();
+						}
+						break;
+					
+					//下一个参数
+					case Keyboard.TAB:
+						event.preventDefault();
 						testOrApply(false);
-						previous();
-					}
-				}
-				else if(Keyboard.RIGHT == event.keyCode)
-				{
-					var lastIndex:int = type_combo.textInput.text.length;
-					if(lastIndex == type_combo.textInput.selectionAnchorPosition && lastIndex == type_combo.textInput.selectionActivePosition)
-					{
-						testOrApply(false);
-						next();
-					}
+						if(!event.shiftKey)
+						{
+							next();
+						}
+						else
+						{
+							previous();
+						}
+						break;
+					
+					//完成输入或者输入回车
+					case Keyboard.ENTER:
+						if(type_combo.textInput.selectionAnchorPosition == type_combo.textInput.selectionActivePosition)
+						{
+							testOrApply(false);
+							editPoint = -1;
+							redraw();
+						}
+						break;
 				}
 			}
 			
@@ -77,13 +106,8 @@
 				
 			}
 			
-			
-			protected static const TYPE_ALL:String = "all";
-			protected static const TYPE_BEGIN:String = "begin";
-			protected static const TYPE_END:String = "end";
-			
 			/**重绘*/
-			protected function redraw(type:String = null):void
+			protected function redraw():void
 			{
 				var access:AccessorProfile = data as AccessorProfile;
 				var method:MethodProfile;
@@ -141,13 +165,8 @@
 				}
 				else
 				{
+//					type_combo.textInput.selectAll();
 					addElement(type_combo);
-					switch(type)
-					{
-						case TYPE_ALL:
-							type_combo.textInput.selectAll();
-							break;
-					}
 					addElement(after_label);
 				}
 				
@@ -175,6 +194,7 @@
 				var arr:Array = type_combo.textInput.text.split("=");
 				var type:String = arr.shift();
 				type = StringUtil.trim(type);
+				var typeValue:ITypeValue = data as AccessorProfile || data.parameters[editPoint];
 				
 				if(!BasicCompiler.getClassNameByParamType(type))
 				{
@@ -195,16 +215,7 @@
 					return;
 				}
 
-				if(data is AccessorProfile)
-				{
-					var access:AccessorProfile = data as AccessorProfile;
-					access.type = type;
-				}
-				else
-				{
-					var method:MethodProfile = data as MethodProfile;
-					method.parameters[editPoint].type = type;
-				}
+				typeValue.type = type;
 				
 				if(arr.length)
 				{
@@ -219,18 +230,11 @@
 						defaultValue = defaultValue.slice(1, length - 1);
 					}
 					
-					if(access)
-					{
-						access.defaultValue = defaultValue;
-					}
-					else
-					{
-						method.parameters[editPoint].defaultValue = defaultValue;
-					}
+					typeValue.defaultValue = defaultValue;
 				}
 				else
 				{
-					method.parameters[editPoint].deleteDefaultValue();
+					typeValue.deleteDefaultValue();
 				}
 				
 			}
@@ -251,7 +255,7 @@
 						editPoint = 0;
 					}
 				}
-				redraw(TYPE_ALL);
+				redraw();
 			}
 			
 			/**导航至上一个参数*/
@@ -269,19 +273,18 @@
 						editPoint = MethodProfile(data).numParameter -1;
 					}
 				}
-				redraw(TYPE_ALL);
+				redraw();
 			}
 			
 			/**点击时显示编辑文本框*/
 			protected function clickHandler(event:MouseEvent):void
 			{
-				if(data is AccessorProfile || (data as MethodProfile).numParameter)
+				if(-1 == editPoint && (data is AccessorProfile || (data as MethodProfile).numParameter))
 				{
 					editPoint = 0;
-					redraw(TYPE_ALL);
+					redraw();
 					type_combo.textInput.setFocus();
 				}
-				
 			}
 			
 			protected function inUse_check_clickHandler(event:MouseEvent):void

@@ -43,12 +43,12 @@
 			
 			protected function input_changeHandler(event:TextOperationEvent):void
 			{
-				editParams[editPoint] = input.text;
-				trace("写入!", input.text.length, input.text, editPoint, editParams)
-				for(var i:int = 0; i < input.text.length; i++)
-				{
-					trace(input.text.charCodeAt(i), input.text.charAt(i), "~~")
-				}
+				//不知为什么，字符串的第一个字符有可能为一个0字符。这会导致一系列问题。这段代码删除此0字符。
+				var text:String = input.text;
+				if(0 == text.charCodeAt(0))
+					text = text.slice(1);
+				
+				editParams[editPoint] = text;
 			}
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
@@ -174,7 +174,7 @@
 				contextMenu = new ContextMenu;
 				var item:ContextMenuItem;
 				
-				if(data[1])
+				if(params)
 				{
 					item = new ContextMenuItem("删除");
 					item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteHandler);
@@ -216,7 +216,8 @@
 						{
 							if(params && params.length > i)
 							{
-								str += formatStr("{0}:{1}", html(params[i]), method.parameters[i].type);
+//								str += formatStr("{0}:{1}", html(params[i]), method.parameters[i].type);
+								str += html(params[i]);
 							}
 							else
 							{
@@ -263,7 +264,8 @@
 							{
 								if(params && params.length > i)
 								{
-									str += formatStr("{0}:{1}", html(editParams[i]), method.parameters[i].type);
+//									str += formatStr("{0}:{1}", html(editParams[i]), method.parameters[i].type);
+									str += html(params[i]);
 								}
 								else
 								{
@@ -277,10 +279,11 @@
 							}
 						}
 						str += ")";
+						setHtml(after_label, str);
 					}
 					
-					setHtml(after_label, str);
 					input.parent || addElement(input);
+					input.selectAll();
 					after_label.parent || addElement(after_label);
 				}
 				
@@ -308,8 +311,7 @@
 			protected function setInput():void
 			{
 				var str:String = editParams[editPoint] as String;
-				input.text = null == str ? "" : str;
-				trace("已经设置input.text，首字符", input.text ? input.text.charCodeAt(0) : null);
+				input.text = str;
 				input.setStyle("backgroundColor", null == str ? 0xff0000 : 0xffffff);
 //				input.setStyle("color", null == str ? 0xff0000 : 0);
 			}

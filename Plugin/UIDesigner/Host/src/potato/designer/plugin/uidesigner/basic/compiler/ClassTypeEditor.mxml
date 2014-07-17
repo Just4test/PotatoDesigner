@@ -73,7 +73,7 @@
 			{
 				if(!timer)
 				{
-					timer = new Timer(1000, 1);
+					timer = new Timer(100, 1);
 				}
 				
 				timer.addEventListener(TimerEvent.TIMER, timerHandler);
