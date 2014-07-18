@@ -27,7 +27,7 @@ package potato.designer.plugin.uidesigner
 		
 		
 		/**根组件替身*/
-		protected static var _rootSubstitute:ComponentSubstitute
+		protected static var _substitutes:Vector.<ComponentSubstitute>
 		/**根组件树*/
 		protected static var _rootTargetTree:TargetTree;
 		
@@ -115,67 +115,17 @@ package potato.designer.plugin.uidesigner
 			_foldPath = foldPath;
 			_focusIndex = focusIndex;
 			
+			_substitutes = ComponentSubstitute.makeSubstitute(tree, foldPath, focusIndex);
+			
 			while(designerStage.numChildren)
 				designerStage.removeChildAt(0);
 			
-			_rootSubstitute = makeSubstitute(tree, foldPath, focusIndex);
-		}
-		
-		/**
-		 *创建替身树 
-		 * @param targetTree 目标树
-		 * @param fold 展开路径。如果为null说明不在展开路径上。
-		 * @param focus 焦点目标。-2表示当前对象是焦点，-1表示没有选中焦点，0及正数表示子节点是焦点。
-		 * 
-		 */
-		protected static function makeSubstitute(targetTree:TargetTree, fold:Vector.<uint>,
-												 focus:int, parent:ComponentSubstitute = null):ComponentSubstitute
-		{
-			if(!targetTree)
+			for each (var i:ComponentSubstitute in _substitutes) 
 			{
-				return null;
+				log("添加了", i.prototype, i.path);
+				designerStage.addChild(i);
 			}
 			
-			logf("为{0}创建替身，{1}，{2}", targetTree.target, targetTree.target.width, targetTree.target.height);
-			var ret:ComponentSubstitute = new ComponentSubstitute(targetTree.target, parent);
-			
-			ret.selected = -2 == focus;
-			ret.unfolded = null != fold;
-			
-			logf("选中{0} 展开{1}", ret.selected, ret.unfolded);
-			
-			
-			if(targetTree.children)
-			{
-				for (var i:int = 0; i < targetTree.children.length; i++) 
-				{
-					var subFold:Vector.<uint> = null;
-					var subFocus:int = -1;
-					
-					if(fold)//如果处在路径上
-					{
-						if(fold.length)//如果还有子路径，确定子fold
-						{
-							if(i == fold[0])
-							{
-								subFold = fold.slice(1);
-								subFocus = focus;	
-							}
-						}
-						else//没有子路径了，确定focus
-						{
-							subFocus = i == focus ? -2 : -1;
-						}
-					}
-					
-					makeSubstitute(targetTree.children[i], subFold, subFocus, ret);
-				}
-			}
-			
-			
-			designerStage.addChild(ret);
-			
-			return ret;
 		}
 		
 		
@@ -188,22 +138,12 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static function setFoldFocus(foldPath:Vector.<uint>, focusIndex:int):void
 		{
+//			for each (var i:ComponentSubstitute in _substitutes) 
+//			{
+//				if(i.path)
+//			}
 			
-		}
-		
-		
-		
-		protected static function buildSubstitute(tree:TargetTree, parrent:ComponentSubstitute = null):ComponentSubstitute
-		{
-			var ret:ComponentSubstitute = new ComponentSubstitute(tree.target, parrent);
-			if(tree.children)
-			{
-				for each(var i:TargetTree in tree.children)
-				{
-					var iSubstitute:ComponentSubstitute = buildSubstitute(i, ret);
-				}
-			}
-			return ret;
+			
 		}
 	}
 }

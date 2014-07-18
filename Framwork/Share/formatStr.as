@@ -2,7 +2,7 @@ package
 {
 	/**
 	 *格式化字符串。
-	 *<br>format("我叫{0}。","just4test") = "我叫just4test。" 
+	 *<br>format("我叫{0}。", "just4test") = "我叫just4test。" 
 	 *<br>抄袭自Flex里面的 mx.utils.StringUtil.substitute
 	 */
 	public function formatStr(str:String, ... rest):String

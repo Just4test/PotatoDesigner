@@ -304,7 +304,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 		public function addChildren(profile:ITargetProfile, tree:TargetTree):Boolean
 		{
 			var container:DisplayObjectContainer = tree.target as DisplayObjectContainer;
-			EventCenter.dispatchEvent(new DesignerEvent("show", [profile, tree]));
+
 			for (var i:int = 0; i < tree.children.length; i++) 
 			{
 				var disObj:DisplayObject = tree.children[i].target as DisplayObject;

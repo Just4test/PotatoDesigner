@@ -1,20 +1,25 @@
 package potato.designer.plugin.uidesigner
 {
 import flash.geom.Matrix;
+import flash.geom.Point;
 import flash.geom.Rectangle;
 
 import core.display.DisplayObject;
+import core.display.DisplayObjectContainer;
 import core.display.Image;
 import core.display.RenderTexture;
 import core.events.Event;
 import core.filters.BorderFilter;
 import core.filters.Filter;
+import core.text.TextField;
 
 import potato.designer.framework.DesignerEvent;
 import potato.designer.framework.EventCenter;
 import potato.designer.plugin.guestManager.GuestManagerGuest;
+import potato.designer.plugin.uidesigner.factory.TargetTree;
 import potato.events.GestureEvent;
 import potato.ui.UIComponent;
+import potato.ui.UIGlobal;
 
 /**
  * 组件替身，用于在编辑器中呈现组件外观，并与编辑器交互
@@ -27,12 +32,20 @@ import potato.ui.UIComponent;
  */
 public class ComponentSubstitute extends UIComponent
 {
-    /**替身的原形*/
-    protected var _prototype:*;
-	/**子替身列表*/
-    protected const _subSubstitutes:Vector.<ComponentSubstitute> = new <ComponentSubstitute>[];
-	/**父替身*/
-    protected var _parentSubstitute:ComponentSubstitute;
+	/**替身对应的目标*/
+	protected var _targetTree:TargetTree;
+	
+	protected var _path:Vector.<uint>;
+	
+	
+	
+	
+//    /**替身的原形*/
+//    protected var _prototype:*;
+//	/**子替身列表*/
+//    protected const _subSubstitutes:Vector.<ComponentSubstitute> = new <ComponentSubstitute>[];
+//	/**父替身*/
+//    protected var _parentSubstitute:ComponentSubstitute;
 	/**指示该替身是否处于选中状态*/
     protected var _selected:Boolean;
 	/**指示该替身是否处于展开状态*/
@@ -45,26 +58,26 @@ public class ComponentSubstitute extends UIComponent
 	protected var startDrugX:int;
 	protected var startDrugY:int;
 	
-	protected static const SELECTED_FILTER:Filter = new BorderFilter();
-	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, false);
+	protected static const SELECTED_FILTER:Filter = new BorderFilter(0xffff0000, 2);
+	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
+	/**边缘宽度，以便显示描边滤镜*/
 	protected static const BORDER_WIDTH:int = 5;
 	
 	
 
-    public function get parentSubstitute():ComponentSubstitute {
-        return _parentSubstitute;
-    }
+//    public function get parentSubstitute():ComponentSubstitute {
+//        return _parentSubstitute;
+//    }
+//
+//    public function get subSubstitutes():Vector.<ComponentSubstitute> {
+//        return _subSubstitutes;
+//    }
 
-    public function get subSubstitutes():Vector.<ComponentSubstitute> {
-        return _subSubstitutes;
-    }
-
-    public function ComponentSubstitute(prototype:*, parent:ComponentSubstitute = null)
+    public function ComponentSubstitute(targetTree:TargetTree, path:Vector.<uint>, rootLayer:DisplayObjectContainer = null)
     {
-        _prototype = prototype;
-        _parentSubstitute = parent;
-		parent && parent._subSubstitutes.push(this);
-        refresh();
+		_targetTree = targetTree;
+		_path = path;
+        draw(rootLayer);
 		
 		/**单击选中组件*/
 		addEventListener(GestureEvent.GESTURE_CLICK, selectHandler);
@@ -81,7 +94,7 @@ public class ComponentSubstitute extends UIComponent
 	 * */
 	public function get prototype():*
 	{
-		return _prototype;
+		return _targetTree.target;
 	}
 
     /**
@@ -94,7 +107,7 @@ public class ComponentSubstitute extends UIComponent
 
     public function set selected(value:Boolean):void {
         _selected = value;
-        refresh();
+		setEffact();
     }
 
     /**
@@ -113,60 +126,65 @@ public class ComponentSubstitute extends UIComponent
 
     public function set unfolded(value:Boolean):void {
         _unfolded = value;
-        refresh();
+		setEffact();
     }
+	
+	protected function setEffact():void
+	{
+		if(!_image)
+			return;
+		
+		_image.filter = _selected ? SELECTED_FILTER : (_unfolded ? UNFOLD_FILTER : null);
+	}
 
-
-    /**
-     *重绘，当原形因为任何原因导致显示改变时调用此方法
-     *
-     */
-    public function refresh():void
+	/**
+	 *刷新显示，三种情况：
+	 * 1.当前对象是DisplayObject，且指定根节点放置层。指定了放置层时，放置层中所有非当前对象的显示对象都已经被隐藏。
+	 * 2.当前对象是DisplayObject，且未指定根节点放置层。将直接绘制当前对象。
+	 * 3.当前对象不是显示对象。将绘制对象的toString文本。
+	 * @param rootLayer 根节点放置层 
+	 * 
+	 */
+    protected function draw(rootLayer:DisplayObjectContainer = null):void
     {
-        addEventListener(Event.ENTER_FRAME, actualRefersh);
-    }
-
-    protected function actualRefersh(e:Event):void
-    {
-        removeEventListener(Event.ENTER_FRAME, actualRefersh);
-
-		_image ||= new Image(null);
-		addChild(_image);
-		_image.x = _image.y = -BORDER_WIDTH;
+		var displayObj:DisplayObject;
 		
-        var displayObj:DisplayObject = _prototype as DisplayObject;
-        if(!displayObj)
-        {
-            return;
-        }
+		if(prototype is DisplayObject)
+		{
+			displayObj = prototype as DisplayObject;
+		}
+		else
+		{
+			displayObj = new TextField(prototype.toString(), 100, 100,  UIGlobal.defaultFont, 20, 0xffffffff);
+		}
 
-        x = displayObj.x;
-        y = displayObj.y;
-
+		var bounes:Rectangle = displayObj.getBounds(rootLayer || displayObj);
 		
-//        graphics.clear();
-		var bounes:Rectangle = displayObj.getBounds(displayObj);
+		x = bounes.x;
+		y = bounes.y;
 		
-
 		//绘制原型自身
 		if(_unfolded)//暂时隐藏所有子节点
 		{
-			var hidden:Array = new Array;
-			for each(var iSubstitute:ComponentSubstitute in subSubstitutes)
+			var hidden:Vector.<DisplayObject> = new Vector.<DisplayObject>;
+			for each(var sub:* in _targetTree.children)
 			{
-				var subDisplayObject:DisplayObject = iSubstitute._prototype as DisplayObject;
-				if(subDisplayObject && subDisplayObject.visible)
+				var subDis:DisplayObject = sub as DisplayObject;
+				if(subDis && subDis.visible)
 				{
-					hidden.push(subDisplayObject);
-					subDisplayObject.visible = false
+					hidden.push(subDis);
+					subDis.visible = false
 				}
 			}
 		}
 		
-		var renderTexture:RenderTexture = new RenderTexture(bounes.width + BORDER_WIDTH * 2, bounes.height + BORDER_WIDTH * 2);//防止显示对象尺寸为0
+		var renderTexture:RenderTexture = new RenderTexture(bounes.width + BORDER_WIDTH * 2, bounes.height + BORDER_WIDTH * 2);
+		//设置转换矩阵。转换矩阵将对象放置在(BORDER_WIDTH, BORDER_WIDTH)点，以便留出边缘显示描边滤镜；
 		var matrix:Matrix = new Matrix;
-		matrix.tx = matrix.ty = BORDER_WIDTH;
-		renderTexture.draw(displayObj, matrix);
+		matrix.tx = BORDER_WIDTH - bounes.x;
+		matrix.ty = BORDER_WIDTH - bounes.y;
+		log("创建替身", displayObj, displayObj.visible, rootLayer, bounes, matrix);
+		renderTexture.draw(rootLayer || displayObj, matrix);
 		
 		if(_unfolded)//重新显示隐藏的子节点
 		{
@@ -176,20 +194,16 @@ public class ComponentSubstitute extends UIComponent
 			}
 		}
 		
-		
-		
-		if(_unfolded)//绘制展开效果
+		if(!_image)
 		{
-			_image.filter = UNFOLD_FILTER;
+			_image = new Image(null);
+			addChild(_image);
 		}
-		else if(_selected)//绘制选中效果
-        {
-			_image.filter = SELECTED_FILTER;
-        }
+		
+		_image.x = _image.y = -BORDER_WIDTH;
+		setEffact();
 		
 		_image.texture = renderTexture;
-		
-		logf("替身重绘完成!宽度{0} 高度{1} 原型{2}，{3}, {4}", width, height, _prototype, _parentSubstitute && _parentSubstitute._prototype, parent);
     }
 
     /**
@@ -198,13 +212,13 @@ public class ComponentSubstitute extends UIComponent
      * */
     public function get path():Vector.<uint>
     {
-        if(!_parentSubstitute)
-        {
-            return new Vector.<uint>;
-        }
-		var ret:Vector.<uint> = _parentSubstitute.path;
-		ret.push(_parentSubstitute._subSubstitutes.indexOf(this))
-        return ret;
+//        if(!_parentSubstitute)
+//        {
+//            return new Vector.<uint>;
+//        }
+//		var ret:Vector.<uint> = _parentSubstitute.path;
+//		ret.push(_parentSubstitute._subSubstitutes.indexOf(this))
+        return _path.concat();
     }
 	
 	/**
@@ -212,13 +226,12 @@ public class ComponentSubstitute extends UIComponent
 	 */
 	public function inPath(foldPath:Vector.<uint>):Boolean
 	{
-		var myPath:Vector.<uint> = path
-		if(myPath.length > foldPath.length)
+		if(_path.length > foldPath.length)
 			return false;
 		
-		for (var i:int = 0; i < myPath.length; i++) 
+		for (var i:int = 0; i < _path.length; i++) 
 		{
-			if(myPath[i] != foldPath[i])
+			if(_path[i] != foldPath[i])
 				return false;
 		}
 		
@@ -295,6 +308,92 @@ public class ComponentSubstitute extends UIComponent
 		if(isDrugging)
 		{
 			isDrugEnable = true;
+		}
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 *创建替身并填充designerStage。
+	 * 规则：
+	 * 如果对象的父对象位于展开路径上，则为其创建替身。
+	 * 具有三个替身队列：位于展开路径下方、位于展开路径上方、父对象是最终展开对象。这三个队列从底至顶排布。
+	 *  
+	 * @param targetTree
+	 * @param fold
+	 * @param focus
+	 * @param parent
+	 * @return 
+	 * 
+	 */
+	public static function makeSubstitute(rootTargetTree:TargetTree, fold:Vector.<uint>,
+										  focus:int):Vector.<ComponentSubstitute>
+	{
+		if(!rootTargetTree)
+		{
+			return null;
+		}
+		
+		var path:Vector.<uint> = new Vector.<uint>;
+		var underFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+		var overFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+		var inFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+		
+		if(rootTargetTree.target is DisplayObject)
+		{
+			var rootLayer:DisplayObjectContainer = new DisplayObjectContainer;
+			rootLayer.addChild(rootTargetTree.target);
+		}
+		
+		var unfolded:Boolean = fold.length;
+		var selected:Boolean = !fold.length && 0 == focus;
+		var rootSubstitute:ComponentSubstitute = make(rootTargetTree, 0, rootTargetTree.target is DisplayObject);
+		rootSubstitute.unfolded = unfolded;
+		rootSubstitute.selected = selected;
+		underFold.push( rootSubstitute );
+		
+		return underFold.concat(overFold).concat(inFold);
+		
+		
+		function make(targetTree:TargetTree, index:uint, inDisTree:Boolean):ComponentSubstitute
+		{
+			var substitute:ComponentSubstitute = new ComponentSubstitute(
+				targetTree, path.concat(new <uint>[i]), inDisTree ? rootLayer : null);
+			
+			if(fold.length && index == fold[0])
+			{
+				var p:int = fold.length ? fold.pop() : -1;
+				path.push(p);
+				
+				for(var i:int = 0; i < targetTree.children.length; i++)
+				{
+					var childtt:TargetTree = targetTree.children[i];
+					
+					var child:ComponentSubstitute = make(childtt, i, 
+						inDisTree && childtt.target is DisplayObject && (childtt.target as DisplayObject).root == rootLayer)
+					
+					if(-1 == p)
+					{
+						inFold.push(substitute);
+						substitute.selected = i == focus;
+					}
+					else
+					{
+						if(i <= p)
+						{
+							underFold.push(substitute);
+							substitute.unfolded = i == p;
+						}
+						else
+						{
+							overFold.push(substitute);
+						}
+					}
+				}
+			}
+			
+				
+			return substitute;
 		}
 	}
 

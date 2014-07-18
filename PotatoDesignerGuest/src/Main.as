@@ -22,7 +22,7 @@ package
 		{
 			DataCenter.loadWorkSpace("designer");
 			
-			text = new TextField("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, UIGlobal.defaultFont, 32, 0xffffffff);
+			text = new TextField("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, UIGlobal.defaultFont, 32, 0xffffff);
 			Stage.getStage().addChild(text);
 			
 			EventCenter.addEventListener(EventCenter.EVENT_LOG, log2text);
@@ -36,9 +36,6 @@ package
 			
 			
 			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_ACCTIVATED, startHandler);
-			
-			
-			EventCenter.addEventListener("show", showSomeThing);
 		}
 		
 		protected function loadPluginWhenLoaded(e:DesignerEvent):void
@@ -48,12 +45,6 @@ package
 		
 		protected function startHandler(e:DesignerEvent):void
 		{
-		}
-		
-		public function showSomeThing(e:DesignerEvent):void
-		{
-			var t:* = e.data;
-			trace(t);
 		}
 	}
 }
