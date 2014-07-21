@@ -14,9 +14,11 @@ package
 		var event:DesignerEvent = new DesignerEvent(EventCenter.EVENT_LOG, s);
 		EventCenter.dispatchEvent(event);
 		
-		if(!event.isDefaultPrevented())
-		{
-			trace.apply(null, args);
-		}
+//		if(!event.isDefaultPrevented())
+//		{
+//			trace.apply(null, args);
+//		}
+		
+		trace.apply(null, args);
 	}
 }

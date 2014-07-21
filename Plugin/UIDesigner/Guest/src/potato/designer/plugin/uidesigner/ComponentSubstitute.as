@@ -59,7 +59,8 @@ public class ComponentSubstitute extends UIComponent
 	protected var startDrugY:int;
 	
 	protected static const SELECTED_FILTER:Filter = new BorderFilter(0xffff0000, 2);
-	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
+//	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
+	protected static const UNFOLD_FILTER:Filter = null;
 	/**边缘宽度，以便显示描边滤镜*/
 	protected static const BORDER_WIDTH:int = 5;
 	
@@ -183,7 +184,7 @@ public class ComponentSubstitute extends UIComponent
 		var matrix:Matrix = new Matrix;
 		matrix.tx = BORDER_WIDTH - bounes.x;
 		matrix.ty = BORDER_WIDTH - bounes.y;
-		log("创建替身", displayObj, displayObj.visible, rootLayer, bounes, matrix);
+		log("创建替身", displayObj, displayObj.visible, bounes, matrix);
 		renderTexture.draw(rootLayer || displayObj, matrix);
 		
 		if(_unfolded)//重新显示隐藏的子节点
@@ -313,90 +314,5 @@ public class ComponentSubstitute extends UIComponent
 	
 	///////////////////////////////////////////////////////////////////////////////
 	
-	/**
-	 *创建替身并填充designerStage。
-	 * 规则：
-	 * 如果对象的父对象位于展开路径上，则为其创建替身。
-	 * 具有三个替身队列：位于展开路径下方、位于展开路径上方、父对象是最终展开对象。这三个队列从底至顶排布。
-	 *  
-	 * @param targetTree
-	 * @param fold
-	 * @param focus
-	 * @param parent
-	 * @return 
-	 * 
-	 */
-	public static function makeSubstitute(rootTargetTree:TargetTree, fold:Vector.<uint>,
-										  focus:int):Vector.<ComponentSubstitute>
-	{
-		if(!rootTargetTree)
-		{
-			return null;
-		}
-		
-		var path:Vector.<uint> = new Vector.<uint>;
-		var underFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
-		var overFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
-		var inFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
-		
-		if(rootTargetTree.target is DisplayObject)
-		{
-			var rootLayer:DisplayObjectContainer = new DisplayObjectContainer;
-			rootLayer.addChild(rootTargetTree.target);
-		}
-		
-		var unfolded:Boolean = fold.length;
-		var selected:Boolean = !fold.length && 0 == focus;
-		var rootSubstitute:ComponentSubstitute = make(rootTargetTree, 0, rootTargetTree.target is DisplayObject);
-		rootSubstitute.unfolded = unfolded;
-		rootSubstitute.selected = selected;
-		underFold.push( rootSubstitute );
-		
-		return underFold.concat(overFold).concat(inFold);
-		
-		
-		function make(targetTree:TargetTree, index:uint, inDisTree:Boolean):ComponentSubstitute
-		{
-			var substitute:ComponentSubstitute = new ComponentSubstitute(
-				targetTree, path.concat(new <uint>[i]), inDisTree ? rootLayer : null);
-			
-			if(fold.length && index == fold[0])
-			{
-				var p:int = fold.length ? fold.pop() : -1;
-				path.push(p);
-				
-				for(var i:int = 0; i < targetTree.children.length; i++)
-				{
-					var childtt:TargetTree = targetTree.children[i];
-					
-					var child:ComponentSubstitute = make(childtt, i, 
-						inDisTree && childtt.target is DisplayObject && (childtt.target as DisplayObject).root == rootLayer)
-					
-					if(-1 == p)
-					{
-						inFold.push(substitute);
-						substitute.selected = i == focus;
-					}
-					else
-					{
-						if(i <= p)
-						{
-							underFold.push(substitute);
-							substitute.unfolded = i == p;
-						}
-						else
-						{
-							overFold.push(substitute);
-						}
-					}
-				}
-			}
-			
-				
-			return substitute;
-		}
-	}
-
-
 }
 }

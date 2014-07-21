@@ -111,7 +111,7 @@ package potato.designer.plugin.uidesigner
 			_rootTargetTree = Factory.compileProfile(_rootTargetProfile);
 			
 			UI.update(_rootTargetTree, _foldPath, _focusIndex);
-			Stage.getStage().addChild(_rootTargetTree.target);
+//			Stage.getStage().addChild(_rootTargetTree.target);
 			
 			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.UPDATE, [_rootTargetProfile, _foldPath, _focusIndex]));
 		}

@@ -2,6 +2,7 @@ package potato.designer.plugin.uidesigner
 {
 	import flash.geom.Matrix;
 	
+	import core.display.DisplayObject;
 	import core.display.DisplayObjectContainer;
 	import core.display.Image;
 	import core.display.Quad;
@@ -20,14 +21,12 @@ package potato.designer.plugin.uidesigner
 		protected static var _stageHeight:int;
 		protected static var _stageBackground:Image;
 		protected static var _stageContainer:DisplayObjectContainer;
+		protected static var _containerMask:Quad;
 
 		
 		protected static var _foldPath:Vector.<uint>;
 		protected static var _focusIndex:int;
 		
-		
-		/**根组件替身*/
-		protected static var _substitutes:Vector.<ComponentSubstitute>
 		/**根组件树*/
 		protected static var _rootTargetTree:TargetTree;
 		
@@ -115,35 +114,117 @@ package potato.designer.plugin.uidesigner
 			_foldPath = foldPath;
 			_focusIndex = focusIndex;
 			
-			_substitutes = ComponentSubstitute.makeSubstitute(tree, foldPath, focusIndex);
-			
-			while(designerStage.numChildren)
-				designerStage.removeChildAt(0);
-			
-			for each (var i:ComponentSubstitute in _substitutes) 
-			{
-				log("添加了", i.prototype, i.path);
-				designerStage.addChild(i);
-			}
+			makeSubstitute(tree, foldPath, focusIndex);
 			
 		}
 		
 		
 		/**
-		 *设置展开路径以及焦点
-		 * <br>展开路径和焦点的概念类似文件路径：可以打开任意文件夹，并选中其中的一个文件，或者不选中任何文件。
-		 * @param foldPath 展开路径。
-		 * @param focusIndex 焦点索引。如果指定为-1则说明没有选中任何对象。
+		 *创建替身树
+		 * <br>替身树和组件树不同，只有展开的容器及其所有直接子组件才会创建替身。
+		 * 规则：
+		 * 如果对象的父对象位于展开路径上，则为其创建替身。
+		 * 具有三个替身队列：位于展开路径下方、位于展开路径上方、父对象是最终展开对象。这三个队列从底至顶排布。
+		 *  
+		 * @param targetTree
+		 * @param fold
+		 * @param focus
+		 * @param parent
+		 * @return 
 		 * 
 		 */
-		public static function setFoldFocus(foldPath:Vector.<uint>, focusIndex:int):void
+		public static function makeSubstitute(rootTargetTree:TargetTree, fold:Vector.<uint>,
+											  focus:int):void
 		{
-//			for each (var i:ComponentSubstitute in _substitutes) 
-//			{
-//				if(i.path)
-//			}
+			const COLOR_MASK:uint = 0xc0cccccc;
+			
+			while(designerStage.numChildren)
+				designerStage.removeChildAt(0);
+			
+			if(!rootTargetTree)
+			{
+				return;
+			}
+			
+			var path:Vector.<uint> = new Vector.<uint>;
+			var underFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+			var overFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+			var inFold:Vector.<ComponentSubstitute> = new Vector.<ComponentSubstitute>;
+			
+			if(rootTargetTree.target is DisplayObject)
+			{
+				var rootLayer:DisplayObjectContainer = new DisplayObjectContainer;
+				rootLayer.addChild(rootTargetTree.target);
+			}
+			
+			make(rootTargetTree, new <uint>[0], rootTargetTree.target is DisplayObject);
 			
 			
+			
+			for each (var i:ComponentSubstitute in underFold.concat(overFold))
+			{
+				designerStage.addChild(i);
+				log("添加了", i.path);
+			}
+			
+			if(!_containerMask)
+			{
+				_containerMask = new Quad(Stage.getStage().stageWidth, Stage.getStage().stageHeight, COLOR_MASK);
+				_containerMask.x = - _stageContainer.x;
+				_containerMask.y = - _stageContainer.y;
+				log("创建mask");
+			}
+			if(fold.length)
+			{
+				designerStage.addChild(_containerMask);
+				log("添加了mask", _containerMask.x, _containerMask.y);
+			}
+			
+			for each (i in inFold)
+			{
+				designerStage.addChild(i);
+				log("添加了", i.path);
+			}
+			
+			
+			
+			function make(targetTree:TargetTree, path:Vector.<uint>, inDisTree:Boolean):void
+			{
+				var substitute:ComponentSubstitute = new ComponentSubstitute(
+					targetTree, path, inDisTree ? rootLayer : null);
+				
+				//由于所有替身对应的组件都在展开路径上，因此仅需要判断其路径的最后一位就可以了解应该放入哪个序列。
+				var index:uint = path[path.length - 1];
+				if(path.length > fold.length)
+				{
+					inFold.push(substitute);
+					substitute.selected = index == focus;
+				}
+				else
+				{
+					var foldIndex:uint = fold[path.length - 1];
+					if(index > foldIndex)
+					{
+						overFold.push(substitute);
+					}
+					else
+					{
+						underFold.push(substitute);
+						if(index == foldIndex)
+						{
+							substitute.unfolded = true;
+							
+							for(var i:int = 0; i < targetTree.children.length; i++)
+							{
+								var childtt:TargetTree = targetTree.children[i];
+								
+								make(childtt, path.concat(new <uint>[i]), inDisTree && childtt.target is DisplayObject && (childtt.target as DisplayObject).root == rootLayer);
+							}
+							
+						}
+					}
+				}
+			}
 		}
 	}
 }
