@@ -8,9 +8,8 @@ import core.display.DisplayObject;
 import core.display.DisplayObjectContainer;
 import core.display.Image;
 import core.display.RenderTexture;
-import core.events.Event;
-import core.filters.BorderFilter;
 import core.filters.Filter;
+import core.filters.ShadowFilter;
 import core.text.TextField;
 
 import potato.designer.framework.DesignerEvent;
@@ -54,14 +53,14 @@ public class ComponentSubstitute extends UIComponent
 	protected var _image:Image;
 	
 	protected var isDrugging:Boolean;
-	protected var isDrugEnable:Boolean;
 	protected var startDrugX:int;
 	protected var startDrugY:int;
 	
-	protected static const SELECTED_FILTER:Filter = new BorderFilter(0xffff0000, 2);
+//	protected static const SELECTED_FILTER:Filter = new BorderFilter(0xffff0000, 2);
+	protected static const SELECTED_FILTER:Filter = new ShadowFilter(0xd0000000, 4, 4);
 //	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
 	protected static const UNFOLD_FILTER:Filter = null;
-	/**边缘宽度，以便显示描边滤镜*/
+	/**边缘宽度，以便显示滤镜*/
 	protected static const BORDER_WIDTH:int = 5;
 	
 	
@@ -86,6 +85,7 @@ public class ComponentSubstitute extends UIComponent
 		addEventListener(GestureEvent.GESTURE_LONG_PRESS, operationHandler);
 		/**拖动以移动组件*/
 		addEventListener(GestureEvent.GESTURE_MOVE, drugingHandler);
+		addEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
     }
 
 	
@@ -244,23 +244,33 @@ public class ComponentSubstitute extends UIComponent
 	/**选中组件的回调*/
 	protected function selectHandler(e:GestureEvent):void
 	{
-		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_CLICK, this);
-		EventCenter.dispatchEvent(controlEvent);
-		if(!controlEvent.isDefaultPrevented())
-		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_CLICK, path);
-		}
+		log("点击", path);
+		
+		var foldPath:Vector.<uint> = path;
+		var focusIndex:int = foldPath.pop();
+		
+		GuestManagerGuest.send(DesignerConst.C2S_SET_FOLD_FOCUS, [foldPath, focusIndex]);
+		
+		
+		
+//		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.C2S_SET_FOLD_FOCUS, this);
+//		EventCenter.dispatchEvent(controlEvent);
+//		if(!controlEvent.isDefaultPrevented())
+//		{
+//			GuestManagerGuest.send(DesignerConst.C2S_SET_FOLD_FOCUS, [foldPath, focusIndex]);
+//		}
 	}
 	
 	/**执行默认操作的回调*/
 	protected function operationHandler(e:GestureEvent):void
 	{
-		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_LONG_PRESS, this);
-		EventCenter.dispatchEvent(controlEvent);
-		if(!controlEvent.isDefaultPrevented())
-		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, path);
-		}
+//		log("长按", path);
+//		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_LONG_PRESS, this);
+//		EventCenter.dispatchEvent(controlEvent);
+//		if(!controlEvent.isDefaultPrevented())
+//		{
+//			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, path);
+//		}
 	}
 	
 	/**拖动组件的回调*/
@@ -268,48 +278,37 @@ public class ComponentSubstitute extends UIComponent
 	{
 		if(isDrugging)
 		{
-			if(isDrugEnable)
-			{
-				x += e.stageX - startDrugX;
-				y += e.stageY - startDrugY;
-			}
+			x = e.stageX - startDrugX;
+			y = e.stageY - startDrugY;
 		}
 		else
 		{
+			if(!_selected)
+				return;
+			
 			isDrugging = true;
-			addEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
-			startDrugX = e.stageX;
-			startDrugY = e.stageY;
-			var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_MOVE_START, this);
-			EventCenter.dispatchEvent(controlEvent);
-			if(!controlEvent.isDefaultPrevented())
-			{
-				GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_START, path);
-			}
+			startDrugX = e.stageX - x;
+			startDrugY = e.stageY - y;
 		}
 		
 	}
 
 	protected function drugEndHandler(e:GestureEvent):void
 	{
+		if(!isDrugging)
+		{
+			return;
+		}
 		isDrugging = false;
-		isDrugEnable = false;
-		removeEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
+
+		var displayObj:DisplayObject = _targetTree.target as DisplayObject;
+		var p:Point = displayObj.globalToLocal(new Point(x, y));
+		p.x += displayObj.x;
+		p.y += displayObj.y;
+		var bounes:Rectangle = displayObj.getBounds(displayObj);
+		p = new Point(p.x - bounes.x, p.y - bounes.y);
 		
-		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_MOVE_END, this);
-		EventCenter.dispatchEvent(controlEvent);
-		if(!controlEvent.isDefaultPrevented())
-		{
-			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_MOVE_END, path);
-		}
-	}
-	
-	public function startDrug():void
-	{
-		if(isDrugging)
-		{
-			isDrugEnable = true;
-		}
+		GuestManagerGuest.send(DesignerConst.C2S_DISPLAYOBJ_MOVE, [path, p.x, p.y]);
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////

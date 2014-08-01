@@ -6,6 +6,7 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 
 	/**
 	 *基础类描述文件
+	 * <br>ClassProfile类的一个子集，用于传输至客户端，以表述使用何种转换器（组）进行变量/存取器赋值或方法调用。
 	 * @author Just4test
 	 * 
 	 */

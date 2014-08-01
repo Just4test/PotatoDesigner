@@ -11,8 +11,13 @@ package potato.designer.plugin.uidesigner
 	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
+	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.Guest;
 	import potato.designer.plugin.guestManager.GuestManagerHost;
+	import potato.designer.plugin.uidesigner.basic.compiler.BasicCompiler;
+	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ClassProfile;
+	import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.ParameterProfile;
+	import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
 	import potato.designer.plugin.uidesigner.view.ComponentView;
 	import potato.designer.plugin.uidesigner.view.LaunchLocalHostView;
 	import potato.designer.plugin.uidesigner.view.OutlineView;
@@ -54,6 +59,8 @@ package potato.designer.plugin.uidesigner
 		protected static var _foldPath:Vector.<uint> = new <uint>[];
 		protected static var _focusIndex:int = -1;
 		protected static var _targetProfile:ITargetProfile;
+		
+//		protected static var _guests:Vector.<Guest> = new Vector.<Guest>;
 		
 //		/***更改了视图列表后调用此方法，以便应用更改。*/
 //		public static function updateWindow():void
@@ -200,8 +207,52 @@ package potato.designer.plugin.uidesigner
 			function finishInit():void
 			{
 				logf("[{0}] 客户端[{1}]初始化完毕。", DesignerConst.PLUGIN_NAME, guest.id);
+				guest.addEventListener(DesignerConst.C2S_SET_FOLD_FOCUS, clientSetFoldFocusHandler);
+				guest.addEventListener(DesignerConst.C2S_DO_DEFAULT_ACTION, clientDoDefaultActionHandler);
+				guest.addEventListener(DesignerConst.C2S_DISPLAYOBJ_MOVE, clientDisplayobjMove);
+				
 				guest.send(DesignerConst.S2C_UPDATE, [_targetProfile, _foldPath, _focusIndex]);
 			}
+		}
+		
+		protected static function clientSetFoldFocusHandler(msg:Message):void
+		{
+			setFoldAndFocus(msg.data[0], msg.data[1]);
+		}
+		
+		protected static function clientDoDefaultActionHandler(msg:Message):void
+		{
+			throw new Error("尚未实现，还不知道有什么功能呢");
+		}
+		
+		protected static function clientDisplayobjMove(msg:Message):void
+		{
+			var compileProfile:CompilerProfile = UIDesignerHost.getCompilerProfileByPath(msg.data[0]);
+			var basicTargetProfile:BasicTargetProfile = compileProfile.targetProfile as BasicTargetProfile;
+			if(!basicTargetProfile)
+			{
+				logf("[{0}] 尝试修改对象{1}的位置，但其不是编译器能理解的基础构建格式"
+					, DesignerConst.PLUGIN_NAME, msg.data[0]);
+				return;
+			}
+			var classProfile:ClassProfile = BasicCompiler.getClassProfileByClassName(basicTargetProfile.className);
+			
+			if(!classProfile.isDisplayObj)
+			{
+				logf("[{0}] 尝试修改对象{1}的位置，但其不是显示对象"
+					, DesignerConst.PLUGIN_NAME, msg.data[0]);
+				return;
+			}
+			if(!classProfile.getMember("x") is ParameterProfile || !classProfile.getMember("y") is ParameterProfile)
+			{
+				logf("[{0}] 尝试修改对象{1}的位置，但其不具有x、y变量/存取器"
+					, DesignerConst.PLUGIN_NAME, msg.data[0]);
+				return;
+			}
+			basicTargetProfile.setValue("x", msg.data[1].toString());
+			basicTargetProfile.setValue("y", msg.data[2].toString());
+			
+			UIDesignerHost.update();
 		}
 		
 		
@@ -327,11 +378,11 @@ package potato.designer.plugin.uidesigner
 			_foldPath = foldPath;
 			_focusIndex = focusIndex;
 			
-			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOCUS_CHANGED, [_foldPath, _focusIndex]));
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOLD_FOCUS_CHANGED, [_foldPath, _focusIndex]));
 			
 			for each(var j:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
 			{
-				j.send(DesignerConst.S2C_FOCUS_CHANGED, [_foldPath, _focusIndex]);
+				j.send(DesignerConst.S2C_FOLD_FOCUS_CHANGED, [_foldPath, _focusIndex]);
 			}
 		}
 		
@@ -357,6 +408,15 @@ package potato.designer.plugin.uidesigner
 			}
 		}
 		
-		
+		/**
+		 *令客户端立即刷新
+		 */
+		public static function refresh():void
+		{
+			for each(var i:Guest in GuestManagerHost.getGuestsWithPlugin(DesignerConst.PLUGIN_NAME))
+			{
+				i.send(DesignerConst.S2C_UPDATE);
+			}
+		}
 	}
 }

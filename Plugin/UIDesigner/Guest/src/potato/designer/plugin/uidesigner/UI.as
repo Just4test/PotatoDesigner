@@ -24,11 +24,11 @@ package potato.designer.plugin.uidesigner
 		protected static var _containerMask:Quad;
 
 		
-		protected static var _foldPath:Vector.<uint>;
-		protected static var _focusIndex:int;
-		
-		/**根组件树*/
-		protected static var _rootTargetTree:TargetTree;
+//		protected static var _foldPath:Vector.<uint>;
+//		protected static var _focusIndex:int;
+//		
+//		/**根组件树*/
+//		protected static var _rootTargetTree:TargetTree;
 		
 		public static function init():void
 		{
@@ -110,9 +110,7 @@ package potato.designer.plugin.uidesigner
 		 */
 		public static function update(tree:TargetTree, foldPath:Vector.<uint>, focusIndex:int):void
 		{
-			_rootTargetTree = tree;
-			_foldPath = foldPath;
-			_focusIndex = focusIndex;
+//			_rootTargetTree = tree;sh
 			
 			makeSubstitute(tree, foldPath, focusIndex);
 			
@@ -125,13 +123,6 @@ package potato.designer.plugin.uidesigner
 		 * 规则：
 		 * 如果对象的父对象位于展开路径上，则为其创建替身。
 		 * 具有三个替身队列：位于展开路径下方、位于展开路径上方、父对象是最终展开对象。这三个队列从底至顶排布。
-		 *  
-		 * @param targetTree
-		 * @param fold
-		 * @param focus
-		 * @param parent
-		 * @return 
-		 * 
 		 */
 		public static function makeSubstitute(rootTargetTree:TargetTree, fold:Vector.<uint>,
 											  focus:int):void
@@ -172,7 +163,6 @@ package potato.designer.plugin.uidesigner
 				_containerMask = new Quad(Stage.getStage().stageWidth, Stage.getStage().stageHeight, COLOR_MASK);
 				_containerMask.x = - _stageContainer.x;
 				_containerMask.y = - _stageContainer.y;
-				log("创建mask");
 			}
 			if(fold.length)
 			{
@@ -213,12 +203,31 @@ package potato.designer.plugin.uidesigner
 						if(index == foldIndex)
 						{
 							substitute.unfolded = true;
-							
+							var hidden:Vector.<DisplayObject> = new Vector.<DisplayObject>;
 							for(var i:int = 0; i < targetTree.children.length; i++)
 							{
 								var childtt:TargetTree = targetTree.children[i];
-								
-								make(childtt, path.concat(new <uint>[i]), inDisTree && childtt.target is DisplayObject && (childtt.target as DisplayObject).root == rootLayer);
+								var displayObj:DisplayObject = childtt.target as DisplayObject;
+								if(displayObj && displayObj.visible)
+								{
+									hidden.push(displayObj);
+									displayObj.visible = false;
+								}
+							}
+							for(i = 0; i < targetTree.children.length; i++)
+							{
+								childtt = targetTree.children[i];
+								displayObj = childtt.target as DisplayObject;
+								if(displayObj && -1 != hidden.indexOf(displayObj))
+								{
+									displayObj.visible = true;
+								}
+								make(childtt, path.concat(new <uint>[i]), inDisTree && displayObj && displayObj.root == rootLayer);
+								displayObj.visible = false;
+							}
+							for each(displayObj in hidden)
+							{
+								displayObj.visible = true;
 							}
 							
 						}

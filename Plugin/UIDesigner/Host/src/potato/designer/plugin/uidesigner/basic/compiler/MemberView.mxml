@@ -24,7 +24,7 @@
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
-				EventCenter.addEventListener(DesignerConst.FOCUS_CHANGED, updateHandler);
+				EventCenter.addEventListener(DesignerConst.FOLD_FOCUS_CHANGED, updateHandler);
 				EventCenter.addEventListener(DesignerConst.UPDATE, updateHandler);
 			}
 			

@@ -4,9 +4,6 @@ package potato.designer.plugin.uidesigner
 	import flash.utils.describeType;
 	import flash.utils.getDefinitionByName;
 	
-	import core.display.DisplayObject;
-	import core.display.Stage;
-	
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
@@ -26,15 +23,14 @@ package potato.designer.plugin.uidesigner
 			//注册消息
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_REQ_DESCRIBE_TYPE, reqDescribeTypeHandler);
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_INIT, initDesignerHandler);
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_REFRESH, refreshHandler);
 			GuestManagerGuest.addEventListener(DesignerConst.S2C_UPDATE, updateHandler);
-			GuestManagerGuest.addEventListener(DesignerConst.S2C_FOCUS_CHANGED, focusChangedHandler);
-			
-			//初始化UI
-			
+			GuestManagerGuest.addEventListener(DesignerConst.S2C_FOLD_FOCUS_CHANGED, focusChangedHandler);
 			
 			//注册基础解释器
 			BasicInterpreter.init();
 			
+			//初始化UI
 			UI.init();
 			
 			info.started();	
@@ -111,7 +107,6 @@ package potato.designer.plugin.uidesigner
 			_rootTargetTree = Factory.compileProfile(_rootTargetProfile);
 			
 			UI.update(_rootTargetTree, _foldPath, _focusIndex);
-//			Stage.getStage().addChild(_rootTargetTree.target);
 			
 			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.UPDATE, [_rootTargetProfile, _foldPath, _focusIndex]));
 		}
@@ -127,8 +122,15 @@ package potato.designer.plugin.uidesigner
 			
 			UI.update(_rootTargetTree, _foldPath, _focusIndex);
 			
-			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOCUS_CHANGED, [_foldPath, _focusIndex]));
+			EventCenter.dispatchEvent(new DesignerEvent(DesignerConst.FOLD_FOCUS_CHANGED, [_foldPath, _focusIndex]));
 			
+		}
+		
+		protected function refreshHandler(msg:Message):void
+		{
+			logf("刷新");
+			
+			UI.update(_rootTargetTree, _foldPath, _focusIndex);
 		}
 	}
 }

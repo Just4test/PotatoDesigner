@@ -309,55 +309,5 @@ package potato.designer.plugin.uidesigner
 			
 			return cp;
 		}
-
-//		/**展开路径
-//		 * <br>请不要直接使用foldPath.shift()等方式修改展开路径，而是修改后使用赋值应用更改。
-//		 */
-//		public static function get foldPath():Vector.<uint>
-//		{
-//			return _foldPath.concat();
-//		}
-//		public static function set foldPath(value:Vector.<uint>):void
-//		{
-//			_foldPath = value;
-//			ViewController.foldPath = _foldPath;
-//		}
-//		
-//		/**焦点索引*/
-//		public static function get focusIndex():int
-//		{
-//			return _focusIndex;
-//		}
-//		
-//		public static function set focusIndex(value:int):void
-//		{
-//			_focusIndex = value;
-//			ViewController.focusIndex = _focusIndex;
-//		}
-		
-		
-//		/**焦点路径，当直接点击了某个焦点对象时使用此设置方式。
-//		 * <br>如果当前没有指定焦点，会返回null。
-//		 * <br>请不要直接使用focusPath.shift()等方式修改焦点路径，而是修改后使用赋值应用更改。
-//		 */
-//		public static function get focusPath():Vector.<uint>
-//		{
-//			if(-1 == _focusIndex)
-//			{
-//				return null;
-//			}
-//			else
-//			{
-//				return _foldPath.concat(_focusIndex);
-//			}
-//		}
-//		public static function set focusPath(value:Vector.<uint>):void
-//		{
-//			_focusIndex = value.pop();
-//			_foldPath = value;
-//			ViewController.focusPath = value;
-//		}
-		
-		
 	}
 }

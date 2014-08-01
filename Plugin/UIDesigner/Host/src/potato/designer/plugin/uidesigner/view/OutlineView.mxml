@@ -22,7 +22,7 @@
 			
 			protected function initializeHandler(event:FlexEvent):void
 			{
-				EventCenter.addEventListener(DesignerConst.FOCUS_CHANGED, focusChangedHandler);
+				EventCenter.addEventListener(DesignerConst.FOLD_FOCUS_CHANGED, focusChangedHandler);
 				EventCenter.addEventListener(DesignerConst.UPDATE, updateHandler);
 				
 				EventCenter.addEventListener(DesignerConst.OUTLINE_ITEM_CLICK, outlineItemClickHandler);

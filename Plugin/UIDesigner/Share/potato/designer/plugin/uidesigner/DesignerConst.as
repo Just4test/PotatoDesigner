@@ -3,11 +3,26 @@ package potato.designer.plugin.uidesigner
 	public class DesignerConst
 	{
 		
-		/***/
-		public static const SUBSTITUTE_CLICK:String = "SUBSTITUTE_CLICK";
-		public static const SUBSTITUTE_LONG_PRESS:String = "SUBSTITUTE_LONG_PRESS";
-		public static const SUBSTITUTE_MOVE_START:String = "SUBSTITUTE_MOVE";
-		public static const SUBSTITUTE_MOVE_END:String = "SUBSTITUTE_MOVE_END";
+		/**
+		 * 设置焦点和选中组件
+		 * <br>msg = [foldPath, focusIndex]
+		 */
+		public static const C2S_SET_FOLD_FOCUS:String = "C2S_SET_FOLD_FOCUS";
+		/**
+		 * 执行默认操作
+		 * <br>msg = path
+		 */
+		public static const C2S_DO_DEFAULT_ACTION:String = "C2S_DO_DEFAULT_ACTION";
+		/**
+		 * 移动目标显示对象
+		 * <br>msg = [path, newX, newY]
+		 */
+		public static const C2S_DISPLAYOBJ_MOVE:String = "C2S_DISPLAYOBJ_MOVE";
+		/**
+		 * 改变目标显示对象的尺寸
+		 * <br>msg = [path, newX, newY]
+		 */
+		public static const C2S_DISPLAYOBJ_RESIZE:String = "C2S_DISPLAYOBJ_RESIZE";
 		
 		
 		/**请求指定的类描述*/		
@@ -16,6 +31,11 @@ package potato.designer.plugin.uidesigner
 		 * <br>这是一个异步方法。
 		 */
 		public static const S2C_INIT:String = "UID_S2C_INIT";
+		
+		
+		/**通知客户端刷新组件树
+		 */
+		public static const S2C_REFRESH:String = "UID_S2C_REFRESH";
 		
 		/**
 		 *组件更新，同时焦点可能也已经改变
@@ -31,15 +51,16 @@ package potato.designer.plugin.uidesigner
 		/**
 		 *选中的组件已经改变 
 		 */
-		public static const FOCUS_CHANGED:String = "FOCUS_CHANGED";
+		public static const FOLD_FOCUS_CHANGED:String = "FOLD_FOCUS_CHANGED";
 		/**通知客户端选中的组件已经改变
 		 * <br>msg = [foldPath, focusIndex]
 		 */
-		public static const S2C_FOCUS_CHANGED:String = "S2C_FOCUS_CHANGED";
-		/**向宿主端发出改变选中组件的请求
-		 * <br>msg = [foldPath, focusIndex]
-		 */		
-		public static const C2S_CHANGE_FOCUS:String = "C2S_CHANGE_FOCUS";
+		public static const S2C_FOLD_FOCUS_CHANGED:String = "S2C_FOLD_FOCUS_CHANGED";
+		
+//		/**向宿主端发出改变选中组件的请求
+//		 * <br>msg = [foldPath, focusIndex]
+//		 */		
+//		public static const C2S_CHANGE_FOCUS:String = "C2S_CHANGE_FOCUS";
 		
 		public static const PLUGIN_NAME:String = "UIDesigner";
 		
