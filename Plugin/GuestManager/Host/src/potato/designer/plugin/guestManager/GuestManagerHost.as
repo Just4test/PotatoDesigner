@@ -237,8 +237,6 @@ package potato.designer.plugin.guestManager
 			var bytes:ByteArray = new ByteArray();
 			bytes.writeUTFBytes(NetConst.S2C_HELLO);
 			
-			var udpSockets:Vector.<DatagramSocket> = new Vector.<DatagramSocket>;
-			
 			//发现本机地址
 			var interfaces:Vector.<NetworkInterface>= NetworkInfo.networkInfo.findInterfaces(); 
 			if(interfaces)
@@ -256,17 +254,10 @@ package potato.designer.plugin.guestManager
 						var socket:DatagramSocket = new DatagramSocket();
 						socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
 						socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
-						udpSockets.push(socket);
+						socket.send(bytes);
 					}
 				}
 			}
-			
-			for each (var i:DatagramSocket in udpSockets) 
-			{
-				i.send(bytes);
-			}
-			
-			
 		}
 		
 		public static function stopHostMultiCast():void

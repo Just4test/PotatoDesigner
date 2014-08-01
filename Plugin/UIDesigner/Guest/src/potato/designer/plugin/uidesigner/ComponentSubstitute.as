@@ -264,13 +264,8 @@ public class ComponentSubstitute extends UIComponent
 	/**执行默认操作的回调*/
 	protected function operationHandler(e:GestureEvent):void
 	{
-//		log("长按", path);
-//		var controlEvent:DesignerEvent = new DesignerEvent(DesignerConst.SUBSTITUTE_LONG_PRESS, this);
-//		EventCenter.dispatchEvent(controlEvent);
-//		if(!controlEvent.isDefaultPrevented())
-//		{
-//			GuestManagerGuest.send(DesignerConst.SUBSTITUTE_LONG_PRESS, path);
-//		}
+		log("长按", path);
+		GuestManagerGuest.send(DesignerConst.C2S_SET_FOLD_FOCUS, [path, -1]);
 	}
 	
 	/**拖动组件的回调*/

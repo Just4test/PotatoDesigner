@@ -375,6 +375,12 @@ package potato.designer.plugin.uidesigner
 					return;
 			}
 			
+			var cp:CompilerProfile = UIDesignerHost.getCompilerProfileByPath(foldPath);
+			if(!cp || !cp.type.isContainer || cp.childrenVector.length - 1 < focusIndex)
+			{
+				return;
+			}
+			
 			_foldPath = foldPath;
 			_focusIndex = focusIndex;
 			
