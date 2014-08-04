@@ -42,11 +42,16 @@ package potato.designer.plugin.uidesigner
 		
 		public static function getCompilerProfileByPath(path:Vector.<uint>):CompilerProfile
 		{
-			//没有根组件、路径长度为0、路径第一位不是0都直接返回null
-			if(!_rootCompilerProfile || !path.length || path.shift())
-				return null;
-
-			return _rootCompilerProfile.getCompilerProfileByPath(path);
+			return get(path.concat());
+			
+			function get(pathCopy:Vector.<uint>):CompilerProfile
+			{
+				//没有根组件、路径长度为0、路径第一位不是0都直接返回null
+				if(!_rootCompilerProfile || !pathCopy.length || pathCopy.shift())
+					return null;
+				
+				return _rootCompilerProfile.getCompilerProfileByPath(pathCopy);
+			}
 		}
 
 		

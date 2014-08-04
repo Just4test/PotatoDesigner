@@ -21,11 +21,9 @@ import potato.ui.UIComponent;
 import potato.ui.UIGlobal;
 
 /**
- * 组件替身，用于在编辑器中呈现组件外观，并与编辑器交互
- * <br>替身如果连接了一个显示组件DisplayObject,则他可以在设计舞台上呈现
- * <br>替身如果连接了一个容器,则它可以展开
- * <br>替身可以被选中，呈现高亮状态并且编辑器可以显示和编辑其对应的组件属性
- * <br>替身可以被拖拽并派发移动事件。编辑器会判断xy是否被托管，以决定是否允许组件被自由拖动。
+ * 组件替身，用于在编辑器中呈现组件外观，并与编辑器交互。
+ * <br>如果替身所对应的原型是显示对象，替身将尽可能的重现原型的外观。
+ * <br>如果原型不是显示对象，替身将显示为文本。
  * @author just4test
  *
  */
@@ -36,15 +34,6 @@ public class ComponentSubstitute extends UIComponent
 	
 	protected var _path:Vector.<uint>;
 	
-	
-	
-	
-//    /**替身的原形*/
-//    protected var _prototype:*;
-//	/**子替身列表*/
-//    protected const _subSubstitutes:Vector.<ComponentSubstitute> = new <ComponentSubstitute>[];
-//	/**父替身*/
-//    protected var _parentSubstitute:ComponentSubstitute;
 	/**指示该替身是否处于选中状态*/
     protected var _selected:Boolean;
 	/**指示该替身是否处于展开状态*/
@@ -56,36 +45,32 @@ public class ComponentSubstitute extends UIComponent
 	protected var startDrugX:int;
 	protected var startDrugY:int;
 	
-//	protected static const SELECTED_FILTER:Filter = new BorderFilter(0xffff0000, 2);
 	protected static const SELECTED_FILTER:Filter = new ShadowFilter(0xd0000000, 4, 4);
-//	protected static const UNFOLD_FILTER:Filter = new BorderFilter(0xff0000ff, 2, true);
 	protected static const UNFOLD_FILTER:Filter = null;
 	/**边缘宽度，以便显示滤镜*/
 	protected static const BORDER_WIDTH:int = 5;
 	
 	
-
-//    public function get parentSubstitute():ComponentSubstitute {
-//        return _parentSubstitute;
-//    }
-//
-//    public function get subSubstitutes():Vector.<ComponentSubstitute> {
-//        return _subSubstitutes;
-//    }
-
+	/**
+	 * 
+	 * @param targetTree 替身的原型所对应的目标树
+	 * @param path
+	 * @param rootLayer 根容器。指定根容器有助于使绘制替身时的效果尽可能的与原型显示对象相同。
+	 * 
+	 */
     public function ComponentSubstitute(targetTree:TargetTree, path:Vector.<uint>, rootLayer:DisplayObjectContainer = null)
     {
 		_targetTree = targetTree;
 		_path = path;
         draw(rootLayer);
 		
-		/**单击选中组件*/
-		addEventListener(GestureEvent.GESTURE_CLICK, selectHandler);
-		/**长按执行默认操作*/
-		addEventListener(GestureEvent.GESTURE_LONG_PRESS, operationHandler);
-		/**拖动以移动组件*/
-		addEventListener(GestureEvent.GESTURE_MOVE, drugingHandler);
-		addEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
+//		/**单击选中组件*/
+//		addEventListener(GestureEvent.GESTURE_CLICK, selectHandler);
+//		/**长按执行默认操作*/
+//		addEventListener(GestureEvent.GESTURE_LONG_PRESS, operationHandler);
+//		/**拖动以移动组件*/
+//		addEventListener(GestureEvent.GESTURE_MOVE, drugingHandler);
+//		addEventListener(GestureEvent.GESTURE_UP, drugEndHandler);
     }
 
 	
@@ -161,9 +146,6 @@ public class ComponentSubstitute extends UIComponent
 
 		var bounes:Rectangle = displayObj.getBounds(rootLayer || displayObj);
 		
-		x = bounes.x;
-		y = bounes.y;
-		
 		//绘制原型自身
 		if(_unfolded)//暂时隐藏所有子节点
 		{
@@ -184,7 +166,6 @@ public class ComponentSubstitute extends UIComponent
 		var matrix:Matrix = new Matrix;
 		matrix.tx = BORDER_WIDTH - bounes.x;
 		matrix.ty = BORDER_WIDTH - bounes.y;
-		log("创建替身", displayObj, displayObj.visible, bounes, matrix);
 		renderTexture.draw(rootLayer || displayObj, matrix);
 		
 		if(_unfolded)//重新显示隐藏的子节点
@@ -201,7 +182,15 @@ public class ComponentSubstitute extends UIComponent
 			addChild(_image);
 		}
 		
-		_image.x = _image.y = -BORDER_WIDTH;
+		var point:Point = displayObj.localToGlobal(new Point(0, 0));
+		
+		x = point.x;
+		y = point.y;
+		
+		_image.x = bounes.x - point.x - BORDER_WIDTH;
+		_image.y = bounes.y - point.y - BORDER_WIDTH;
+		
+		log(displayObj.x, displayObj.y, point,  bounes, _image.x, _image.y);
 		setEffact();
 		
 		_image.texture = renderTexture;

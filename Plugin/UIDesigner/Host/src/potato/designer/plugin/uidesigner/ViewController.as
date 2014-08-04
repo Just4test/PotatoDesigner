@@ -60,50 +60,6 @@ package potato.designer.plugin.uidesigner
 		protected static var _focusIndex:int = -1;
 		protected static var _targetProfile:ITargetProfile;
 		
-//		protected static var _guests:Vector.<Guest> = new Vector.<Guest>;
-		
-//		/***更改了视图列表后调用此方法，以便应用更改。*/
-//		public static function updateWindow():void
-//		{
-//			if(window0Views.length)
-//			{
-//				if(!_window0)
-//				{
-//					_window0 = WindowManager.openWindow("", window0Views, new VerticalLayout);
-//				}
-//				
-//				_window0.refresh();
-//			}
-//			else
-//			{
-//				if(_window0)
-//				{
-//					_window0.refresh();
-//					_window0.close();
-//					_window0 = null;
-//				}
-//			}
-//			
-//			if(window1Views.length)
-//			{
-//				if(!_window1)
-//				{
-//					_window1 = WindowManager.openWindow("", window1Views, new VerticalLayout);
-//				}
-//				
-//				_window1.refresh();
-//			}
-//			else
-//			{
-//				if(_window1)
-//				{
-//					_window1.refresh();
-//					_window1.close();
-//					_window1 = null;
-//				}
-//			}
-//		}
-		
 		internal static function clearStage():void
 		{
 			_foldPath.length = 0;
@@ -375,10 +331,20 @@ package potato.designer.plugin.uidesigner
 					return;
 			}
 			
-			var cp:CompilerProfile = UIDesignerHost.getCompilerProfileByPath(foldPath);
-			if(!cp || !cp.type.isContainer || cp.childrenVector.length - 1 < focusIndex)
+			if(-1 == focusIndex)
 			{
-				return;
+				var cp:CompilerProfile = UIDesignerHost.getCompilerProfileByPath(foldPath);
+				if(!cp || !cp.type.isContainer || cp.childrenVector.length - 1 < focusIndex)
+				{
+					return;
+				}
+			}
+			else
+			{
+				
+				cp = UIDesignerHost.getCompilerProfileByPath(foldPath.concat(new <uint>[focusIndex]));
+				if(!cp)
+					return;
 			}
 			
 			_foldPath = foldPath;
