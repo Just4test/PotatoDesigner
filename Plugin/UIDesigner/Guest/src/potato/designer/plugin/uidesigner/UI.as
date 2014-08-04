@@ -332,19 +332,26 @@ package potato.designer.plugin.uidesigner
 				var displayObj:DisplayObject = substitute.prototype as DisplayObject;
 				//检查原始显示对象的0,0点与其替身的位置差异
 				
+				//将替身坐标换算成显示对象坐标
 				var p:Point = displayObj.globalToLocal(new Point(substitute.x, substitute.y));
 				p.x *= displayObj.scaleX;
 				p.y *= displayObj.scaleY;
 				
-				log("移动至", substitute.x, substitute.y, p, displayObj.x, displayObj.y)
-				p.x += displayObj.x;
-				p.y += displayObj.y;
-//				var bounes:Rectangle = displayObj.getBounds(displayObj);
-//				p = new Point(p.x - bounes.x, p.y - bounes.y);
-//				
-//				log("移动至", bounes, p.x, p.y)
-				log("移动至", p.x, p.y)
-				GuestManagerGuest.send(DesignerConst.C2S_DISPLAYOBJ_MOVE, [substitute.path, p.x, p.y]);
+				//旋转补偿
+				//显示对象旋转弧度
+				var r:Number = displayObj.rotation / 180 * Math.PI;
+				//目标点弧度
+				var r2:Number = Math.atan2(p.y, p.x);
+				var sin:Number = Math.sin(r + r2);
+				var cos:Number = Math.cos(r + r2);
+				var p2:Point = new Point(Math.cos(r + r2) * p.length, Math.sin(r + r2) * p.length);
+				
+				
+				//换算得到的显示对象坐标是显示对象的内部0,0坐标。需要加上显示对象自身的偏移坐标。
+				p2.x += displayObj.x;
+				p2.y += displayObj.y;
+				
+				GuestManagerGuest.send(DesignerConst.C2S_DISPLAYOBJ_MOVE, [substitute.path, p2.x, p2.y]);
 			}
 		}
 		

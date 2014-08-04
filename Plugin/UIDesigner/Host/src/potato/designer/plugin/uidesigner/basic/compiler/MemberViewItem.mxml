@@ -53,6 +53,9 @@
 			
 			protected function input_keyDownHandler(event:KeyboardEvent):void
 			{
+				if(-1 == editPoint)
+					return;
+				
 				changed = true;
 				
 				switch(event.keyCode)
