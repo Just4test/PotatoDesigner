@@ -226,3 +226,5 @@ pip-log.txt
 *.settings/*
 *.metadata/*
 */bin-debug/*
+
+* Guest/share
