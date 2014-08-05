@@ -1,9 +1,0 @@
-{
-	"id":"BootLoader",
-	"version":1,
-	"depend":["GuestManager"],
-	"startLevel":10,
-	"guestFile":"Plugin BootLoader Guest.swc",
-	"guestEncryptionFile":"",
-	"guestClass":"potato.designer.plugin.bootloader.BootLoader"	
-}
