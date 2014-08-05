@@ -255,6 +255,7 @@ package potato.designer.plugin.guestManager
 						socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
 						socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
 						socket.send(bytes);
+						socket.close();
 					}
 				}
 			}

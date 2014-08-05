@@ -1,4 +1,4 @@
-package
+package 
 {
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
@@ -16,9 +16,7 @@ package
 		
 //		if(!event.isDefaultPrevented())
 //		{
-//			trace.apply(null, args);
+			trace.apply(null, args);
 //		}
-		
-		trace.apply(null, args);
 	}
 }
