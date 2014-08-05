@@ -1,0 +1,24 @@
+{
+	"core.display::DisplayObject":
+	{
+		"x":
+		{
+			"type":"Number",
+			"value":"0"
+		},
+		"y":
+		{
+			"type":"Number",
+			"value":"0"
+		}
+	},
+	"core.display::Quad":
+	{
+		"Quad":
+		[
+			{"type":"Number", "value":100},
+			{"type":"Number", "value":100},
+			{"type":"uint", "value":"0xff00ffff"}
+		]
+	}
+}
