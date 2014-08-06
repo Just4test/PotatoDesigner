@@ -138,8 +138,8 @@ package potato.designer.framework
 			
 			log("[Plugin] 插件[" + _id + "]正在启动");
 			var activator:IPluginActivator;
-//			try
-//			{
+			try
+			{
 				CONFIG::HOST
 				{
 					//从Manager的domain创建启动类实例
@@ -155,11 +155,11 @@ package potato.designer.framework
 				_state = STATE_INITING;
 				activator.start(this);
 				
-//			}
-//			catch(error:Error)
-//			{
-//				log("[Plugin] 启动插件[" + _id + "]时发生错误，\n" + error);
-//			}
+			}
+			catch(error:Error)
+			{
+				log("[Plugin] 启动插件[" + _id + "]时发生错误，\n" + error);
+			}
 			
 		}
 		
