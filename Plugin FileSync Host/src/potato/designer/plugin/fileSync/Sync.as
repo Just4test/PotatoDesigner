@@ -2,15 +2,11 @@ package potato.designer.plugin.fileSync
 {
 	import potato.designer.framework.DataCenter;
 	import potato.designer.net.Message;
+	import potato.designer.plugin.guestManager.Guest;
 
 	CONFIG::HOST
 	{
 		import flash.events.Event;
-		import flash.filesystem.File;
-		import flash.filesystem.FileMode;
-		import flash.filesystem.FileStream;
-		
-		import potato.designer.plugin.guestManager.Guest;
 	}
 	CONFIG::GUEST
 	{
@@ -20,11 +16,8 @@ package potato.designer.plugin.fileSync
 	
 	public class Sync
 	{
-		protected var _localPath:String;
-		protected var _remotePath:String;
-		protected var _direction:String;
-		protected var _syncSubfolder:Boolean;
-		protected var _changeLess:String;
+		/**创建远程Sync对象*/
+		public static const CREATE_REMOTE_SYNC:String = "CREATE_REMOTE_SYNC";
 		
 		/**没有文件会被同步。*/
 		public static const DIRECTION_NONE:String = "DIRECTION_NONE";
@@ -61,28 +54,93 @@ package potato.designer.plugin.fileSync
 		public static const CHANGELESS_REMOTE:String = "CHANGELESS_REMOTE";
 		
 		
-		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
-		protected const fileMap:Object = {};
-		protected const changedMap:Object = {};
+		protected static const JOB_SCAN:String = "SCAN";
+		protected static const JOB_SYNC:String = "SYNC";
+		protected static const JOB_PUSH:String = "PUSH";
+		protected static const JOB_PULL:String = "PULL";
+		protected static const JOB_REMOTE_SCAN:String = "SYNC_REMOTE_SCAN";
+		protected static const JOB_REMOTE_SYNC:String = "SYNC_REMOTE_SYNC";
 		
+		
+		protected var _id:String;
+		protected var _localPath:String;
+		protected var _remotePath:String;
+		protected var _direction:String;
+		protected var _syncSubfolder:Boolean;
+		protected var _changeLess:String;
+		
+		
+		
+		internal const fileMap:Object = {};
+		internal const changedMap:Object = {};
+		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
+		
+		protected var native:INativeSync;
+		protected var remoteCrated:Boolean;
 		
 		
 		CONFIG::HOST
-		{
-			protected var guest:Guest;
+		{	
+			public function Sync(guest:Guest, localPath:String, remotePath:String, syncSubfolder:Boolean,
+								 direction:String, changeLess:String, id:String = null)
+			{
+				
+				id ||= Math.random().toString();
+				_id = id;
+				_localPath = localPath;
+				_remotePath = remotePath;
+				_syncSubfolder = syncSubfolder;
+				_direction = direction;
+				_changeLess = changeLess;
+				
+				native = new NativeSyncHost(this, guest);
+				native.addEventListener(JOB_REMOTE_SCAN, remoteScanHandler);
+				native.addEventListener(JOB_REMOTE_SYNC, remoteSyncHandler);
+				native.send(CREATE_REMOTE_SYNC,
+					[localPath, remotePath, syncSubfolder, direction, changeLess, id], remoteCreatedHandler);
+				
+				scanLocal();
+			}
 		}
 		
-		
-		public function Sync(localPath:String, remotePath:String, syncSubfolder:Boolean,
-							 direction:String, changeLess:String = CHANGELESS_NONE)
+		CONFIG::GUEST
 		{
-			_localPath = localPath;
-			_remotePath = remotePath;
-			_syncSubfolder = syncSubfolder;
-			_direction = direction;
-			_changeLess = changeLess;
-			
+			public function Sync(localPath:String, remotePath:String, syncSubfolder:Boolean,
+								 direction:String, changeLess:String = CHANGELESS_NONE)
+			{
+				
+				//TODO
+				_localPath = localPath;
+				_remotePath = remotePath;
+				_syncSubfolder = syncSubfolder;
+				_direction = direction;
+				_changeLess = changeLess;
+				
+				scanLocal();
+			}
+		}
+		
+		protected function remoteCreatedHandler(msg:Message):void
+		{
+			remoteCrated = true;
+			work();
+		}
+		
+		protected function remoteScanHandler(msg:Message):void
+		{
 			scanLocal();
+			
+			msg.answer("");
+		}
+		
+		protected function remoteSyncHandler(msg:Message):void
+		{
+			actualSync(okHandler);
+			
+			function okHandler():void
+			{
+				msg.answer("");
+			}
 		}
 		
 		
@@ -107,45 +165,13 @@ package potato.designer.plugin.fileSync
 		 */
 		public function scanLocal():void
 		{
-			CONFIG::HOST
-			{
-				var rootFile:File = new File(DataCenter.workSpaceFolderPath + "/" + _localPath);
-				scanThis(rootFile);
-				//TODO
-				
-				function scanThis(file:File):void
-				{
-					if(!file.exists)
-					{
-						return;
-					}
-					
-					if(file.isDirectory)
-					{
-						for each(var i:File in file.getDirectoryListing())
-						{
-							scanThis(i);
-						} 
-					}
-					else
-					{
-						var path:String = rootFile.getRelativePath(file);
-						var newTime:Number = file.modificationDate.time;
-						
-						if(fileMap[path] != newTime)
-						{
-							fileMap[path] = newTime;
-							changedMap[path] = true;
-						}
-					}
-				}
-			}
+			native.nativeScanLocal();
 		}
 		
 		public function scanRemote(callback:Function):void
 		{
 			var job:SyncJob = new SyncJob;
-			job.type = SyncJob.TYPE_REMOTE_SCAN;
+			job.type = JOB_REMOTE_SCAN;
 			job.callback = callback;
 			
 			jobs.push(job);
@@ -167,7 +193,7 @@ package potato.designer.plugin.fileSync
 				
 				//同步到本地是由对方Sync执行的
 				case DIRECTION_TO_LOCAL:
-					guest.send(SyncJob.TYPE_REMOTE_SYNC, syncToLocalHandler);
+					native.send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
 					function syncToLocalHandler(msg:Message):void
 					{
 						callback && callback();
@@ -185,46 +211,59 @@ package potato.designer.plugin.fileSync
 			}
 		}
 		
+		protected function addJob(job:SyncJob):void
+		{
+			jobs.push(job);
+			if(1 == jobs.length)
+			{
+				work();
+			}
+		}
+		
 		protected function work():void
 		{
-			if(!jobs.length)
+			if(!remoteCrated || !jobs.length)
 				return;
 			
-			var job:SyncJob = jobs.shift();
+			var job:SyncJob = jobs[0];
 			switch(job.type)
 			{
 				
-				case SyncJob.TYPE_SYNC:
+				case JOB_SYNC:
 					actualSync(job.callback);
 					break;
 				
-				case SyncJob.TYPE_SCAN:
+				case JOB_SCAN:
 					scanLocal();
 					break;
 				
-				case SyncJob.TYPE_PULL:
+				case JOB_PULL:
 					pull(job.path, job.callback);
 					break;
 				
-				case SyncJob.TYPE_PUSH:
+				case JOB_PUSH:
 					push(job.path, job.callback);
 					break;
 				
-				case SyncJob.TYPE_REMOTE_SCAN:
-					guest.send(SyncJob.TYPE_REMOTE_SCAN, remoteScanCallback);
+				case JOB_REMOTE_SCAN:
+					native.send(JOB_REMOTE_SCAN, null, remoteScanCallback);
 					function remoteScanCallback(msg:Message):void
 					{
 						log("[Sync] 远程扫描完成！", remotePath);
 						job.callback && job.callback();
+						jobs.shift();
+						work();
 					}
 					break;
 				
-				case SyncJob.TYPE_REMOTE_SYNC:
-					guest.send(SyncJob.TYPE_REMOTE_SYNC, remoteSyncCallback);
+				case JOB_REMOTE_SYNC:
+					native.send(JOB_REMOTE_SYNC, null, remoteSyncCallback);
 					function remoteSyncCallback(msg:Message):void
 					{
 						log("[Sync] 远程同步完成！", remotePath);
 						job.callback && job.callback();
+						jobs.shift();
+						work();
 					}
 					break;
 			}
