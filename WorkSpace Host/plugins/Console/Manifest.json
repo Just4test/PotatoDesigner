@@ -1,0 +1,8 @@
+{
+	"id":"Console",
+	"version":1,
+	"depend":["Window"],
+	"startLevel":10,
+	"hostFile":"Plugin Console.swc",
+	"hostClass":"potato.designer.plugin.console.Console"
+}
