@@ -65,8 +65,8 @@ package potato.designer.plugin.fileSync
 		
 		protected static const JOB_SCAN:String = "SCAN";
 		protected static const JOB_SYNC:String = "SYNC";
-		protected static const JOB_PUSH:String = "PUSH";
-		protected static const JOB_PULL:String = "PULL";
+		protected static const JOB_PUSH:String = "SYNC_PUSH";
+		protected static const JOB_PULL:String = "SYNC_PULL";
 		protected static const JOB_REMOTE_SCAN:String = "SYNC_REMOTE_SCAN";
 		protected static const JOB_REMOTE_SYNC:String = "SYNC_REMOTE_SYNC";
 		
@@ -84,8 +84,14 @@ package potato.designer.plugin.fileSync
 		
 		
 		internal const fileMap:Object = {};
-		internal const changedMap:Object = {};
+		internal var changedMap:Object;
 		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
+		
+		protected function jobDone(...args):void
+		{
+			var job:SyncJob = jobs.shift();
+			job.callback && job.callback.apply(null, args);
+		}
 		
 		CONFIG::HOST
 			protected static const guestMap:Dictionary = new Dictionary;
@@ -238,37 +244,35 @@ package potato.designer.plugin.fileSync
 		{
 			CONFIG::HOST
 				const syncMap:Object = guestMap[msg.target];
-				
+			
 			const sync:Sync = syncMap[msg.data[0]];
-			sync.msgHandler(msg);
-		}
-		
-		/**
-		 *统一的消息处理 
-		 * @param msg
-		 * 
-		 */
-		protected function msgHandler(msg:Message):void
-		{
 			
-		}
-		
-		protected function remoteCreatedHandler(msg:Message):void
-		{
-			remoteCrated = true;
-			work();
-		}
-		
-		protected function remoteScanHandler(msg:Message):void
-		{
-			scanLocal();
-			
-			msg.answer("");
+			switch(msg.type)
+			{
+				case JOB_PUSH:
+					sync.pushRequestHandler(msg);
+					break;
+				case JOB_PULL:
+					sync.pullRequestHandler(msg);
+					break;
+				case JOB_REMOTE_SCAN:
+					sync.scanRemoteRequestHandler(msg);
+					break;
+				case JOB_PUSH:
+					sync.pushRequestHandler(msg);
+					break;
+				case JOB_PUSH:
+					sync.pushRequestHandler(msg);
+					break;
+				
+				default:
+					throw "无法理解消息类型";
+			}
 		}
 		
 		protected function remoteSyncHandler(msg:Message):void
 		{
-			actualSync(okHandler);
+			syncNow(okHandler);
 			
 			function okHandler():void
 			{
@@ -286,12 +290,6 @@ package potato.designer.plugin.fileSync
 		public function push(path:String, callback:Function):void
 		{
 			jobs.push(new SyncJob(JOB_PUSH, callback, path));
-		}
-		
-		protected function jobDone(...args):void
-		{
-			var job:SyncJob = jobs.shift();
-			job.callback && job.callback.apply(null, args);
 		}
 		
 		protected function pushNow():void
@@ -408,7 +406,7 @@ package potato.designer.plugin.fileSync
 		protected function scanRemoteNow():void
 		{
 			var job:SyncJob = jobs[0];
-			send(JOB_PULL, [_id, job.path], doneMsgHandler);
+			send(JOB_REMOTE_SCAN, [_id, job.path], doneMsgHandler);
 			
 			function doneMsgHandler(msg:Message):void
 			{
@@ -433,41 +431,75 @@ package potato.designer.plugin.fileSync
 			{
 				msg.answer("", null);
 			}
-			
 		}
 		
-		public function actualSync(callback:Function):void
+		public function sync(callback:Function):void
 		{
-			if(CHANGELESS_LOCAL != _changeLess)
+			jobs.push(new SyncJob(JOB_SYNC, callback, null));
+		}
+		
+		protected function syncNow(callback:Function):void
+		{
+			var job:SyncJob = jobs[0];
+			if(DIRECTION_NONE == _direction)
+			{
+				return jobDone(true);
+			}
+			
+			send(JOB_REMOTE_SCAN, [_id, job.path], doneMsgHandler);
+			
+			if(_changeLess != CHANGELESS_LOCAL)
 			{
 				scanLocal();
 			}
 			
-			switch(_direction)
+			function doneMsgHandler(msg:Message):void
 			{
-				case DIRECTION_NONE:
-					callback();
-					return;
-					break;
+				if(!msg.data)
+				{
+					log("[Sync] [Error] 同步远程目录时发生错误");
+					return jobDone(false);
+				}
+
+				switch(_direction)
+				{
+					//同步到本地是由对方Sync执行的
+					case DIRECTION_TO_LOCAL:
+						send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
+						function syncToLocalHandler(msg:Message):void
+						{
+							callback && callback();
+						}
+						break;
+					
+					case DIRECTION_TO_REMOTE:
+						break;
+					
+					case DIRECTION_TWO_WAY:
+						break;
+					
+					default:
+						throw new Error("指定的同步方向无法识别");
+				}
 				
-				//同步到本地是由对方Sync执行的
-				case DIRECTION_TO_LOCAL:
-					send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
-					function syncToLocalHandler(msg:Message):void
-					{
-						callback && callback();
-					}
-					break;
-				
-				case DIRECTION_TO_REMOTE:
-					break;
-				
-				case DIRECTION_TWO_WAY:
-					break;
-				
-				default:
-					throw new Error("指定的同步方向无法识别");
+				return jobDone(true);
 			}
+		}
+		
+		
+		protected function syncPrepareRequestHandler(msg:Message):void
+		{
+			try
+			{
+				if(!changedMap || _changeLess != CHANGELESS_REMOTE)
+					scanLocal();
+				msg.answer("", changedMap);
+			} 
+			catch(error:Error) 
+			{
+				msg.answer("", null);
+			}
+			
 		}
 		
 		protected function addJob(job:SyncJob):void
@@ -489,7 +521,7 @@ package potato.designer.plugin.fileSync
 			{
 				
 				case JOB_SYNC:
-					actualSync(job.callback);
+					syncNow(job.callback);
 					break;
 				
 				case JOB_SCAN:

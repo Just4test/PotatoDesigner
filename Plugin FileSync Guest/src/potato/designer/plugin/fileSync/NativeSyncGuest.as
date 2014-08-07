@@ -2,6 +2,7 @@ package potato.designer.plugin.fileSync
 {
 	import core.filesystem.File;
 	import core.filesystem.FileInfo;
+	import core.utils.Timer;
 	
 	import potato.designer.framework.DataCenter;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
@@ -49,6 +50,9 @@ package potato.designer.plugin.fileSync
 		
 		protected function scanThese(arr:Array, parentPath:String):void
 		{
+			var currentTime:Number = new Date().time;
+			sync.changedMap = {};
+			
 			for each(var i:FileInfo in arr)
 			{
 				if("." == i.name || ".." == i.name)
@@ -71,7 +75,7 @@ package potato.designer.plugin.fileSync
 					if(sync.fileMap[path] != newTime)
 					{
 						sync.fileMap[path] = newTime;
-						sync.changedMap[path] = true;
+						sync.changedMap[path] = currentTime - newTime;
 					}
 				}
 			}

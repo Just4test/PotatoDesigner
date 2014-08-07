@@ -1,7 +1,7 @@
 @echo off
 echo 创建文件夹链接
 
-::连接共享代码
+echo 连接共享代码
 
 rd /s /q "PotatoDesigner Guest/share"
 mklink /j "PotatoDesigner Guest/share" "PotatoDesigner Host/share"
@@ -18,12 +18,12 @@ mklink /j "Plugin UIDesigner Guest/share" "Plugin UIDesigner Host/share"
 rd /s /q "Plugin FileSync Guest/share"
 mklink /j "Plugin FileSync Guest/share" "Plugin FileSync Host/share"
 
-::将客户端运行目录与客户端工作空间相连
+echo 将客户端运行目录与客户端工作空间相连
 
 rd /s /q "PotatoDesigner Guest/bin-debug/designer"
 mklink /j "PotatoDesigner Guest/bin-debug/designer" "WorkSpace Guest"
 
-::将工作空间与工程编译结果相连
+echo 将工作空间与工程编译结果相连
 
 rd /s /q "Plugin Console\bin"
 mklink /j "Plugin Console\bin" "WorkSpace Host\plugins\Console"
