@@ -371,6 +371,10 @@ package potato.designer.plugin.guestManager
 		 */
 		public static function send(type:String, data:* = null, callbackHandle:Function = null):void
 		{
+			if(!_connection)
+			{
+				throw new Error("在尚未建立连接的情况下尝试发送消息");
+			}
 			_connection.send(type, data, callbackHandle);
 		}
 		

@@ -1,7 +1,7 @@
 package potato.designer.framework
 {
 	/**
-	 *插件启动接口
+	 *插件启动接口。该接口的对象必须具有无参构造方法。
 	 * @author Administrator
 	 * 
 	 */

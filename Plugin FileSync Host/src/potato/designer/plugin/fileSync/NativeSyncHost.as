@@ -1,21 +1,17 @@
 package potato.designer.plugin.fileSync
 {
 	import flash.filesystem.File;
-	
+
 	import potato.designer.framework.DataCenter;
-	import potato.designer.net.Connection;
-	import potato.designer.plugin.guestManager.Guest;
 
 	public class NativeSyncHost implements INativeSync
 	{
 		protected var sync:Sync;
-		protected var guest:Guest;
 				
 		
-		public function NativeSyncHost(sync:Sync, guest:Guest)
+		public function NativeSyncHost(sync:Sync)
 		{
 			this.sync = sync;
-			this.guest = guest;
 		}
 		
 		public function nativeScanLocal():void
@@ -35,12 +31,14 @@ package potato.designer.plugin.fileSync
 				{
 					for each(var i:File in file.getDirectoryListing())
 					{
-						scanThis(i);
+						if(!i.isDirectory || sync.syncSubfolder)
+							scanThis(i);
 					} 
 				}
 				else
 				{
 					var path:String = rootFile.getRelativePath(file);
+					log("[Sync] 处理了文件", path);
 					var newTime:Number = file.modificationDate.time;
 					
 					if(sync.fileMap[path] != newTime)
@@ -55,17 +53,5 @@ package potato.designer.plugin.fileSync
 		public function nativeSync():void
 		{
 		}
-		
-		public function send(type:String, data:* = null, callbackHandle:Function = null):void
-		{
-			guest.send(type, data, callbackHandle);
-		}
-		
-		public function addEventListener(type:String, listener:Function):void
-		{
-			guest.addEventListener(type, listener);
-		}
-		
-		
 	}
 }

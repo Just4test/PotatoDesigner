@@ -1,4 +1,4 @@
-package potato.designer.plugin.fileSync
+package potato.designer.plugin.fileSync 
 {
 	public class SyncJob
 	{

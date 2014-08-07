@@ -1,17 +1,22 @@
-package potato.designer.plugin.fileSync
+package potato.designer.plugin.fileSync 
 {
-	import potato.designer.framework.DataCenter;
+	
+	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
-	import potato.designer.plugin.guestManager.Guest;
 
 	CONFIG::HOST
 	{
 		import flash.events.Event;
+		import flash.utils.Dictionary;
+		
+		import potato.designer.framework.EventCenter;
+		import potato.designer.plugin.guestManager.Guest;
+		import potato.designer.plugin.guestManager.GuestManagerHost;
 	}
+	
 	CONFIG::GUEST
 	{
-		import core.filesystem.File;
-		import core.filesystem.FileInfo;
+		import potato.designer.plugin.guestManager.GuestManagerGuest;
 	}
 	
 	public class Sync
@@ -62,6 +67,9 @@ package potato.designer.plugin.fileSync
 		protected static const JOB_REMOTE_SYNC:String = "SYNC_REMOTE_SYNC";
 		
 		
+		CONFIG::HOST
+			protected var _guest:Guest;
+		
 		protected var _id:String;
 		protected var _localPath:String;
 		protected var _remotePath:String;
@@ -75,49 +83,170 @@ package potato.designer.plugin.fileSync
 		internal const changedMap:Object = {};
 		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
 		
+		CONFIG::HOST
+			protected static const guestMap:Dictionary = new Dictionary;
+		CONFIG::GUEST
+			protected static const syncMap:Object = new Object;
+		
 		protected var native:INativeSync;
 		protected var remoteCrated:Boolean;
 		
 		
-		CONFIG::HOST
-		{	
-			public function Sync(guest:Guest, localPath:String, remotePath:String, syncSubfolder:Boolean,
-								 direction:String, changeLess:String, id:String = null)
+		internal static function start(info:PluginInfo):void
+		{
+			CONFIG::HOST
 			{
-				
-				id ||= Math.random().toString();
-				_id = id;
-				_localPath = localPath;
-				_remotePath = remotePath;
-				_syncSubfolder = syncSubfolder;
-				_direction = direction;
-				_changeLess = changeLess;
-				
-				native = new NativeSyncHost(this, guest);
-				native.addEventListener(JOB_REMOTE_SCAN, remoteScanHandler);
-				native.addEventListener(JOB_REMOTE_SYNC, remoteSyncHandler);
-				native.send(CREATE_REMOTE_SYNC,
-					[localPath, remotePath, syncSubfolder, direction, changeLess, id], remoteCreatedHandler);
-				
-				scanLocal();
+				for each(var i:Guest in GuestManagerHost.guestList)
+				{
+					addEventListenerTo(i);
+				}
+				EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED,
+					function(msg:Message):void
+					{
+						addEventListenerTo(msg.target);
+					});
+			}
+			
+			CONFIG::GUEST
+			{
+				addEventListenerTo(GuestManagerGuest)
+			}
+			
+			info.started();
+			
+			
+			function addEventListenerTo(eventDispatcher:*):void
+			{
+				eventDispatcher.addEventListener(Sync.CREATE_REMOTE_SYNC, createRemoteSyncHandler);
+				eventDispatcher.addEventListener(JOB_REMOTE_SCAN, msgForwardHandler);
+				eventDispatcher.addEventListener(JOB_REMOTE_SYNC, msgForwardHandler);
 			}
 		}
 		
-		CONFIG::GUEST
+		protected static function createRemoteSyncHandler(msg:Message):void
 		{
-			public function Sync(localPath:String, remotePath:String, syncSubfolder:Boolean,
-								 direction:String, changeLess:String = CHANGELESS_NONE)
+			CONFIG::HOST
+				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5], msg.data[6]);
+				
+			CONFIG::GUEST
+				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]);
+			
+		}
+		
+		
+		CONFIG::HOST
+		protected function send(type:String, data:* = null, callbackHandle:Function = null):void
+		{
+			_guest.send(type, data, callbackHandle);
+		}
+		
+		CONFIG::GUEST
+		protected function send(type:String, data:* = null, callbackHandle:Function = null):void
+		{
+			GuestManagerGuest.send(type, data, callbackHandle);
+		}
+		
+		
+		
+		CONFIG::HOST
+		/**
+		 *创建一个同步对象 
+		 * @param localPath 本地路径
+		 * @param remotePath 远程路径
+		 * @param syncSubfolder 是否同步子目录
+		 * @param channel
+		 * @param direction
+		 * @param changeLess
+		 * @param id
+		 * 
+		 */
+		public function Sync(guest:Guest, localPath:String, remotePath:String, syncSubfolder:Boolean,
+							 direction:String = DIRECTION_NONE, changeLess:String = CHANGELESS_NONE, id:String = null)
+		{
+			
+			id ||= Math.random().toString();
+			_id = id;
+			_localPath = localPath;
+			_remotePath = remotePath;
+			_syncSubfolder = syncSubfolder;
+			_direction = direction;
+			_changeLess = changeLess;
+			
+			
+			CONFIG::HOST
 			{
-				
-				//TODO
-				_localPath = localPath;
-				_remotePath = remotePath;
-				_syncSubfolder = syncSubfolder;
-				_direction = direction;
-				_changeLess = changeLess;
-				
-				scanLocal();
+				native = new NativeSyncHost(this);
 			}
+			CONFIG::GUEST
+			{
+				native = new NativeSyncGuest(this);
+				initRemote();
+			}
+			
+			scanLocal();
+		}
+		
+		
+		CONFIG::GUEST
+		/**
+		 *创建一个同步对象 
+		 * @param localPath 本地路径
+		 * @param remotePath 远程路径
+		 * @param syncSubfolder 是否同步子目录
+		 * @param channel
+		 * @param direction
+		 * @param changeLess
+		 * @param id
+		 * 
+		 */
+		public function Sync(localPath:String, remotePath:String, syncSubfolder:Boolean,
+							 direction:String = DIRECTION_NONE, changeLess:String = CHANGELESS_NONE, id:String = null)
+		{
+			
+			id ||= Math.random().toString();
+			_id = id;
+			_localPath = localPath;
+			_remotePath = remotePath;
+			_syncSubfolder = syncSubfolder;
+			_direction = direction;
+			_changeLess = changeLess;
+			
+			
+			CONFIG::HOST
+			{
+				native = new NativeSyncHost(this);
+			}
+			CONFIG::GUEST
+			{
+				native = new NativeSyncGuest(this);
+			}
+			
+			scanLocal();
+		}
+		
+		
+		/**
+		 *将同一个客户端/主机端传递过来的相关消息转发给对应的Sync对象 
+		 * @param msg
+		 * 
+		 */
+		protected static function msgForwardHandler(msg:Message):void
+		{
+			CONFIG::HOST
+				const syncMap:Object = guestMap[msg.target];
+				
+			const sync:Sync = syncMap[msg.data[0]];
+			sync.msgHandler(msg);
+		}
+		
+		/**
+		 *统一的消息处理 
+		 * @param msg
+		 * 
+		 */
+		protected function msgHandler(msg:Message):void
+		{
+			
 		}
 		
 		protected function remoteCreatedHandler(msg:Message):void
@@ -193,7 +322,7 @@ package potato.designer.plugin.fileSync
 				
 				//同步到本地是由对方Sync执行的
 				case DIRECTION_TO_LOCAL:
-					native.send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
+					send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
 					function syncToLocalHandler(msg:Message):void
 					{
 						callback && callback();
@@ -246,7 +375,7 @@ package potato.designer.plugin.fileSync
 					break;
 				
 				case JOB_REMOTE_SCAN:
-					native.send(JOB_REMOTE_SCAN, null, remoteScanCallback);
+					send(JOB_REMOTE_SCAN, null, remoteScanCallback);
 					function remoteScanCallback(msg:Message):void
 					{
 						log("[Sync] 远程扫描完成！", remotePath);
@@ -257,7 +386,7 @@ package potato.designer.plugin.fileSync
 					break;
 				
 				case JOB_REMOTE_SYNC:
-					native.send(JOB_REMOTE_SYNC, null, remoteSyncCallback);
+					send(JOB_REMOTE_SYNC, null, remoteSyncCallback);
 					function remoteSyncCallback(msg:Message):void
 					{
 						log("[Sync] 远程同步完成！", remotePath);
