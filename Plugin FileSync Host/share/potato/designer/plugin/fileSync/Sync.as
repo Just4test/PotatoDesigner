@@ -1,6 +1,10 @@
 package potato.designer.plugin.fileSync 
 {
 	
+	import flash.utils.ByteArray;
+	
+	import core.filesystem.File;
+	
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 
@@ -274,19 +278,113 @@ package potato.designer.plugin.fileSync
 		
 		
 		/**
-		 *推送本地文件 
-		 * @param path
-		 * @param callback
+		 *推送本地文件到远程目录
+		 * @param path 目录
+		 * @param callback 完成时的回调。参数：ok:Boolean 表示是否推送成功
 		 * 
 		 */
 		public function push(path:String, callback:Function):void
 		{
-			
+			jobs.push(new SyncJob(JOB_PUSH, callback, path));
 		}
 		
+		protected function jobDone(...args):void
+		{
+			var job:SyncJob = jobs.shift();
+			job.callback && job.callback.apply(null, args);
+		}
+		
+		protected function pushNow():void
+		{
+			var job:SyncJob = jobs[0];
+			var bytes:ByteArray;
+			
+			try
+			{
+				CONFIG::GUEST
+					bytes = File.readByteArray(job.path);
+			} 
+			catch(error:Error) 
+			{
+				log("[Sync] [Error] 推送文件时读取本地文件错误，", localPath + "/" + job.path);
+				
+				return jobDone(false);
+			}
+			
+			
+			send(JOB_PUSH, [_id, job.path, bytes], doneMsgHandler);
+			
+			function doneMsgHandler(msg:Message):void
+			{
+				return jobDone(msg.data);
+			}
+		}
+		
+		protected function pushRequestHandler(msg:Message):void
+		{
+			try
+			{
+				File.write(localPath + "/" + msg.data[1], msg.data[2]);
+			} 
+			catch(error:Error) 
+			{
+				log("[Sync] [Error] 收到远程Sync发来的推送请求，但是写文件时发生错误", localPath + "/" + msg.data[1]);
+				msg.answer("", false);
+			}
+				
+			msg.answer("", true);
+		}
+		
+		/**
+		 *从远程目录拉取一个文件 
+		 * @param path 目录
+		 * @param callback 完成时的回调。参数：ok:Boolean 表示是否拉取成功
+		 * 
+		 */
 		public function pull(path:String, callback:Function):void
 		{
+			jobs.push(new SyncJob(JOB_PULL, callback, path));
+		}
+		
+		protected function pullNow():void
+		{
+			var job:SyncJob = jobs[0];
+			send(JOB_PULL, [_id, job.path], doneMsgHandler);
 			
+			function doneMsgHandler(msg:Message):void
+			{
+				if(msg.data)
+				{
+					try
+					{
+						CONFIG::GUEST
+							File.write(localPath + "/" + job.path, msg.data);
+					} 
+					catch(error:Error) 
+					{
+						log("[Sync] [Error] 拉取文件时写文件发生错误", localPath + "/" + job.path);
+						return jobDone(false);
+					}
+				}
+				
+				return jobDone(msg.data);
+			}
+		}
+		
+		protected function pullRequestHandler(msg:Message):void
+		{
+			var bytes:ByteArray;
+			try
+			{
+				CONFIG::GUEST
+					bytes = File.readByteArray(localPath + "/" + msg.data[1]);
+			} 
+			catch(error:Error) 
+			{
+				log("[Sync] [Error] 收到远程Sync发来的拉取请求，但是读文件时发生错误", localPath + "/" + msg.data[1]);
+			}
+			
+			msg.answer("", bytes);
 		}
 		
 		/**
@@ -297,13 +395,45 @@ package potato.designer.plugin.fileSync
 			native.nativeScanLocal();
 		}
 		
+		/**
+		 *扫描远程目录 
+		 * @param callback 完成时的回调。参数：fileMap:Object 远程目录的文件表
+		 * 
+		 */
 		public function scanRemote(callback:Function):void
 		{
-			var job:SyncJob = new SyncJob;
-			job.type = JOB_REMOTE_SCAN;
-			job.callback = callback;
+			jobs.push(new SyncJob(JOB_REMOTE_SCAN, callback, null));
+		}
+		
+		protected function scanRemoteNow():void
+		{
+			var job:SyncJob = jobs[0];
+			send(JOB_PULL, [_id, job.path], doneMsgHandler);
 			
-			jobs.push(job);
+			function doneMsgHandler(msg:Message):void
+			{
+				if(!msg.data)
+				{
+					log("[Sync] [Error] 扫描远程目录时发生错误");
+				}
+				
+				return jobDone(msg.data);
+			}
+		}
+		
+		protected function scanRemoteRequestHandler(msg:Message):void
+		{
+			var bytes:ByteArray;
+			try
+			{
+				scanLocal();
+				msg.answer("", fileMap);
+			} 
+			catch(error:Error) 
+			{
+				msg.answer("", null);
+			}
+			
 		}
 		
 		public function actualSync(callback:Function):void
