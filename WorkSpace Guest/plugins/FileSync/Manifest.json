@@ -1,0 +1,10 @@
+{
+	"id":"FileSync",
+	"version":1,
+	"depend":["GuestManager"],
+	"startLevel":10,
+	"hostFile":"Plugin FileSync Host.swc",
+	"hostClass":"potato.designer.plugin.fileSync.PluginActivator",
+	"guestFile":"Plugin FileSync Guest.swc",
+	"guestClass":"potato.designer.plugin.fileSync.PluginActivator"	
+}
