@@ -144,7 +144,7 @@ public class ComponentSubstitute extends UIComponent
 			displayObj = new TextField(prototype.toString(), 100, 100,  UIGlobal.defaultFont, 20, 0xffffffff);
 		}
 
-		var bounes:Rectangle = displayObj.getBounds(rootLayer || displayObj);
+		var bounds:Rectangle = displayObj.getBounds(rootLayer || displayObj);
 		
 		//绘制原型自身
 		if(_unfolded)//暂时隐藏所有子节点
@@ -161,11 +161,11 @@ public class ComponentSubstitute extends UIComponent
 			}
 		}
 		
-		var renderTexture:RenderTexture = new RenderTexture(bounes.width + BORDER_WIDTH * 2, bounes.height + BORDER_WIDTH * 2);
+		var renderTexture:RenderTexture = new RenderTexture(bounds.width + BORDER_WIDTH * 2, bounds.height + BORDER_WIDTH * 2);
 		//设置转换矩阵。转换矩阵将对象放置在(BORDER_WIDTH, BORDER_WIDTH)点，以便留出边缘显示描边滤镜；
 		var matrix:Matrix = new Matrix;
-		matrix.tx = BORDER_WIDTH - bounes.x;
-		matrix.ty = BORDER_WIDTH - bounes.y;
+		matrix.tx = BORDER_WIDTH - bounds.x;
+		matrix.ty = BORDER_WIDTH - bounds.y;
 		renderTexture.draw(rootLayer || displayObj, matrix);
 		
 		if(_unfolded)//重新显示隐藏的子节点
@@ -187,10 +187,10 @@ public class ComponentSubstitute extends UIComponent
 		x = point.x;
 		y = point.y;
 		
-		_image.x = bounes.x - point.x - BORDER_WIDTH;
-		_image.y = bounes.y - point.y - BORDER_WIDTH;
+		_image.x = bounds.x - point.x - BORDER_WIDTH;
+		_image.y = bounds.y - point.y - BORDER_WIDTH;
 		
-		log(displayObj.x, displayObj.y, point,  bounes, _image.x, _image.y);
+		log(displayObj.x, displayObj.y, point,  bounds, _image.x, _image.y);
 		setEffact();
 		
 		_image.texture = renderTexture;

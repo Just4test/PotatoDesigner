@@ -227,4 +227,4 @@ pip-log.txt
 *.metadata/*
 */bin-debug/*
 
-* Guest/share
+*Guest/share

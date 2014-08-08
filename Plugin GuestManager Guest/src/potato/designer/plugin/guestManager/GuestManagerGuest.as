@@ -409,6 +409,11 @@ package potato.designer.plugin.guestManager
 			return _connected;
 		}
 		
+		public function toString():String
+		{
+			return "[Guest " + _id + "]";
+		}
+		
 		//////////////////////////////////////////////////////////////////
 		
 		protected static function log2host(event:DesignerEvent):void

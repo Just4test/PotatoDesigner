@@ -1,16 +1,19 @@
 package potato.designer.plugin.fileSync 
 {
 	
+	
 	import flash.utils.ByteArray;
 	
-	import core.filesystem.File;
-	
+	import potato.designer.framework.DataCenter;
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 
 	CONFIG::HOST
 	{
 		import flash.events.Event;
+		import flash.filesystem.File;
+		import flash.filesystem.FileMode;
+		import flash.filesystem.FileStream;
 		import flash.utils.Dictionary;
 		
 		import potato.designer.framework.EventCenter;
@@ -20,6 +23,9 @@ package potato.designer.plugin.fileSync
 	
 	CONFIG::GUEST
 	{
+		import core.filesystem.File;
+		import core.filesystem.FileInfo;
+		
 		import potato.designer.plugin.guestManager.GuestManagerGuest;
 	}
 	
@@ -82,8 +88,9 @@ package potato.designer.plugin.fileSync
 		protected var _changeLess:String;
 		
 		
-		
+		/**存储文件的上次更改时间*/
 		internal const fileMap:Object = {};
+		/**存储文件的更改距今时间。如果文件在上次同步之后未曾更改，则值为null。*/
 		internal var changedMap:Object;
 		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
 		
@@ -98,7 +105,6 @@ package potato.designer.plugin.fileSync
 		CONFIG::GUEST
 			protected static const syncMap:Object = new Object;
 		
-		protected var native:INativeSync;
 		protected var remoteCrated:Boolean;
 		
 		
@@ -127,7 +133,9 @@ package potato.designer.plugin.fileSync
 			
 			function addEventListenerTo(eventDispatcher:*):void
 			{
-				eventDispatcher.addEventListener(Sync.CREATE_REMOTE_SYNC, createRemoteSyncHandler);
+				eventDispatcher.addEventListener(CREATE_REMOTE_SYNC, createRemoteSyncHandler);
+				eventDispatcher.addEventListener(JOB_PUSH, msgForwardHandler);
+				eventDispatcher.addEventListener(JOB_PULL, msgForwardHandler);
 				eventDispatcher.addEventListener(JOB_REMOTE_SCAN, msgForwardHandler);
 				eventDispatcher.addEventListener(JOB_REMOTE_SYNC, msgForwardHandler);
 			}
@@ -135,14 +143,57 @@ package potato.designer.plugin.fileSync
 		
 		protected static function createRemoteSyncHandler(msg:Message):void
 		{
+			log("接收到创建远程Sync对象的请求", msg.data);
+			
 			CONFIG::HOST
 				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5], msg.data[6]);
 				
 			CONFIG::GUEST
 				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]);
+				
+			msg.answer("");
 			
 		}
 		
+		protected function remoteSyncCreatedHandler(msg:Message):void
+		{
+			remoteCrated = true;
+			log("远程Sync已经创建", _id);
+		}
+		
+		/**
+		 *将同一个客户端/主机端传递过来的相关消息转发给对应的Sync对象 
+		 * @param msg
+		 * 
+		 */
+		protected static function msgForwardHandler(msg:Message):void
+		{
+			CONFIG::HOST
+			{
+				const syncMap:Object = guestMap[msg.target];
+			}
+			
+			const sync:Sync = syncMap[msg.data[0]];
+			
+			switch(msg.type)
+			{
+				case JOB_PUSH:
+					sync.pushRequestHandler(msg);
+					break;
+				case JOB_PULL:
+					sync.pullRequestHandler(msg);
+					break;
+				case JOB_REMOTE_SCAN:
+					sync.scanRemoteRequestHandler(msg);
+					break;
+				case JOB_REMOTE_SYNC:
+					sync.pushRequestHandler(msg);
+					break;
+				
+				default:
+					throw "无法理解消息类型";
+			}
+		}
 		
 		CONFIG::HOST
 		protected function send(type:String, data:* = null, callbackHandle:Function = null):void
@@ -182,17 +233,6 @@ package potato.designer.plugin.fileSync
 			_direction = direction;
 			_changeLess = changeLess;
 			
-			
-			CONFIG::HOST
-			{
-				native = new NativeSyncHost(this);
-			}
-			CONFIG::GUEST
-			{
-				native = new NativeSyncGuest(this);
-				initRemote();
-			}
-			
 			scanLocal();
 		}
 		
@@ -221,64 +261,9 @@ package potato.designer.plugin.fileSync
 			_direction = direction;
 			_changeLess = changeLess;
 			
-			
-			CONFIG::HOST
-			{
-				native = new NativeSyncHost(this);
-			}
-			CONFIG::GUEST
-			{
-				native = new NativeSyncGuest(this);
-			}
-			
 			scanLocal();
 		}
 		
-		
-		/**
-		 *将同一个客户端/主机端传递过来的相关消息转发给对应的Sync对象 
-		 * @param msg
-		 * 
-		 */
-		protected static function msgForwardHandler(msg:Message):void
-		{
-			CONFIG::HOST
-				const syncMap:Object = guestMap[msg.target];
-			
-			const sync:Sync = syncMap[msg.data[0]];
-			
-			switch(msg.type)
-			{
-				case JOB_PUSH:
-					sync.pushRequestHandler(msg);
-					break;
-				case JOB_PULL:
-					sync.pullRequestHandler(msg);
-					break;
-				case JOB_REMOTE_SCAN:
-					sync.scanRemoteRequestHandler(msg);
-					break;
-				case JOB_PUSH:
-					sync.pushRequestHandler(msg);
-					break;
-				case JOB_PUSH:
-					sync.pushRequestHandler(msg);
-					break;
-				
-				default:
-					throw "无法理解消息类型";
-			}
-		}
-		
-		protected function remoteSyncHandler(msg:Message):void
-		{
-			syncNow(okHandler);
-			
-			function okHandler():void
-			{
-				msg.answer("");
-			}
-		}
 		
 		
 		/**
@@ -295,19 +280,10 @@ package potato.designer.plugin.fileSync
 		protected function pushNow():void
 		{
 			var job:SyncJob = jobs[0];
-			var bytes:ByteArray;
+			var bytes:ByteArray = readFile(job.path);
 			
-			try
-			{
-				CONFIG::GUEST
-					bytes = File.readByteArray(job.path);
-			} 
-			catch(error:Error) 
-			{
-				log("[Sync] [Error] 推送文件时读取本地文件错误，", localPath + "/" + job.path);
-				
+			if(!bytes)
 				return jobDone(false);
-			}
 			
 			
 			send(JOB_PUSH, [_id, job.path, bytes], doneMsgHandler);
@@ -320,17 +296,7 @@ package potato.designer.plugin.fileSync
 		
 		protected function pushRequestHandler(msg:Message):void
 		{
-			try
-			{
-				File.write(localPath + "/" + msg.data[1], msg.data[2]);
-			} 
-			catch(error:Error) 
-			{
-				log("[Sync] [Error] 收到远程Sync发来的推送请求，但是写文件时发生错误", localPath + "/" + msg.data[1]);
-				msg.answer("", false);
-			}
-				
-			msg.answer("", true);
+			msg.answer("", writeFile(msg.data[1], msg.data[2]));
 		}
 		
 		/**
@@ -351,47 +317,21 @@ package potato.designer.plugin.fileSync
 			
 			function doneMsgHandler(msg:Message):void
 			{
-				if(msg.data)
-				{
-					try
-					{
-						CONFIG::GUEST
-							File.write(localPath + "/" + job.path, msg.data);
-					} 
-					catch(error:Error) 
-					{
-						log("[Sync] [Error] 拉取文件时写文件发生错误", localPath + "/" + job.path);
-						return jobDone(false);
-					}
-				}
+				if(!msg.data)
+					return jobDone(false);
 				
-				return jobDone(msg.data);
+				return jobDone(writeFile(job.path, msg.data));
 			}
 		}
+		
+		
 		
 		protected function pullRequestHandler(msg:Message):void
 		{
-			var bytes:ByteArray;
-			try
-			{
-				CONFIG::GUEST
-					bytes = File.readByteArray(localPath + "/" + msg.data[1]);
-			} 
-			catch(error:Error) 
-			{
-				log("[Sync] [Error] 收到远程Sync发来的拉取请求，但是读文件时发生错误", localPath + "/" + msg.data[1]);
-			}
-			
-			msg.answer("", bytes);
+			msg.answer("", readFile(msg.data[1]));
 		}
 		
-		/**
-		 *扫描本地目录，这是一个同步操作。
-		 */
-		public function scanLocal():void
-		{
-			native.nativeScanLocal();
-		}
+		
 		
 		/**
 		 *扫描远程目录 
@@ -460,22 +400,46 @@ package potato.designer.plugin.fileSync
 					log("[Sync] [Error] 同步远程目录时发生错误");
 					return jobDone(false);
 				}
-
+				
+				var remoteFileMap:Object = msg.data[0];
+				var remoteChangedMap:Object = msg.data[1];
+				var job:SyncJob;
+				var path:String;
+				
 				switch(_direction)
 				{
-					//同步到本地是由对方Sync执行的
-					case DIRECTION_TO_LOCAL:
-						send(JOB_REMOTE_SYNC, null, syncToLocalHandler);
-						function syncToLocalHandler(msg:Message):void
+					case DIRECTION_TO_REMOTE:
+						for(path in changedMap)
 						{
-							callback && callback();
+							job = new SyncJob(JOB_PUSH, null, path);
+							jobs.push(job);
 						}
+						job.callback = syncDoneCallback;
 						break;
 					
-					case DIRECTION_TO_REMOTE:
+					case DIRECTION_TO_LOCAL:
+						for(path in remoteChangedMap)
+						{
+							job = new SyncJob(JOB_PULL, null, path);
+							jobs.push(job);
+						}
+						job.callback = syncDoneCallback;
 						break;
 					
 					case DIRECTION_TWO_WAY:
+						for(path in changedMap)
+						{
+							job = new SyncJob(JOB_PUSH, null, path);
+							jobs.push(job);
+						}
+						
+						for(path in remoteChangedMap)
+						{
+							job = new SyncJob(JOB_PULL, null, path);
+							jobs.push(job);
+						}
+						job.callback = syncDoneCallback;
+
 						break;
 					
 					default:
@@ -483,6 +447,11 @@ package potato.designer.plugin.fileSync
 				}
 				
 				return jobDone(true);
+			}
+			
+			function syncDoneCallback(result:Boolean):void
+			{
+				callback && callback(result);
 			}
 		}
 		
@@ -559,6 +528,184 @@ package potato.designer.plugin.fileSync
 					break;
 			}
 		}
+		
+		/////////////////////////Native相关代码//////////////////////////
+		
+		
+		protected function readFile(path:String):ByteArray
+		{
+			path = localPath + "/" + path;
+			var bytes:ByteArray;
+			
+			
+			try
+			{
+				CONFIG::HOST
+				{
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(new File(path), FileMode.READ);
+					bytes = new ByteArray;
+					fileStream.readBytes(bytes);
+				}
+				
+				CONFIG::GUEST
+				{
+					bytes = File.readByteArray(path);
+				}
+			} 
+			catch(error:Error) 
+			{
+				log("[Sync] [Error] 读取本地文件错误，", path);
+			}
+			
+			CONFIG::HOST
+			{
+				fileStream.close();
+			}
+			
+			return bytes;
+		}
+		
+		protected function writeFile(path:String, bytes:ByteArray):Boolean
+		{
+			path = localPath + "/" + path;
+			
+			try
+			{
+				CONFIG::HOST
+				{
+					var fileStream:FileStream = new FileStream();
+					fileStream.open(new File(path), FileMode.WRITE);
+					fileStream.writeBytes(bytes);
+					fileStream.close();
+				}
+				CONFIG::GUEST
+				{
+					File.writeByteArray(path, bytes);
+				}
+			} 
+			catch(error:Error) 
+			{
+				log("[Sync] [Error] 写文件时发生错误", path);
+				CONFIG::HOST
+				{
+					fileStream.close();
+				}
+				
+				return false;
+			}
+			
+			return true;
+		}
+		
+		CONFIG::HOST
+		public function scanLocal():void
+		{
+			var rootFile:File = new File(DataCenter.workSpaceFolderPath + "/" + localPath);
+			scanThis(rootFile);
+			//TODO
+			
+			function scanThis(file:File):void
+			{
+				if(!file.exists)
+				{
+					return;
+				}
+				
+				if(file.isDirectory)
+				{
+					for each(var i:File in file.getDirectoryListing())
+					{
+						if(!i.isDirectory || syncSubfolder)
+							scanThis(i);
+					} 
+				}
+				else
+				{
+					var path:String = rootFile.getRelativePath(file);
+					log("[Sync] 处理了文件", path);
+					var newTime:Number = file.modificationDate.time;
+					
+					if(fileMap[path] != newTime)
+					{
+						fileMap[path] = newTime;
+						changedMap[path] = true;
+					}
+				}
+			}
+		}
+		
+		CONFIG::GUEST
+		/**
+		 *扫描本地目录，这是一个同步操作。
+		 */
+		public function scanLocal():void
+		{
+			var path:String = DataCenter.workSpaceFolderPath + "/" + localPath;
+			if("/" == path.charAt(path.length - 1))
+			{
+				path = path.substring(0, path.length - 1);
+			}
+			
+			if(File.exists(path))
+			{
+				//目标是单个文件
+				var temp:Array = path.split("/");
+				var fileName:String = temp.pop();
+				var parentPath:String = temp.join("/");
+				
+				for each(var i:FileInfo in File.getDirectoryListing(parentPath))
+				{
+					if(i.name == fileName)
+					{
+						scanThese([i], parentPath);
+						break;
+						
+					}
+				}
+			}
+			else
+			{
+				scanThese(File.getDirectoryListing(path), path)
+			}
+			
+			
+			
+			function scanThese(arr:Array, parentPath:String):void
+			{
+				var currentTime:Number = new Date().time;
+				changedMap = {};
+				
+				for each(var i:FileInfo in arr)
+				{
+					if("." == i.name || ".." == i.name)
+					{
+						continue;
+					}
+					
+					var path:String = parentPath + "/" + i.name;
+					
+					if(i.isDirectory)
+					{
+						if(syncSubfolder)
+							scanThese(File.getDirectoryListing(path), path);
+					}
+					else
+					{
+						log("[Sync] 处理了文件", path);
+						var newTime:Number = i.lastWriteTime.time;
+						
+						if(fileMap[path] != newTime)
+						{
+							fileMap[path] = newTime;
+							changedMap[path] = currentTime - newTime;
+						}
+					}
+				}
+			}
+		}
+		
+		////////////////////////读写器/////////////////////////////////////
 
 		/**
 		 *同步的本地路径 
