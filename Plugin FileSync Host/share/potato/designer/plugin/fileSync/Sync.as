@@ -5,6 +5,7 @@ package potato.designer.plugin.fileSync
 	import flash.utils.ByteArray;
 	
 	import potato.designer.framework.DataCenter;
+	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.PluginInfo;
 	import potato.designer.net.Message;
 
@@ -31,6 +32,8 @@ package potato.designer.plugin.fileSync
 	
 	public class Sync
 	{
+		public static const PLUGIN_NAME:String = "FileSync";
+		
 		/**创建远程Sync对象*/
 		public static const CREATE_REMOTE_SYNC:String = "CREATE_REMOTE_SYNC";
 		
@@ -91,13 +94,22 @@ package potato.designer.plugin.fileSync
 		/**存储文件的上次更改时间*/
 		internal const fileMap:Object = {};
 		/**存储文件的更改距今时间。如果文件在上次同步之后未曾更改，则值为null。*/
-		internal var changedMap:Object;
+		internal var changedMap:Object = {};
 		protected const jobs:Vector.<SyncJob> = new Vector.<SyncJob>;
+		protected var working:Boolean;
+		
+		protected function addJob(job:SyncJob):void
+		{
+			jobs.push(job);
+			work();
+		}
 		
 		protected function jobDone(...args):void
 		{
 			var job:SyncJob = jobs.shift();
 			job.callback && job.callback.apply(null, args);
+			working = false;
+			work();
 		}
 		
 		CONFIG::HOST
@@ -117,19 +129,21 @@ package potato.designer.plugin.fileSync
 					addEventListenerTo(i);
 				}
 				EventCenter.addEventListener(GuestManagerHost.EVENT_GUEST_CONNECTED,
-					function(msg:Message):void
+					function(event:DesignerEvent):void
 					{
-						addEventListenerTo(msg.target);
+						addEventListenerTo(event.target);
+						
+						//
+						new Sync(event.data as Guest, "", "", true);
 					});
 			}
 			
 			CONFIG::GUEST
 			{
-				addEventListenerTo(GuestManagerGuest)
+				addEventListenerTo(GuestManagerGuest);
 			}
 			
 			info.started();
-			
 			
 			function addEventListenerTo(eventDispatcher:*):void
 			{
@@ -146,19 +160,17 @@ package potato.designer.plugin.fileSync
 			log("接收到创建远程Sync对象的请求", msg.data);
 			
 			CONFIG::HOST
+			{
 				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5], msg.data[6]);
+			}
 				
 			CONFIG::GUEST
+			{
 				new Sync(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5]);
+			}
 				
 			msg.answer("");
 			
-		}
-		
-		protected function remoteSyncCreatedHandler(msg:Message):void
-		{
-			remoteCrated = true;
-			log("远程Sync已经创建", _id);
 		}
 		
 		/**
@@ -224,6 +236,7 @@ package potato.designer.plugin.fileSync
 		public function Sync(guest:Guest, localPath:String, remotePath:String, syncSubfolder:Boolean,
 							 direction:String = DIRECTION_NONE, changeLess:String = CHANGELESS_NONE, id:String = null)
 		{
+			_guest = guest;
 			
 			id ||= Math.random().toString();
 			_id = id;
@@ -234,6 +247,20 @@ package potato.designer.plugin.fileSync
 			_changeLess = changeLess;
 			
 			scanLocal();
+			
+			if(guest.isPluginActived(PLUGIN_NAME))
+				sendCreateRemoteSync();
+			else
+				guest.addEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
+			
+			function guestPluginActivatedHandler(event:DesignerEvent):void
+			{
+				if(PLUGIN_NAME == event.data)
+				{
+					guest.removeEventListener(GuestManagerHost.EVENT_GUEST_PLUGIN_ACTIVATED, guestPluginActivatedHandler);
+					sendCreateRemoteSync();
+				}
+			}
 		}
 		
 		
@@ -252,7 +279,6 @@ package potato.designer.plugin.fileSync
 		public function Sync(localPath:String, remotePath:String, syncSubfolder:Boolean,
 							 direction:String = DIRECTION_NONE, changeLess:String = CHANGELESS_NONE, id:String = null)
 		{
-			
 			id ||= Math.random().toString();
 			_id = id;
 			_localPath = localPath;
@@ -261,7 +287,24 @@ package potato.designer.plugin.fileSync
 			_direction = direction;
 			_changeLess = changeLess;
 			
+			log("创建Sync", localPath, remotePath, syncSubfolder, direction, changeLess, id);
+			
+			sendCreateRemoteSync();
+			
 			scanLocal();
+			
+		}
+		
+		protected function sendCreateRemoteSync():void
+		{
+			log("[Sync] 请求创建远程Sync", _id);
+			send(CREATE_REMOTE_SYNC, [localPath, remotePath, syncSubfolder, direction, changeLess, _id], remoteSyncCreatedHandler);
+		}
+		
+		protected function remoteSyncCreatedHandler(msg:Message):void
+		{
+			remoteCrated = true;
+			log("远程Sync已经创建", _id);
 		}
 		
 		
@@ -274,7 +317,7 @@ package potato.designer.plugin.fileSync
 		 */
 		public function push(path:String, callback:Function):void
 		{
-			jobs.push(new SyncJob(JOB_PUSH, callback, path));
+			addJob(new SyncJob(JOB_PUSH, callback, path));
 		}
 		
 		protected function pushNow():void
@@ -307,7 +350,7 @@ package potato.designer.plugin.fileSync
 		 */
 		public function pull(path:String, callback:Function):void
 		{
-			jobs.push(new SyncJob(JOB_PULL, callback, path));
+			addJob(new SyncJob(JOB_PULL, callback, path));
 		}
 		
 		protected function pullNow():void
@@ -340,7 +383,7 @@ package potato.designer.plugin.fileSync
 		 */
 		public function scanRemote(callback:Function):void
 		{
-			jobs.push(new SyncJob(JOB_REMOTE_SCAN, callback, null));
+			addJob(new SyncJob(JOB_REMOTE_SCAN, callback, null));
 		}
 		
 		protected function scanRemoteNow():void
@@ -375,16 +418,18 @@ package potato.designer.plugin.fileSync
 		
 		public function sync(callback:Function):void
 		{
-			jobs.push(new SyncJob(JOB_SYNC, callback, null));
+			addJob(new SyncJob(JOB_SYNC, callback, null));
 		}
 		
-		protected function syncNow(callback:Function):void
+		protected function syncNow():void
 		{
 			var job:SyncJob = jobs[0];
+			
 			if(DIRECTION_NONE == _direction)
 			{
 				return jobDone(true);
 			}
+			
 			
 			send(JOB_REMOTE_SCAN, [_id, job.path], doneMsgHandler);
 			
@@ -401,9 +446,12 @@ package potato.designer.plugin.fileSync
 					return jobDone(false);
 				}
 				
+				
+				//展开同步工作为一组pull/push工作。最后一个pull/push工作完成时，同步工作完成
+				
 				var remoteFileMap:Object = msg.data[0];
 				var remoteChangedMap:Object = msg.data[1];
-				var job:SyncJob;
+				var subJob:SyncJob;
 				var path:String;
 				
 				switch(_direction)
@@ -411,34 +459,34 @@ package potato.designer.plugin.fileSync
 					case DIRECTION_TO_REMOTE:
 						for(path in changedMap)
 						{
-							job = new SyncJob(JOB_PUSH, null, path);
-							jobs.push(job);
+							subJob = new SyncJob(JOB_PUSH, null, path);
+							addJob(subJob);
 						}
-						job.callback = syncDoneCallback;
+						subJob.callback = syncDoneCallback;
 						break;
 					
 					case DIRECTION_TO_LOCAL:
 						for(path in remoteChangedMap)
 						{
-							job = new SyncJob(JOB_PULL, null, path);
-							jobs.push(job);
+							subJob = new SyncJob(JOB_PULL, null, path);
+							addJob(subJob);
 						}
-						job.callback = syncDoneCallback;
+						subJob.callback = syncDoneCallback;
 						break;
 					
 					case DIRECTION_TWO_WAY:
 						for(path in changedMap)
 						{
-							job = new SyncJob(JOB_PUSH, null, path);
-							jobs.push(job);
+							subJob = new SyncJob(JOB_PUSH, null, path);
+							addJob(subJob);
 						}
 						
 						for(path in remoteChangedMap)
 						{
-							job = new SyncJob(JOB_PULL, null, path);
-							jobs.push(job);
+							subJob = new SyncJob(JOB_PULL, null, path);
+							addJob(subJob);
 						}
-						job.callback = syncDoneCallback;
+						subJob.callback = syncDoneCallback;
 
 						break;
 					
@@ -446,12 +494,16 @@ package potato.designer.plugin.fileSync
 						throw new Error("指定的同步方向无法识别");
 				}
 				
-				return jobDone(true);
-			}
-			
-			function syncDoneCallback(result:Boolean):void
-			{
-				callback && callback(result);
+				var callback:Function = job.callback;
+				job.callback = null;
+				jobDone();
+				
+				
+				
+				function syncDoneCallback(result:Boolean):void
+				{
+					callback && callback(true);
+				}
 			}
 		}
 		
@@ -471,26 +523,21 @@ package potato.designer.plugin.fileSync
 			
 		}
 		
-		protected function addJob(job:SyncJob):void
-		{
-			jobs.push(job);
-			if(1 == jobs.length)
-			{
-				work();
-			}
-		}
-		
 		protected function work():void
 		{
-			if(!remoteCrated || !jobs.length)
+			log("[Sync]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! enter WORK!");
+			
+			if(working || !remoteCrated || !jobs.length)
 				return;
+			
+			working = true;
 			
 			var job:SyncJob = jobs[0];
 			switch(job.type)
 			{
 				
 				case JOB_SYNC:
-					syncNow(job.callback);
+					syncNow();
 					break;
 				
 				case JOB_SCAN:
@@ -498,11 +545,11 @@ package potato.designer.plugin.fileSync
 					break;
 				
 				case JOB_PULL:
-					pull(job.path, job.callback);
+					pullNow();
 					break;
 				
 				case JOB_PUSH:
-					push(job.path, job.callback);
+					pushNow();
 					break;
 				
 				case JOB_REMOTE_SCAN:
@@ -510,9 +557,7 @@ package potato.designer.plugin.fileSync
 					function remoteScanCallback(msg:Message):void
 					{
 						log("[Sync] 远程扫描完成！", remotePath);
-						job.callback && job.callback();
-						jobs.shift();
-						work();
+						jobDone(msg.data);
 					}
 					break;
 				
@@ -521,9 +566,7 @@ package potato.designer.plugin.fileSync
 					function remoteSyncCallback(msg:Message):void
 					{
 						log("[Sync] 远程同步完成！", remotePath);
-						job.callback && job.callback();
-						jobs.shift();
-						work();
+						jobDone(msg.data);
 					}
 					break;
 			}
