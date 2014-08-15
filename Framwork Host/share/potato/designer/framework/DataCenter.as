@@ -89,7 +89,7 @@ package potato.designer.framework
 				throw new Error("工作空间未被关闭之前不得再次载入工作空间");
 			}
 			
-			if("/" == path.charAt(path.length - 1))
+			if("/" == path.charAt(path.length - 1) || "\\" == path.charAt(path.length - 1))
 			{
 				path = path.substring(0, path.length - 1);
 			}

@@ -223,7 +223,7 @@ package potato.designer.plugin.guestManager
 			
 			
 			
-			log("开始本机地址广播");
+			log("[GuestManager] 开始本机地址广播");
 			timer.reset();
 			timer.start();
 			
@@ -263,7 +263,7 @@ package potato.designer.plugin.guestManager
 		
 		public static function stopHostMultiCast():void
 		{
-			log("停止本机地址广播");
+			log("[GuestManager] 停止本机地址广播");
 			timer.stop();
 		}
 		
