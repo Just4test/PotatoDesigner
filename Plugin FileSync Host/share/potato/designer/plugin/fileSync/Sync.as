@@ -2,7 +2,9 @@ package potato.designer.plugin.fileSync
 {
 	
 	
+	import flash.events.TimerEvent;
 	import flash.utils.ByteArray;
+	import flash.utils.Timer;
 	
 	import potato.designer.framework.DataCenter;
 	import potato.designer.framework.DesignerEvent;
@@ -39,12 +41,12 @@ package potato.designer.plugin.fileSync
 		
 		/**没有文件会被同步。*/
 		public static const DIRECTION_NONE:String = "DIRECTION_NONE";
-		/**远程目录是源目录，本地目录是目标目录。*/
-		public static const DIRECTION_TO_LOCAL:String = "DIRECTION_TO_LOCAL";
+//		/**远程目录是源目录，本地目录是目标目录。*/
+//		public static const DIRECTION_TO_LOCAL:String = "DIRECTION_TO_LOCAL";
 		/**本地目录是源目录，远程目录是目标目录。*/
 		public static const DIRECTION_TO_REMOTE:String = "DIRECTION_TO_REMOTE";
-		/**双向同步*/
-		public static const DIRECTION_TWO_WAY:String = "DIRECTION_TWO_WAY";
+//		/**双向同步*/
+//		public static const DIRECTION_TWO_WAY:String = "DIRECTION_TWO_WAY";
 		
 		/**
 		 *模式：默认
@@ -153,10 +155,14 @@ package potato.designer.plugin.fileSync
 					{
 						addEventListenerTo(event.target);
 						
-						//
-						var s:Sync = new Sync(event.data as Guest, "temp", "temp", true, DIRECTION_TO_REMOTE);
-//						s.push("new.bmp", function(result:Boolean):void{log("同步结束！", result)});
-						s.sync(function(result:Boolean):void{log("同步结束！", result)});
+						//测试代码
+//						var s:Sync = new Sync(event.data as Guest, "temp", "temp", true, DIRECTION_TO_REMOTE);
+//						var timer:Timer = new Timer(1000);
+//						timer.addEventListener(TimerEvent.TIMER, function(e:TimerEvent):void
+//						{
+//							s.sync(function(result:Boolean):void{log("同步结束！", result)});
+//						});
+//						timer.start();
 					});
 			}
 			
@@ -218,7 +224,6 @@ package potato.designer.plugin.fileSync
 				const syncMap:Object = guestMap[msg.target];
 			}
 			
-			log("[Sync] 接收到远程指令", msg.data[0], msg.type, msg.data);
 			const sync:Sync = syncMap[msg.data[0]];
 			
 			
@@ -383,6 +388,10 @@ package potato.designer.plugin.fileSync
 			
 			function doneMsgHandler(msg:Message):void
 			{
+				//推送成功则将本地文件标记为最新
+				if(msg.data)
+					lastSyncMap[job.path] = fileMap[job.path];
+				
 				return jobDone(msg.data);
 			}
 		}
@@ -439,6 +448,8 @@ package potato.designer.plugin.fileSync
 				if(result)
 					refreshFile(job.path);
 				
+				msg.answer("", result);
+				
 				return jobDone(result);
 			}
 		}
@@ -447,7 +458,15 @@ package potato.designer.plugin.fileSync
 		
 		protected function pullRequestHandler(msg:Message):void
 		{
-			msg.answer("", readFile(msg.data[1]));
+			var bytes:ByteArray = readFile(msg.data[1]);
+			msg.answer("", bytes, bytes ? doneMsgHandler : null);
+			
+			function doneMsgHandler(msg2:Message):void
+			{
+				if(msg2.data)
+					lastSyncMap[msg.data[1]] = fileMap[msg.data[1]];
+					
+			}
 		}
 		
 		
@@ -507,7 +526,6 @@ package potato.designer.plugin.fileSync
 				return jobDone(true);
 			}
 			
-			log("[Sync] 从远端拉取文件结构");
 			send(JOB_REMOTE_SCAN, [_id, job.path], doneMsgHandler);
 			
 			if(_changeLess != CHANGELESS_LOCAL)
@@ -525,11 +543,11 @@ package potato.designer.plugin.fileSync
 				
 				
 				//展开同步工作为一组pull/push工作。最后一个pull/push工作完成时，同步工作完成
+				//TODO 扩充本方法以支持更多同步模式
 				
 				var remoteFileMap:Object = msg.data[0];
 				var remoteLastSyncMap:Object = msg.data[1];
 				var remoteChangedMap:Object = msg.data[2];
-				log("[Sync] 文件结构拉取成功");
 				var subJob:SyncJob;
 				var path:String;
 				
@@ -542,7 +560,7 @@ package potato.designer.plugin.fileSync
 						{
 							addJob(new SyncJob(JOB_PUSH, null, path));
 						}
-						//传送对方被缺失的文件
+						//传送对方缺失的文件
 						for(path in fileMap)
 						{
 							if(!remoteFileMap[path] && !changedMap[path])
@@ -550,27 +568,27 @@ package potato.designer.plugin.fileSync
 						}
 						break;
 					
-					case DIRECTION_TO_LOCAL:
-						for(path in remoteChangedMap)
-						{
-							addJob(new SyncJob(JOB_PULL, null, path));
-						}
-						break;
-					
-					case DIRECTION_TWO_WAY:
-						for(path in lastSyncMap)
-						{
-							subJob = new SyncJob(JOB_PUSH, null, path);
-							addJob(subJob);
-						}
-						
-						for(path in remoteChangedMap)
-						{
-							subJob = new SyncJob(JOB_PULL, null, path);
-							addJob(subJob);
-						}
-
-						break;
+//					case DIRECTION_TO_LOCAL:
+//						for(path in remoteChangedMap)
+//						{
+//							addJob(new SyncJob(JOB_PULL, null, path));
+//						}
+//						break;
+//					
+//					case DIRECTION_TWO_WAY:
+//						for(path in lastSyncMap)
+//						{
+//							subJob = new SyncJob(JOB_PUSH, null, path);
+//							addJob(subJob);
+//						}
+//						
+//						for(path in remoteChangedMap)
+//						{
+//							subJob = new SyncJob(JOB_PULL, null, path);
+//							addJob(subJob);
+//						}
+//
+//						break;
 					
 					default:
 						throw new Error("指定的同步方向无法识别");
@@ -608,7 +626,6 @@ package potato.designer.plugin.fileSync
 			
 			if(working || !remoteCrated || !jobs.length)
 				return;
-			log("[Sync]!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! enter WORK!");
 			
 			working = true;
 			
@@ -774,7 +791,7 @@ package potato.designer.plugin.fileSync
 				else
 				{
 					var path:String = rootFile.getRelativePath(file);
-					log("[Sync] 处理了文件", path);
+					log("[Sync] 扫描了文件", path);
 					fileMap[path] = file.modificationDate.time;
 				}
 			}
@@ -797,7 +814,7 @@ package potato.designer.plugin.fileSync
 			
 			if(fileInfo.isDirectory)
 			{
-				scanFold(getFullPath(""));
+				scanFold("");
 			}
 			else
 			{
@@ -807,14 +824,14 @@ package potato.designer.plugin.fileSync
 			
 			function scanFold(foldPath:String):void
 			{
-				for each(var i:FileInfo in File.getDirectoryListing(foldPath))
+				for each(var i:FileInfo in File.getDirectoryListing(getFullPath(foldPath)))
 				{
 					if("." == i.name || ".." == i.name)
 					{
 						continue;
 					}
 					
-					var currentPath:String = foldPath + "/" + i.name;
+					var currentPath:String = foldPath ? foldPath + "/" + i.name : i.name;//不会出现"/file.txt"
 					
 					if(i.isDirectory)
 					{
@@ -822,8 +839,9 @@ package potato.designer.plugin.fileSync
 							scanFold(currentPath);
 					}
 					else
+						
 					{
-						log("[Sync] 处理了文件 \"" + currentPath + "\"");
+						log("[Sync] 扫描了文件 \"" + currentPath + "\"");
 						fileMap[currentPath] = i.lastWriteTime.time;
 					}
 				}
@@ -837,7 +855,6 @@ package potato.designer.plugin.fileSync
 			var temp:Array = getFullPath(path).split("/");
 			var fileName:String = temp.pop();
 			var parentPath:String = temp.join("/");
-			trace("getFileInfo", path, getFullPath(path), parentPath);
 			
 			try
 			{

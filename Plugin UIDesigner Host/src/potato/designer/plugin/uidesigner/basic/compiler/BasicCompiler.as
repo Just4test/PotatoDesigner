@@ -1,5 +1,6 @@
 package potato.designer.plugin.uidesigner.basic.compiler
 {
+	import flash.filesystem.File;
 	import flash.net.registerClassAlias;
 	
 	import mx.core.UIComponent;
@@ -29,6 +30,7 @@ package potato.designer.plugin.uidesigner.basic.compiler
 		 * <br>_typeTable[typeName] = className
 		 */
 		protected static var _paramTypeTable:Object;
+		protected static var _typePickerTable:Object = {};
 		
 		/**类名到类描述文件映射表*/
 		protected static var _className2ProfileTable:Object = {};
@@ -49,6 +51,18 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			ViewController.regComponentTypeCreater("添加类", addClassType);
 			
 			ViewController.window.addElement(new MemberView);
+			
+			var imgPicker:FilePicker = new FilePicker;
+			imgPicker.setParam("选择一个图片", null, filterFunction);
+			regTypePicker("Image", imgPicker);
+			regTypePicker("Texture", imgPicker);
+			regTypePicker("TextureData", imgPicker);
+			
+			function filterFunction(url:String):String
+			{
+				var file:File = new File(url);
+				return file.nativePath;
+			}
 		}
 		
 		
@@ -58,7 +72,6 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			var editor:ClassTypeEditor = new ClassTypeEditor;
 			
 			editor.window = WindowManager.openWindow("类组件编辑器", Vector.<UIComponent>([editor]));
-			
 		}
 		
 		public function addTarget(profile:CompilerProfile, parent:CompilerProfile):Boolean
@@ -167,6 +180,16 @@ package potato.designer.plugin.uidesigner.basic.compiler
 			{
 				g.send(BasicConst.S2C_REG_CLASS, classProfile.getClientProfile());
 			}
+		}
+		
+		public static function regTypePicker(typeName:String, picker:ITypePicker):void
+		{
+			_typePickerTable[typeName] = picker;
+		}
+		
+		public static function getTypePicker(typeName:String):ITypePicker
+		{
+			return _typePickerTable[typeName];
 		}
 		
 		/**

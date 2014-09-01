@@ -141,8 +141,6 @@ package potato.designer.plugin.uidesigner
 			return false;
 		}
 		
-//		protected static function 
-		
 		
 		
 		

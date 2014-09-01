@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 第三方爽肤水 -->
+<s:Button xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  click="buttonClickHandler(event)"
+		  implements="potato.designer.plugin.uidesigner.basic.compiler.ITypePicker">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.filesystem.File;
+			
+			import mx.core.UIComponent;
+			
+			import spark.components.Group;
+			protected function buttonClickHandler(event:MouseEvent):void
+			{
+				showPicker();
+			}
+			
+			protected var memberViewItem:MemberViewItem;
+			protected var title:String = "请选择文件";
+			protected var typeFilter:Array;
+			protected var filterFunction:Function;
+			
+			
+			/**
+			 *设置参数
+			 * @param name 组件名
+			 * @param isContainer 组件是否是容器。这决定了组件能否展开并插入子组件
+			 * @param icon 为组件指定图标
+			 * @param filterFunction url过滤器方法。如果提供此方法，则该方法接受一个String参数：文件的URL。
+			 * <br>方法的返回值可以是String或者void。如果方法返回String，则将向memberViewItem输出该返回值。
+			 * <br>如果方法是void类型，则稍后可使用setValueToView向memberViewItem输出值。
+			 * 
+			 */
+			public function setParam(title:String, typeFilter:Array=null, filterFunction:Function = null):void
+			{
+				this.title = title;
+				this.typeFilter = typeFilter;
+				this.filterFunction = filterFunction;
+			}
+			
+			protected function showPicker():void
+			{
+				var file:File = new File;
+				file.browseForOpen(title, typeFilter);
+				file.addEventListener(Event.SELECT, selectHandler);
+			}
+			
+			protected function selectHandler(event:Event):void
+			{
+				var url:String = (event.target as File).url;
+				if(null != filterFunction)
+				{
+					var result:* = filterFunction(url);
+					if(undefined !== result)
+					{
+						memberViewItem.currentValue = result as String;
+					}
+				}
+				else
+				{
+					memberViewItem.currentValue = url;
+				}
+			}
+			
+			public function hide():void
+			{
+				if(parent)
+				{
+					if(parent is Group)
+						(parent as Group).removeElement(this);
+					else
+						parent.removeChild(this);
+				}
+			}
+			
+			public function setValue(value:String):void
+			{
+				//什么都不做
+			}
+			
+			public function setValueToView(value:String):void
+			{
+				memberViewItem.currentValue = value;
+			}
+			
+			public function show(memberViewItem:MemberViewItem):void
+			{
+				this.memberViewItem = memberViewItem;
+				
+				if(memberViewItem.isAccess)
+				{
+					showPicker();
+					return;
+				}
+				else
+				{
+					var group:Group = memberViewItem.parent as Group;
+					group.addElementAt(this, group.getChildIndex(memberViewItem));
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+</s:Button>

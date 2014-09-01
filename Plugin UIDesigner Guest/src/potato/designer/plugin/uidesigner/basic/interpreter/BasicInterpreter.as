@@ -8,8 +8,6 @@ package potato.designer.plugin.uidesigner.basic.interpreter
 	import core.display.Texture;
 	import core.display.TextureData;
 	
-	import potato.designer.framework.DesignerEvent;
-	import potato.designer.framework.EventCenter;
 	import potato.designer.net.Message;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	import potato.designer.plugin.uidesigner.ITargetProfile;

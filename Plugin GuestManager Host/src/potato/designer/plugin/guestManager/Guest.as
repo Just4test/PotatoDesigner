@@ -85,7 +85,7 @@ package potato.designer.plugin.guestManager
 		 */
 		public function send(type:String, data:* = null, callbackHandle:Function = null):void
 		{
-			connection.send(type, data, callbackHandle);
+			connection && connection.send(type, data, callbackHandle);
 		}
 
 		/**

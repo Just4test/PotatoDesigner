@@ -3,7 +3,6 @@
 				xmlns:s="library://ns.adobe.com/flex/spark"
 				xmlns:mx="library://ns.adobe.com/flex/mx"
 				autoDrawBackground="true" click="editHandler(event)"
-				creationComplete="creationCompleteHandler(event)"
 				dataChange="dataChangeHandler(event)" fontSize="16">
 	<s:layout>
 		<s:HorizontalLayout verticalAlign="middle"/>
@@ -12,18 +11,18 @@
 		<![CDATA[
 			import flash.filesystem.File;
 			
-			import mx.events.FlexEvent;
-			
-			import spark.events.TextOperationEvent;
-			
 			import flashx.textLayout.conversion.ITextImporter;
 			import flashx.textLayout.conversion.TextConverter;
+			
+			import mx.events.FlexEvent;
 			
 			import potato.designer.plugin.uidesigner.UIDesignerHost;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.AccessorProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.IMemberProfile;
 			import potato.designer.plugin.uidesigner.basic.compiler.classdescribe.MethodProfile;
 			import potato.designer.plugin.uidesigner.basic.interpreter.BasicTargetProfile;
+			
+			import spark.events.TextOperationEvent;
 			
 			/**类型描述：变量和存取器*/
 			protected var access:AccessorProfile;
@@ -37,8 +36,47 @@
 			protected var editPoint:int = -1;
 			protected var changed:Boolean;
 			
-			protected function creationCompleteHandler(event:FlexEvent):void
+			/**指示目前编辑功能是否可用*/
+			public function get currentEditAvailable():Boolean
 			{
+				return (access || method) && -1 != editPoint;
+			}
+			
+			/**指示代表的对象是变量/存取器，还是方法。变量/存取器返回true，方法返回false。*/
+			public function get isAccess():Boolean
+			{
+				return null != access;
+			}
+			
+			/**正在编辑的参数值*/
+			public function get currentValue():String
+			{
+				if(-1 == editPoint)
+				{
+					throw new Error("尝试在不处于编辑状态时访问此方法");
+				}
+				return editParams[editPoint] as String;
+			}
+			
+			/**正在编辑的参数值*/
+			public function set currentValue(value:String):void
+			{
+				if(-1 == editPoint)
+				{
+					throw new Error("尝试在不处于编辑状态时访问此方法");
+				}
+				editParams[editPoint] = value;
+				changed = true;
+			}
+			
+			/**正在编辑的参数值*/
+			public function get currentType():String
+			{
+				if(-1 == editPoint)
+				{
+					throw new Error("尝试在不处于编辑状态时访问此方法");
+				}
+				return access ? access.type : method.parameters[editPoint].type;
 			}
 			
 			protected function input_changeHandler(event:TextOperationEvent):void
@@ -288,6 +326,8 @@
 					input.parent || addElement(input);
 					input.selectAll();
 					after_label.parent || addElement(after_label);
+					var picker:ITypePicker = BasicCompiler.getTypePicker(currentType);
+					picker && picker.show(this);
 				}
 				
 //				commitProperties();
