@@ -251,11 +251,17 @@ package potato.designer.plugin.guestManager
 						if("IPv4" != address.ipVersion)
 							continue;
 						
-						var socket:DatagramSocket = new DatagramSocket();
-						socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
-						socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
-						socket.send(bytes);
-						socket.close();
+						try
+						{
+							var socket:DatagramSocket = new DatagramSocket();
+							socket.bind(NetConst.HOST_MULTICAST_PORT, address.address);
+							socket.connect(NetConst.HOST_MULTICAST_IP, NetConst.HOST_MULTICAST_PORT);
+							socket.send(bytes);
+							socket.close();
+						} 
+						catch(error:Error) 
+						{
+						}
 					}
 				}
 			}
