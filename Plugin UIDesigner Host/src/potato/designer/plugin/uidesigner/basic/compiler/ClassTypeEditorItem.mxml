@@ -90,6 +90,9 @@
 			
 			protected function inputOverHandler(e:Event):void
 			{
+				if(-1 == editPoint)
+					return;
+				
 				testOrApply(false);
 				editPoint = -1;
 				redraw();
@@ -255,6 +258,7 @@
 						editPoint = 0;
 					}
 				}
+				trace("editPoint", editPoint);
 				redraw();
 			}
 			
@@ -273,6 +277,7 @@
 						editPoint = MethodProfile(data).numParameter -1;
 					}
 				}
+				trace("editPoint", editPoint);
 				redraw();
 			}
 			

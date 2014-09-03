@@ -175,6 +175,9 @@
 			
 			protected function input_focusOutHandler(e:Event):void
 			{
+				if(-1 == editPoint || BasicCompiler.getTypePicker(currentType))
+					return;
+				
 				apply();
 				editPoint = -1;
 				redraw();
