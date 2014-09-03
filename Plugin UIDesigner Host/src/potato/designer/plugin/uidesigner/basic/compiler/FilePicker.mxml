@@ -90,15 +90,15 @@
 			{
 				this.memberViewItem = memberViewItem;
 				
-				if(memberViewItem.isAccess)
+//				if(memberViewItem.isAccess)
+					if(true)
 				{
 					showPicker();
 					return;
 				}
 				else
 				{
-					var group:Group = memberViewItem.parent as Group;
-					group.addElementAt(this, group.getChildIndex(memberViewItem));
+					memberViewItem.addElement(this);
 				}
 				
 			}
