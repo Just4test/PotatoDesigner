@@ -15,7 +15,7 @@
 	</fx:Declarations>
 	<s:VGroup id="rootGroup" left="10" right="10" top="10" bottom="10">
 		<s:HGroup width="100%" verticalAlign="middle">
-			<s:Button id="workSpaceBtn" label="工作空间路径"/>
+			<s:Button id="workSpaceBtn" label="工作空间路径" click="workSpaceBtn_clickHandler(event)"/>
 			<s:ComboBox id="workSpaceInput" width="100%" change="workSpaceInput_changeHandler(event)"/>
 		</s:HGroup>
 		<s:Label id="infoLabel" width="100%" text="这里显示一些信息" textAlign="right"/>
@@ -207,6 +207,26 @@
 			
 			protected function window_creationCompleteHandler(event:FlexEvent):void
 			{
+			}
+			
+			protected function workSpaceBtn_clickHandler(event:MouseEvent):void
+			{
+				try
+				{
+					var file:File = new File;
+					file.browseForDirectory("请选择工作空间");
+					file.addEventListener(Event.SELECT, workSpaceSelectedHandler);
+				} 
+				catch(error:Error) 
+				{
+					
+				}
+				
+				function workSpaceSelectedHandler(event:Event):void
+				{
+					workSpaceInput.textInput.text = file.nativePath;
+					testWorkSpace();
+				}
 			}
 			
 			protected function workSpaceInput_changeHandler(event:IndexChangeEvent):void
