@@ -67,6 +67,7 @@
 				}
 				editParams[editPoint] = value;
 				changed = true;
+				redraw();
 			}
 			
 			/**正在编辑的参数值*/

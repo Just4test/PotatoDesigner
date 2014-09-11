@@ -3,6 +3,8 @@ package potato.designer.framework
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
 	
+	import core.text.Font;
+	
 	import potato.designer.utils.MultiLock;
 	
 	
@@ -47,6 +49,12 @@ package potato.designer.framework
 		public static const EVENT_SAVED:String = "EVENT_SAVED";
 		/**工作空间保存失败*/
 		public static const EVENT_SAVE_FAIL:String = "EVENT_SAVE_FAIL";
+		
+		CONFIG::GUEST
+		{
+			/**为客户端指定默认字体。载入工作空间之后有效*/
+			public static const DEFAULT_FONT:String = "DEFAULT_FONT";
+		}
 		
 		private static var _isWorkSpaceLoaded:Boolean;
 		
@@ -140,6 +148,13 @@ package potato.designer.framework
 				instance._data[key] = data[key];
 			}
 			_isWorkSpaceLoaded = true;
+			
+			CONFIG::GUEST
+			{
+				Font.registerFont(_workSpaceFolderPath + "/asset/SourceHanSansCN-Normal.otf", DEFAULT_FONT);
+			}
+			
+			
 			log("[DataCenter] 载入了工作空间，位于", path);
 			EventCenter.dispatchEvent(new Event(EVENT_LOADED));
 			

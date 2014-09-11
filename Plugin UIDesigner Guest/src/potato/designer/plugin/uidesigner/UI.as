@@ -119,7 +119,7 @@ package potato.designer.plugin.uidesigner
 			
 			makeSubstitute(tree, foldPath, focusIndex);
 			
-			Stage.getStage().addChild(tree.target);
+//			Stage.getStage().addChild(tree.target);
 			
 		}
 		
@@ -156,7 +156,6 @@ package potato.designer.plugin.uidesigner
 			}
 			
 			make(rootTargetTree, new <uint>[0], rootTargetTree.target is DisplayObject);
-			
 			
 			
 			for each (var i:ComponentSubstitute in underFold.concat(overFold))
