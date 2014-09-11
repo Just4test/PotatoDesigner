@@ -48,6 +48,8 @@ package potato.designer.framework
 		{
 			/**为客户端指定默认字体。载入工作空间之后有效*/
 			public static const DEFAULT_FONT:String = "DEFAULT_FONT";
+			/**为客户端指定启动参数。载入工作空间稍后才会有效。生效时会派发事件。*/
+			public static const BOOT_PARAMETERS:String = "BOOT_PARAMETERS";
 		}
 		
 		/**工作空间已经保存*/
@@ -152,6 +154,7 @@ package potato.designer.framework
 			CONFIG::GUEST
 			{
 				Font.registerFont(_workSpaceFolderPath + "/asset/SourceHanSansCN-Normal.otf", DEFAULT_FONT);
+				instance.regProperty(BOOT_PARAMETERS, Array, false, BOOT_PARAMETERS);
 			}
 			
 			
