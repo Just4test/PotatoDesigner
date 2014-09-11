@@ -31,6 +31,9 @@ mklink /j "Plugin Console\bin" "WorkSpace Host\plugins\Console"
 rd /s /q "Plugin Window\bin"
 mklink /j "Plugin Window\bin" "WorkSpace Host\plugins\Window"
 
+rd /s /q "Plugin Bootloader Guest\bin"
+mklink /j "Plugin Bootloader Guest\bin" "WorkSpace Guest\plugins\Bootloader"
+
 rd /s /q "Plugin UIDesigner Guest\bin"
 mklink /j "Plugin UIDesigner Guest\bin" "WorkSpace Guest\plugins\UIDesigner"
 

@@ -9,6 +9,7 @@ package potato.designer.plugin.bootloader
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.IPluginActivator;
 	import potato.designer.framework.PluginInfo;
+	import potato.designer.plugin.guestManager.ConnectHelper;
 	import potato.designer.plugin.guestManager.GuestManagerGuest;
 	
 	public class BootLoader implements IPluginActivator
@@ -21,20 +22,21 @@ package potato.designer.plugin.bootloader
 		public function start(info:PluginInfo):void
 		{
 			_info = info;
-			EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
-			GuestManagerGuest.startHostDiscovery();
+			ConnectHelper.show();
+//			EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
+//			GuestManagerGuest.startHostDiscovery();
 			
 		}
 		
-		protected function hostDiscoverdHandler(event:DesignerEvent):void
-		{
-			if(event.data.length)
-			{
-				EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_CONNECTED, connectedHandler);
-				GuestManagerGuest.tryConnect(event.data[0]);
-				GuestManagerGuest.stopHostDiscovery();
-			}
-		}
+//		protected function hostDiscoverdHandler(event:DesignerEvent):void
+//		{
+//			if(event.data.length)
+//			{
+//				EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_CONNECTED, connectedHandler);
+//				GuestManagerGuest.tryConnect(event.data[0]);
+//				GuestManagerGuest.stopHostDiscovery();
+//			}
+//		}
 		
 		protected function connectedHandler(event:DesignerEvent):void
 		{

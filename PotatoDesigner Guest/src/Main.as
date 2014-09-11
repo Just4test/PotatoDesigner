@@ -22,7 +22,7 @@ package
 		{
 			DataCenter.loadWorkSpace("designer");
 			
-			text = new TextField("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, UIGlobal.defaultFont, 32, 0xffffff);
+			text = new TextField("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, DataCenter.DEFAULT_FONT, 20, 0xffffff);
 			Stage.getStage().addChild(text);
 			
 			EventCenter.addEventListener(EventCenter.EVENT_LOG, log2text);

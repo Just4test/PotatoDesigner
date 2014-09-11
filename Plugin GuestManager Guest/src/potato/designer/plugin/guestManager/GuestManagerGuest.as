@@ -75,8 +75,12 @@ package potato.designer.plugin.guestManager
 		
 		protected static const _messageTarget:EventDispatcher = new EventDispatcher;
 		
+		public static var path:String;
+		
 		public function start(info:PluginInfo):void
 		{
+			path = info.path;
+			
 			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_ACCTIVATED, pluginActiveHandler);
 			
 			info.started();
@@ -170,26 +174,17 @@ package potato.designer.plugin.guestManager
 		 */
 		public static function get discoveredHosts():Vector.<String>
 		{
-			if(!_hostTable)
-				return null;
-			
 			var ret:Vector.<String> = new Vector.<String>;
+			
+			if(!_hostTable)
+				return ret;
+			
 			for(var i:String in _hostTable)
 			{
 				ret.push(i);
 			}
 			ret.sort(0);
 			return ret;
-		}
-		
-		/**
-		 * 显示连接助手
-		 * <br>连接助手是一个用于连接到主机端的UI
-		 * <br>当连接成功之后连接助手会自动关闭
-		 */
-		public static function showConnectHelper(defaultIp:String):void
-		{
-			
 		}
 		
 		/**

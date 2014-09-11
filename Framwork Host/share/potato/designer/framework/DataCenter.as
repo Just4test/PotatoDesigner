@@ -3,8 +3,6 @@ package potato.designer.framework
 	import flash.utils.Proxy;
 	import flash.utils.flash_proxy;
 	
-	import core.text.Font;
-	
 	import potato.designer.utils.MultiLock;
 	
 	
@@ -23,6 +21,7 @@ package potato.designer.framework
 	{
 		import core.events.Event;
 		import core.filesystem.File;
+		import core.text.Font;
 	}
 	
 	/**
@@ -45,16 +44,17 @@ package potato.designer.framework
 		 */
 		public static const EVENT_SAVING:String = "EVENT_SAVING";
 		
-		/**工作空间已经保存*/
-		public static const EVENT_SAVED:String = "EVENT_SAVED";
-		/**工作空间保存失败*/
-		public static const EVENT_SAVE_FAIL:String = "EVENT_SAVE_FAIL";
-		
 		CONFIG::GUEST
 		{
 			/**为客户端指定默认字体。载入工作空间之后有效*/
 			public static const DEFAULT_FONT:String = "DEFAULT_FONT";
 		}
+		
+		/**工作空间已经保存*/
+		public static const EVENT_SAVED:String = "EVENT_SAVED";
+		/**工作空间保存失败*/
+		public static const EVENT_SAVE_FAIL:String = "EVENT_SAVE_FAIL";
+		
 		
 		private static var _isWorkSpaceLoaded:Boolean;
 		

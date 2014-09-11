@@ -169,16 +169,17 @@ package potato.designer.plugin.fileSync
 			CONFIG::GUEST
 			{
 				addEventListenerTo(GuestManagerGuest);
-				EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
-				GuestManagerGuest.startHostDiscovery();
-				function hostDiscoverdHandler(event:DesignerEvent):void
-				{
-					if(event.data.length)
-					{
-						GuestManagerGuest.tryConnect(event.data[0]);
-						GuestManagerGuest.stopHostDiscovery();
-					}
-				}
+				//测试代码
+//				EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
+//				GuestManagerGuest.startHostDiscovery();
+//				function hostDiscoverdHandler(event:DesignerEvent):void
+//				{
+//					if(event.data.length)
+//					{
+//						GuestManagerGuest.tryConnect(event.data[0]);
+//						GuestManagerGuest.stopHostDiscovery();
+//					}
+//				}
 			}
 			
 			info.started();
