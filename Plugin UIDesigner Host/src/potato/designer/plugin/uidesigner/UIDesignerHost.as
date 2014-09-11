@@ -11,7 +11,7 @@ package potato.designer.plugin.uidesigner
 	 * <br>提供两个窗口作为Host端UI。这两个窗口均为纵向布局。习惯上，窗口0显示组件类型视图和大纲视图，窗口1显示属性视图。
 	 * <br>提供打包、传输组件描述文件的方式
 	 * <br>提供控制组件替身的方式
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class UIDesignerHost implements IPluginActivator

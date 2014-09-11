@@ -13,7 +13,7 @@ package potato.designer.plugin.guestManager
 
 	/**
 	 * 提供UI以便用户决定要连接到哪个主机。
-	 * @author Administrator
+	 * @author Just4test Administrator
 	 * 
 	 */
 	public class ConnectHelper extends DisplayObjectContainer

@@ -23,20 +23,8 @@ package potato.designer.plugin.bootloader
 		{
 			_info = info;
 			ConnectHelper.show();
-//			EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_DISCOVERED, hostDiscoverdHandler);
-//			GuestManagerGuest.startHostDiscovery();
 			
 		}
-		
-//		protected function hostDiscoverdHandler(event:DesignerEvent):void
-//		{
-//			if(event.data.length)
-//			{
-//				EventCenter.addEventListener(GuestManagerGuest.EVENT_HOST_CONNECTED, connectedHandler);
-//				GuestManagerGuest.tryConnect(event.data[0]);
-//				GuestManagerGuest.stopHostDiscovery();
-//			}
-//		}
 		
 		protected function connectedHandler(event:DesignerEvent):void
 		{

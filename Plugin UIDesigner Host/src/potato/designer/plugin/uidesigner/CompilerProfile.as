@@ -7,7 +7,7 @@ package potato.designer.plugin.uidesigner
 	 * <br>UIDesignerHost通过编译器配置文件操作ITargetProfile树。
 	 * <br>允许在ITargetProfile树中插入不受编译器配置文件管理的ITargetProfile。比如，为某个显示对象插入自动生成的布局对象。
 	 * <br>但该ITargetProfile应该是由其父ITargetProfile管理的，而不是由其兄弟ITargetProfile管理。
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class CompilerProfile

@@ -16,7 +16,7 @@ package potato.designer.framework
 	[Event(name=EVENT_FAIL, type="potato.designer.framework.PluginLoader")]
 	/**
 	 *载入宿主端插件。包含解压缩swc提取swf，载入swf到domain的操作。 
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class PluginLoader extends EventDispatcher

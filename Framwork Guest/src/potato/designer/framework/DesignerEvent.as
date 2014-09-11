@@ -5,7 +5,7 @@ package potato.designer.framework
 
 	/**
 	 *设计器建议使用的事件。可以附带数据，并且可以撤销
-	 * @author Administrator
+	 * @author Just4test Administrator
 	 * 
 	 */
 	public class DesignerEvent extends CancelableEvent

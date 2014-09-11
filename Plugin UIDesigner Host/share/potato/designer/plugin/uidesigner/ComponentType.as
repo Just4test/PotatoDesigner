@@ -6,7 +6,7 @@ package potato.designer.plugin.uidesigner
 	
 	/**
 	 *组件类型 
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class ComponentType implements IExternalizable

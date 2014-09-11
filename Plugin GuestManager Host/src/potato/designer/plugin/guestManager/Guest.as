@@ -12,7 +12,7 @@ package potato.designer.plugin.guestManager
 
 	/**
 	 *客户端的抽象模型 
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class Guest extends EventDispatcher

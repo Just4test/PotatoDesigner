@@ -8,7 +8,7 @@ package potato.designer.plugin.uidesigner
 	 * <br>编译器创建目标配置文件，由编译器进行构建。
 	 * <br>编译器管理器将多个编译器组织成一个编译器序列。依次调用每一个编译器以创建目标配置文件。序列中靠前的编译器先被执行，并且允许跳过之后所有编译器。
 	 * <br>编译器接口包含多个方法。每个编译器未必需要实现所有这些方法：其他不关心的方法给予空实现：返回false。
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public interface ICompiler

@@ -2,7 +2,7 @@ package potato.designer.plugin.uidesigner
 {
 	/**
 	 *导出配置文件
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class ExportProfile

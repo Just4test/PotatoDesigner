@@ -28,7 +28,7 @@ package potato.designer.plugin.uidesigner
 	/**
 	 *视图控制器
 	 * <br>控制编辑器UI与客户端视图。
-	 * @author Administrator
+	 * @author Just4test
 	 * 
 	 */
 	public class ViewController
