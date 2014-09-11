@@ -9,7 +9,6 @@ package
 	import potato.designer.framework.DesignerEvent;
 	import potato.designer.framework.EventCenter;
 	import potato.designer.framework.PluginManager;
-	import potato.ui.UIGlobal;
 	
 	public class Main extends DisplayObjectContainer
 	{
@@ -32,14 +31,14 @@ package
 				text.text += event.data + "\n";
 			}
 			
-			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, loadPluginWhenLoaded);
+			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_INSTALLED, startPluginWhenLoaded);
 			PluginManager.scan();
 			
 			
 			EventCenter.addEventListener(PluginManager.EVENT_PLUGIN_ACCTIVATED, startHandler);
 		}
 		
-		protected function loadPluginWhenLoaded(e:DesignerEvent):void
+		protected function startPluginWhenLoaded(e:DesignerEvent):void
 		{
 			PluginManager.startPlugin(e.data.id);
 		}

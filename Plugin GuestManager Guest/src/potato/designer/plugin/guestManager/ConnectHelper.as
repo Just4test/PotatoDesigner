@@ -70,7 +70,7 @@ package potato.designer.plugin.guestManager
 			img.y = 50;
 			addChild(img);
 			//输入文本
-			input = new TextField("XXX.XXX.XXX.XXX", 400, FONT_SIZE + 2, DataCenter.DEFAULT_FONT, FONT_SIZE, COLOR);
+			input = new TextField("XXX.XXX.XXX.XXX", 270, FONT_SIZE + 2, DataCenter.DEFAULT_FONT, FONT_SIZE, COLOR);
 			input.x = img.x + img.width + 10;
 			input.y = img.y + (img.height - input.textHeight) / 2;
 			addChild(input);

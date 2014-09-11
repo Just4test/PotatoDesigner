@@ -24,8 +24,27 @@
 			
 			protected function applicationCompleteHandler(event:FlexEvent):void
 			{	
-				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
+				//检测内置工作空间
+				var readOnlyDefaultWorkSpace:File = File.applicationDirectory.resolvePath("designer/defaultWorkSpace");
+				if(readOnlyDefaultWorkSpace.exists)
+				{
+					var defaultWorkSpace:File = File.applicationStorageDirectory.resolvePath("designer/defaultWorkSpace");
+					if(!defaultWorkSpace.exists)
+					{
+						//初次安装，拷贝内置工作空间到应用存储目录，然后添加此工作空间到工作空间列表
+						readOnlyDefaultWorkSpace.copyTo(defaultWorkSpace);
+						
+						var data:Object = {array:[defaultWorkSpace.nativePath], isDefault:false};
+						var jStr:String = JSON.stringify(data);
+						var file:File = File.applicationStorageDirectory.resolvePath("history.json");
+						var fileStream:FileStream = new FileStream();
+						fileStream.open(file, FileMode.WRITE);
+						fileStream.writeMultiByte(jStr, File.systemCharset);
+						fileStream.close();
+					}
+				}
 				
+				EventCenter.addEventListener(DataCenter.EVENT_LOADED, loadedHandler);
 				var selectWorkSpaceDialog:SelectWorkSpaceDialog = new SelectWorkSpaceDialog;
 				selectWorkSpaceDialog.open(true);
 				
