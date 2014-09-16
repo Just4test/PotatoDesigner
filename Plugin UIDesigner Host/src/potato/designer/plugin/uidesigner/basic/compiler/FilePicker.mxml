@@ -90,8 +90,9 @@
 			{
 				this.memberViewItem = memberViewItem;
 				
-//				if(memberViewItem.isAccess)
-					if(true)
+				//如果是存取器，就立即弹出窗口。否则，显示按钮
+//				if(memberViewItem.isAccess)//目前没有为UI手动指定皮肤，因而会报错
+				if(true)
 				{
 					showPicker();
 					return;

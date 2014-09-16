@@ -209,6 +209,7 @@ package potato.designer.framework
 				{
 					var pluginInfo:PluginInfo = new PluginInfo(path, File.read(path + "/" + MANIFEST_FILE_NAME));
 					var filePath:String = pluginInfo.startFilePath;
+					log("[Plugin] 插件主代码文件", filePath, File.exists(filePath));
 					var bytes:ByteArray = File.readByteArray(filePath);
 					if(filePath.indexOf(".swc") == filePath.length - 4)
 					{

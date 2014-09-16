@@ -20,7 +20,7 @@ package
 		public function Main(...args)
 		{
 			DataCenter.loadWorkSpace("designer");
-			DataCenter.instance[DataCenter.BOOT_PARAMETERS] = args;
+//			DataCenter.instance[DataCenter.BOOT_PARAMETERS] = args;
 			
 			text = new TextField("", Stage.getStage().stageWidth, Stage.getStage().stageHeight, DataCenter.DEFAULT_FONT, 20, 0xffffff);
 			Stage.getStage().addChild(text);
